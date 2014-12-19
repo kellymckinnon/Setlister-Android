@@ -1,5 +1,9 @@
 package me.kellymckinnon.setlister;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,6 +16,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.ProgressBar;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,11 +25,13 @@ import java.util.List;
  * Created by kelly on 12/19/14.
  */
 public class SearchFragment extends Fragment {
+
     private DelayAutoCompleteTextView actv;
     private Filter filter;
     private ArrayAdapter<String> adapter;
 
-    public SearchFragment() {}
+    public SearchFragment() {
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -49,7 +57,8 @@ public class SearchFragment extends Fragment {
             }
         };
 
-        adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_dropdown_item_1line) {
+        adapter = new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_dropdown_item_1line) {
             public Filter getFilter() {
                 return filter;
             }
@@ -71,25 +80,54 @@ public class SearchFragment extends Fragment {
     }
 
     public class SearchTask extends AsyncTask<Void, Void, Void> {
+
         List<String> artists = new ArrayList<String>();
 
 
         @Override
         protected Void doInBackground(Void... params) {
-            String query = actv.getText().toString();
-            artists.add("test1");
-            artists.add("test2");
-            // TODO: perform API call here
+            String artist = actv.getText().toString();
+
+            StringBuilder query = new StringBuilder();
+            query.append("http://api.setlist.fm/rest/0.1/search/artists.json?artistName=");
+            try {
+                query.append(URLEncoder.encode(artist, "UTF-8"));
+
+                Log.d("URL IS: ", query.toString());
+
+                JSONObject json = null;
+                json = JSONRetriever.getJSON(query.toString()).getJSONObject("artists");
+
+                // If only one result, it's a JSONObject, else an array
+                if (json.getString("@total").equals("1")) {
+                    JSONObject currentArtist = json.getJSONObject("artist");
+                    String name = currentArtist.getString("@name");
+                    artists.add(name);
+                } else {
+                    JSONArray items = json.getJSONArray("artist");
+
+                    for (int i = 0; i < items.length(); i++) {
+                        JSONObject currentArtist = items.getJSONObject(i);
+                        String name = currentArtist.getString("@name");
+                        artists.add(name);
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             int size = artists.size();
-            if(size > 0) {
+            if (size > 0) {
                 adapter.clear();
                 Log.i("ADAPTER SIZE", "" + size);
-                for(int i = 0; i < size; i++){
+                for (int i = 0; i < size; i++) {
                     adapter.add(artists.get(i));
                     Log.i("ADDED", artists.get(i));
                 }

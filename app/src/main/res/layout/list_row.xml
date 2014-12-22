@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="3dp"
+    android:paddingBottom="3dp">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="01/01/1999"
+        android:id="@+id/date"
+        android:textStyle="bold"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:id="@+id/band"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Band Name"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@id/date"
+        android:singleLine="true"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:id="@+id/venue"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Venue"
+        android:layout_below="@id/band"
+        android:layout_marginBottom="4dp" />
+
+
+
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0 songs"
+        android:id="@+id/num_songs"
+        android:textSize="12sp"
+        android:layout_below="@id/venue"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:id="@+id/tour"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Tour"
+        android:layout_toLeftOf="@id/num_songs"
+        android:singleLine="true"
+        android:layout_marginRight="10dp"
+        android:layout_below="@id/venue" />
+
+
+
+
+
+
+
+</RelativeLayout>

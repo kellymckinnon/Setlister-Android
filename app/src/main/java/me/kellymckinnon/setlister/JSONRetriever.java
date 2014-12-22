@@ -38,11 +38,12 @@ public class JSONRetriever {
             return new JSONObject(jsonString);
 
         } catch (IOException e) {
+            System.out.println("IOException");
             e.printStackTrace();
         } catch (JSONException e) {
-            e.printStackTrace();
+            System.out.println("No results found.");
         }
-        //Only thrown in the case of an exception
-        throw new RuntimeException("Error in GET request");
+
+        return null;
     }
 }

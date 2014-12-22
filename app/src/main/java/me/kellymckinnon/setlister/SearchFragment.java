@@ -5,6 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,9 +31,6 @@ public class SearchFragment extends Fragment {
     private Filter filter;
     private ArrayAdapter<String> adapter;
 
-    public SearchFragment() {
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -47,7 +45,7 @@ public class SearchFragment extends Fragment {
                         "Filter:" + constraint + " thread: " + Thread.currentThread());
                 if (constraint != null) {
                     Log.i("Filter", "doing a search ..");
-                    new SearchTask().execute();
+                    new ArtistSearch().execute();
                 }
                 return null;
             }
@@ -69,7 +67,9 @@ public class SearchFragment extends Fragment {
         actv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // TODO: implement clicking a search result
+                Intent intent = new Intent(getActivity(), ListingActivity.class);
+                intent.putExtra("ARTIST_NAME", actv.getText().toString());
+                startActivity(intent);
             }
         });
 
@@ -79,7 +79,7 @@ public class SearchFragment extends Fragment {
 
     }
 
-    public class SearchTask extends AsyncTask<Void, Void, Void> {
+    public class ArtistSearch extends AsyncTask<Void, Void, Void> {
 
         List<String> artists = new ArrayList<String>();
 
@@ -96,6 +96,11 @@ public class SearchFragment extends Fragment {
                 Log.d("URL IS: ", query.toString());
 
                 JSONObject json = null;
+
+                if(JSONRetriever.getJSON(query.toString()) == null) { // No results found
+                    return null;
+                }
+
                 json = JSONRetriever.getJSON(query.toString()).getJSONObject("artists");
 
                 // If only one result, it's a JSONObject, else an array
@@ -113,8 +118,10 @@ public class SearchFragment extends Fragment {
                     }
                 }
             } catch (JSONException e) {
+                System.out.println("JSONException");
                 e.printStackTrace();
             } catch (UnsupportedEncodingException e) {
+                System.out.println("UnsupportedEncodingException");
                 e.printStackTrace();
             }
 

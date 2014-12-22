@@ -6,7 +6,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class Search extends ActionBarActivity {
+public class SearchActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -14,7 +14,7 @@ public class Search extends ActionBarActivity {
         setContentView(R.layout.activity_search);
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, new SearchFragment())
+                    .add(R.id.activity_search, new SearchFragment())
                     .commit();
         }
     }

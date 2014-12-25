@@ -1,37 +1,12 @@
 package me.kellymckinnon.setlister;
 
-import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 
 public class ListingActivity extends ActionBarActivity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_list);
-
-        String artist = getIntent().getStringExtra("ARTIST_NAME");
-
-        getSupportActionBar().setTitle(artist);
-
-        if (savedInstanceState == null) {
-            ListingFragment lf = new ListingFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString("ARTIST_NAME", artist);
-            lf.setArguments(bundle);
-            getFragmentManager().beginTransaction()
-                    .add(R.id.activity_list, lf)
-                    .commit();
-        }
-
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -53,5 +28,27 @@ public class ListingActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_list);
+
+        String artist = getIntent().getStringExtra("ARTIST_NAME");
+
+        getSupportActionBar().setTitle(artist);
+
+        if (savedInstanceState == null) {
+            ListingFragment lf = new ListingFragment();
+            Bundle bundle = new Bundle();
+            bundle.putString("ARTIST_NAME", artist);
+            lf.setArguments(bundle);
+            getFragmentManager().beginTransaction()
+                    .add(R.id.activity_list, lf)
+                    .commit();
+        }
+
     }
 }

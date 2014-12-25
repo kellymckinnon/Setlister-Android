@@ -18,14 +18,13 @@ public class DelayAutoCompleteTextView extends AutoCompleteTextView {
     private static final int DEFAULT_AUTOCOMPLETE_DELAY = 750;
 
     private int mAutoCompleteDelay = DEFAULT_AUTOCOMPLETE_DELAY;
-    private ProgressBar mLoadingIndicator;
-
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             DelayAutoCompleteTextView.super.performFiltering((CharSequence) msg.obj, msg.arg1);
         }
     };
+    private ProgressBar mLoadingIndicator;
 
     public DelayAutoCompleteTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -45,7 +44,8 @@ public class DelayAutoCompleteTextView extends AutoCompleteTextView {
             mLoadingIndicator.setVisibility(View.VISIBLE);
         }
         mHandler.removeMessages(MESSAGE_TEXT_CHANGED);
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(MESSAGE_TEXT_CHANGED, text), mAutoCompleteDelay);
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MESSAGE_TEXT_CHANGED, text),
+                mAutoCompleteDelay);
     }
 
     @Override

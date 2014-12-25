@@ -97,7 +97,7 @@ public class SearchFragment extends Fragment {
 
                 JSONObject json = null;
 
-                if(JSONRetriever.getJSON(query.toString()) == null) { // No results found
+                if (JSONRetriever.getJSON(query.toString()) == null) { // No results found
                     return null;
                 }
 

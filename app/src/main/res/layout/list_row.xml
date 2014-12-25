@@ -4,10 +4,11 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:paddingTop="3dp"
-    android:paddingBottom="3dp">
+    android:paddingLeft="12dp"
+    android:paddingRight="12dp"
+    android:paddingTop="12dp"
+    android:background="?android:attr/selectableItemBackground"
+    android:paddingBottom="12dp">
 
 
     <TextView
@@ -16,6 +17,7 @@
         android:text="01/01/1999"
         android:id="@+id/date"
         android:textStyle="bold"
+        android:textColor="@color/my_accent"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
@@ -26,28 +28,25 @@
         android:text="Band Name"
         android:textSize="16sp"
         android:textStyle="bold"
+        android:textColor="@color/primary_text_default_material_light"
         android:layout_alignParentTop="true"
         android:layout_toLeftOf="@id/date"
         android:singleLine="true"
-        android:layout_marginRight="10dp"
-        android:layout_marginBottom="4dp" />
+        android:layout_marginRight="10dp" />
 
     <TextView
         android:id="@+id/venue"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/primary_text_default_material_light"
         android:text="Venue"
-        android:layout_below="@id/band"
-        android:layout_marginBottom="4dp" />
-
-
-
-
+        android:layout_below="@id/band" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="0 songs"
+        android:textColor="@color/secondary_text_default_material_light"
         android:id="@+id/num_songs"
         android:textSize="12sp"
         android:layout_below="@id/venue"
@@ -60,14 +59,9 @@
         android:layout_height="wrap_content"
         android:text="Tour"
         android:layout_toLeftOf="@id/num_songs"
+        android:textColor="@color/secondary_text_default_material_light"
         android:singleLine="true"
         android:layout_marginRight="10dp"
         android:layout_below="@id/venue" />
-
-
-
-
-
-
 
 </RelativeLayout>

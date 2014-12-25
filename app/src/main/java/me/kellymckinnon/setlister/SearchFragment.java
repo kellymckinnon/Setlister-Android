@@ -8,14 +8,20 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.method.KeyListener;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -30,6 +36,7 @@ public class SearchFragment extends Fragment {
     private DelayAutoCompleteTextView actv;
     private Filter filter;
     private ArrayAdapter<String> adapter;
+    private ArtistSearch search;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -45,7 +52,8 @@ public class SearchFragment extends Fragment {
                         "Filter:" + constraint + " thread: " + Thread.currentThread());
                 if (constraint != null) {
                     Log.i("Filter", "doing a search ..");
-                    new ArtistSearch().execute();
+                    search = new ArtistSearch();
+                    search.execute();
                 }
                 return null;
             }
@@ -63,13 +71,36 @@ public class SearchFragment extends Fragment {
         };
 
         actv.setAdapter(adapter);
-        actv.setLoadingIndicator((ProgressBar) rootView.findViewById(R.id.search_progress_bar));
         actv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //FIXME: Change to MBID implementation -- will need a HashMap of Name -> MBID
                 Intent intent = new Intent(getActivity(), ListingActivity.class);
                 intent.putExtra("ARTIST_NAME", actv.getText().toString());
                 startActivity(intent);
+            }
+        });
+
+        actv.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+
+
+                if(keyCode == KeyEvent.KEYCODE_ENTER || keyCode == EditorInfo.IME_ACTION_SEARCH) {
+                    Intent intent = new Intent(getActivity(), ListingActivity.class);
+                    intent.putExtra("ARTIST_NAME", actv.getText().toString());
+                    startActivity(intent);
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        ImageButton clearSearch = (ImageButton) rootView.findViewById(R.id.clear_search);
+        clearSearch.setOnClickListener(new ImageButton.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                actv.setText("");
             }
         });
 
@@ -79,19 +110,29 @@ public class SearchFragment extends Fragment {
 
     }
 
+    @Override
+    public void onStop() {
+        //check the state of the task
+        if(search != null && search.getStatus() == AsyncTask.Status.RUNNING)
+            search.cancel(true);
+
+        super.onStop();
+
+    }
+
     public class ArtistSearch extends AsyncTask<Void, Void, Void> {
 
-        List<String> artists = new ArrayList<String>();
+        List<Artist> artists = new ArrayList<Artist>();
 
 
         @Override
         protected Void doInBackground(Void... params) {
-            String artist = actv.getText().toString();
+            String artistName = actv.getText().toString();
 
             StringBuilder query = new StringBuilder();
             query.append("http://api.setlist.fm/rest/0.1/search/artists.json?artistName=");
             try {
-                query.append(URLEncoder.encode(artist, "UTF-8"));
+                query.append(URLEncoder.encode(artistName, "UTF-8"));
 
                 Log.d("URL IS: ", query.toString());
 
@@ -106,22 +147,20 @@ public class SearchFragment extends Fragment {
                 // If only one result, it's a JSONObject, else an array
                 if (json.getString("@total").equals("1")) {
                     JSONObject currentArtist = json.getJSONObject("artist");
-                    String name = currentArtist.getString("@name");
-                    artists.add(name);
+                    populateArtist(currentArtist);
                 } else {
                     JSONArray items = json.getJSONArray("artist");
 
                     for (int i = 0; i < items.length(); i++) {
                         JSONObject currentArtist = items.getJSONObject(i);
-                        String name = currentArtist.getString("@name");
-                        artists.add(name);
+                        populateArtist(currentArtist);
                     }
                 }
             } catch (JSONException e) {
-                System.out.println("JSONException");
+                Log.e("ArtistSearch", "JSONException");
                 e.printStackTrace();
             } catch (UnsupportedEncodingException e) {
-                System.out.println("UnsupportedEncodingException");
+                Log.e("ArtistSearch", "UEE");
                 e.printStackTrace();
             }
 
@@ -133,10 +172,10 @@ public class SearchFragment extends Fragment {
             int size = artists.size();
             if (size > 0) {
                 adapter.clear();
-                Log.i("ADAPTER SIZE", "" + size);
+
                 for (int i = 0; i < size; i++) {
-                    adapter.add(artists.get(i));
-                    Log.i("ADDED", artists.get(i));
+                    adapter.add(artists.get(i).name);
+                    Log.i("ADDED", artists.get(i).name + " " + artists.get(i).mbid);
                 }
 
                 adapter.notifyDataSetChanged();
@@ -145,5 +184,28 @@ public class SearchFragment extends Fragment {
 
             super.onPostExecute(aVoid);
         }
+
+        public void populateArtist(JSONObject currentArtist) throws JSONException {
+            String name = currentArtist.getString("@name");
+            Artist artist = new Artist();
+            artist.name = currentArtist.getString("@name");
+            artist.mbid = currentArtist.getString("@mbid");
+
+            try {
+                artist.genre = currentArtist.getString("@disambiguation");
+            } catch (JSONException e) {
+                artist.genre = "";
+            }
+
+            // If the artist has no setlists, don't add it to the list of choices
+            JSONObject json = JSONRetriever.getJSON("http://api.setlist.fm/rest/0.1/artist/"+artist.mbid+"/setlists.json");
+
+            if(json == null) {
+                return;
+            }
+
+            artists.add(artist);
+        }
     }
 }
+

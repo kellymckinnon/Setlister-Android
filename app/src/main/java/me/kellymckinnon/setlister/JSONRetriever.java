@@ -8,6 +8,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +17,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * Helper class that sends a GET request through the passed url and returns
@@ -22,32 +26,29 @@ import java.io.Writer;
  */
 public class JSONRetriever {
 
-    public static JSONObject getJSON(String url) {
+    public static JSONObject getJSON(String stringURL) {
         try {
-            HttpClient client = new DefaultHttpClient();
-            HttpUriRequest request = new HttpGet(url);
-            HttpResponse response = client.execute(request);
-            InputStream inputStream = response.getEntity().getContent();
-            String jsonString = "";
-
-            if (inputStream != null) { //Convert inputStream to String
-                Writer writer = new StringWriter();
-                char[] buffer = new char[1024];
-                Reader reader = new BufferedReader(new InputStreamReader(inputStream));
-                int n;
-                while ((n = reader.read(buffer)) != -1) {
-                    writer.write(buffer, 0, n);
+            StringBuilder response  = new StringBuilder();
+            URL url = new URL(stringURL);
+            HttpURLConnection httpconn = (HttpURLConnection)url.openConnection();
+            if (httpconn.getResponseCode() == HttpURLConnection.HTTP_OK)
+            {
+                BufferedReader input = new BufferedReader(new InputStreamReader(httpconn.getInputStream()),8192);
+                String strLine = null;
+                while ((strLine = input.readLine()) != null)
+                {
+                    response.append(strLine);
                 }
-                jsonString = writer.toString();
+                input.close();
+
+                return new JSONObject(response.toString());
             }
-
-            return new JSONObject(jsonString);
-
         } catch (IOException e) {
-            System.out.println("IOException");
+            Log.e("JSONRetriever", "IOException");
             e.printStackTrace();
         } catch (JSONException e) {
-            System.out.println("No results found.");
+            Log.e("JSONRetriever", "JSONException");
+            e.printStackTrace();
         }
 
         return null;

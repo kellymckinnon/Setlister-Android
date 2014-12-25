@@ -26,21 +26,23 @@
         <me.kellymckinnon.setlister.DelayAutoCompleteTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColorHint="@color/material_blue_grey_800"
+            android:textColorHint="@color/secondary_text_default_material_light"
             android:focusable="true"
+            android:imeOptions="actionSearch"
             android:focusableInTouchMode="true"
+            android:inputType="text"
             android:hint="Results powered by setlist.fm"
             android:id="@+id/searchAutoComplete" />
 
-        <ProgressBar
-            android:id="@+id/search_progress_bar"
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/clear_search"
             android:layout_gravity="center_vertical|end"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="5dp"
             android:layout_marginBottom="10dp"
-            style="?android:attr/progressBarStyleSmall"
-            android:visibility="gone"/>
+            android:background="@android:drawable/ic_menu_close_clear_cancel"
+            android:visibility="visible"/>
 
     </FrameLayout>
 

@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,7 +27,7 @@ import java.util.ArrayList;
  */
 public class ListingFragment extends Fragment {
 
-    private final LinearLayoutManager llm = new LinearLayoutManager(getActivity());
+    private LinearLayoutManager llm;
     private RecyclerView rv;
     private String artist;
     private TextView noShows;
@@ -40,6 +41,8 @@ public class ListingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
 
+        setRetainInstance(true);
+
         View rootView = inflater.inflate(R.layout.fragment_listing, container, false);
         artist = getArguments().getString("ARTIST_NAME");
         noShows = (TextView) rootView.findViewById(R.id.no_shows);
@@ -48,9 +51,7 @@ public class ListingFragment extends Fragment {
         rv.addItemDecoration(
                 new RecyclerViewDivider(getActivity(), RecyclerViewDivider.VERTICAL_LIST));
 
-        rv.setHasFixedSize(true);
-        rv.setLayoutManager(llm);
-        rv.setItemAnimator(new DefaultItemAnimator());
+        llm = new LinearLayoutManager(getActivity());
 
         firstVisibleItem = 0;
         visibleItemCount = 0;
@@ -58,7 +59,9 @@ public class ListingFragment extends Fragment {
 
         adapter = new ShowAdapter(getActivity());
         rv.setAdapter(adapter);
-
+        rv.setHasFixedSize(true);
+        rv.setLayoutManager(llm);
+        rv.setItemAnimator(new DefaultItemAnimator());
 
         /* Load new page(s) if the user scrolls to the end */
         rv.setOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -77,6 +80,8 @@ public class ListingFragment extends Fragment {
                 }
             }
         });
+
+        setRetainInstance(true);
 
         // Start the initial search
         new ShowSearch().execute();

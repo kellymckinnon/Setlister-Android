@@ -1,14 +1,29 @@
 package me.kellymckinnon.setlister;
 
+import com.spotify.sdk.android.Spotify;
+import com.spotify.sdk.android.authentication.AuthenticationResponse;
+import com.spotify.sdk.android.authentication.SpotifyAuthentication;
+import com.spotify.sdk.android.playback.Player;
+
+import android.animation.StateListAnimator;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Config;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
 public class SetlistActivity extends ActionBarActivity {
+
+    String [] songs;
+    String artist;
+    String date;
+    String venue;
+    String tour;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -36,13 +51,19 @@ public class SetlistActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent intent = getIntent();
+        Bundle arguments;
 
-        String[] songs = intent.getStringArrayExtra("SONGS");
-        String artist = intent.getStringExtra("ARTIST");
-        String date = intent.getStringExtra("DATE");
-        String venue = intent.getStringExtra("VENUE");
-        String tour = intent.getStringExtra("TOUR");
+        if(savedInstanceState == null) {
+            arguments = getIntent().getExtras();
+        } else {
+            arguments = savedInstanceState;
+        }
+
+        songs = arguments.getStringArray("SONGS");
+        artist = arguments.getString("ARTIST");
+        date = arguments.getString("DATE");
+        venue = arguments.getString("VENUE");
+        tour = arguments.getString("TOUR");
 
         ActionBar ab = getSupportActionBar();
         if (ab != null) {
@@ -52,25 +73,52 @@ public class SetlistActivity extends ActionBarActivity {
         }
 
         setContentView(R.layout.activity_setlist);
-        if (savedInstanceState == null) {
-            SetlistFragment sf = new SetlistFragment();
-            Bundle bundle = new Bundle();
-            bundle.putStringArray("SONGS", songs);
-            bundle.putString("ARTIST", artist);
-            bundle.putString("DATE", date);
-            bundle.putString("TOUR", tour);
-            bundle.putString("VENUE", venue);
 
-            sf.setArguments(bundle);
-            getFragmentManager().beginTransaction()
-                    .add(R.id.activity_setlist, sf)
-                    .commit();
-        }
+        SetlistFragment sf = new SetlistFragment();
+        Bundle bundle = new Bundle();
+        bundle.putStringArray("SONGS", songs);
+        bundle.putString("ARTIST", artist);
+        bundle.putString("DATE", date);
+        bundle.putString("TOUR", tour);
+        bundle.putString("VENUE", venue);
+
+        sf.setArguments(bundle);
+        getFragmentManager().beginTransaction()
+                .add(R.id.activity_setlist, sf)
+                .commit();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putStringArray("SONGS", songs);
+        outState.putString("ARTIST", artist);
+        outState.putString("DATE", date);
+        outState.putString("TOUR", tour);
+        outState.putString("VENUE", venue);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Uri uri = intent.getData();
+        if (uri != null) {
+            AuthenticationResponse response = SpotifyAuthentication.parseOauthResponse(uri);
+
+            // THIS IS WHAT'S IMPORTANT
+            // TODO: Save this so authentication is not necessary every time -- needs a refresh token (see web API)
+            String accessToken = response.getAccessToken();
+        }
     }
 }

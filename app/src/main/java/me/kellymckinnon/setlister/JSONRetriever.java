@@ -1,10 +1,14 @@
 package me.kellymckinnon.setlister;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,11 +30,22 @@ import java.net.URL;
  */
 public class JSONRetriever {
 
-    public static JSONObject getJSON(String stringURL) {
+    public static JSONObject getJSON(String url) {
+        return getJSON(url, null, null);
+    }
+
+    public static JSONObject getJSON(String stringURL, String authorizationType, String authorization) {
         try {
             StringBuilder response  = new StringBuilder();
             URL url = new URL(stringURL);
             HttpURLConnection httpconn = (HttpURLConnection)url.openConnection();
+
+            if(authorization != null) {
+                httpconn.setRequestProperty("Authorization", authorizationType + " " + authorization);
+            }
+
+            httpconn.setRequestProperty("Content-Type", "application/json");
+
             if (httpconn.getResponseCode() == HttpURLConnection.HTTP_OK)
             {
                 BufferedReader input = new BufferedReader(new InputStreamReader(httpconn.getInputStream()),8192);

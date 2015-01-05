@@ -12,6 +12,7 @@
         <activity
             android:name=".SearchActivity"
             android:label="@string/app_name"
+            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateAlwaysVisible" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,6 +31,8 @@
         <activity
             android:name=".SetlistActivity"
             android:label="@string/title_activity_setlist"
+            android:launchMode="singleInstance"
+            android:configChanges="orientation|screenSize"
             android:parentActivityName=".ListingActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

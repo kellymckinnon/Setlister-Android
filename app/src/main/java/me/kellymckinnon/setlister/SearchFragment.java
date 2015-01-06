@@ -1,5 +1,7 @@
 package me.kellymckinnon.setlister;
 
+import com.rengwuxian.materialedittext.MaterialEditText;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -8,6 +10,10 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -16,8 +22,10 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.ImageButton;
+import android.widget.ListView;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -25,65 +33,56 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by kelly on 12/19/14.
+ * Fragment opened by SearchActivity that holds a search bar
+ * and displays recent results as well as suggestions
  */
 public class SearchFragment extends Fragment {
 
-    private DelayAutoCompleteTextView actv;
+    private MaterialEditText searchBar;
     private Filter filter;
     private ArrayAdapter<String> adapter;
     private ArtistSearch search;
+
+    private final int TRIGGER_SEARCH = 1;
+    private final long SEARCH_DELAY_IN_MS = 500;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_search, container, false);
-        actv = (DelayAutoCompleteTextView) rootView.findViewById(R.id.searchAutoComplete);
+        searchBar = (MaterialEditText) rootView.findViewById(R.id.searchBar);
 
-        filter = new Filter() {
-
+        final Handler handler = new Handler() {
             @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
-                Log.i("Filter",
-                        "Filter:" + constraint + " thread: " + Thread.currentThread());
-                if (constraint != null) {
-                    Log.i("Filter", "doing a search ..");
+            public void handleMessage(Message msg) {
+                if (msg.what == TRIGGER_SEARCH) {
                     search = new ArtistSearch();
                     search.execute();
                 }
-                return null;
-            }
-
-            @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) {
             }
         };
 
-        adapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_dropdown_item_1line) {
-            public Filter getFilter() {
-                return filter;
-            }
-        };
-
-        actv.setAdapter(adapter);
-        actv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        searchBar.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //FIXME: Change to MBID implementation -- will need a HashMap of Name -> MBID
-                Intent intent = new Intent(getActivity(), ListingActivity.class);
-                intent.putExtra("ARTIST_NAME", actv.getText().toString());
-                startActivity(intent);
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                handler.removeMessages(TRIGGER_SEARCH);
+                handler.sendEmptyMessageDelayed(TRIGGER_SEARCH, SEARCH_DELAY_IN_MS);
             }
         });
 
-        actv.setOnKeyListener(new View.OnKeyListener() {
+        searchBar.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
 
                 if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == EditorInfo.IME_ACTION_SEARCH) {
                     Intent intent = new Intent(getActivity(), ListingActivity.class);
-                    intent.putExtra("ARTIST_NAME", actv.getText().toString());
+                    intent.putExtra("ARTIST_NAME", searchBar.getText().toString());
                     startActivity(intent);
                     return true;
                 }
@@ -91,15 +90,31 @@ public class SearchFragment extends Fragment {
             }
         });
 
-        ImageButton clearSearch = (ImageButton) rootView.findViewById(R.id.clear_search);
+        final ImageButton clearSearch = (ImageButton) rootView.findViewById(R.id.clear_search);
         clearSearch.setOnClickListener(new ImageButton.OnClickListener() {
             @Override
             public void onClick(View v) {
-                actv.setText("");
+                searchBar.setText("");
             }
         });
 
-        adapter.setNotifyOnChange(false);
+
+        ListView suggestionList = (ListView) rootView.findViewById(R.id.suggestionList);
+
+        adapter = new ArrayAdapter<>(getActivity(),
+                android.R.layout.simple_list_item_1);
+
+        suggestionList.setAdapter(adapter);
+
+        suggestionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //FIXME: Change to MBID implementation -- will need a HashMap of Name -> MBID
+                Intent intent = new Intent(getActivity(), ListingActivity.class);
+                intent.putExtra("ARTIST_NAME", searchBar.getText().toString());
+                startActivity(intent);
+            }
+        });
 
         return rootView;
 
@@ -145,7 +160,7 @@ public class SearchFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... params) {
-            String artistName = actv.getText().toString();
+            String artistName = searchBar.getText().toString();
 
             StringBuilder query = new StringBuilder();
             query.append("http://api.setlist.fm/rest/0.1/search/artists.json?artistName=");
@@ -197,7 +212,6 @@ public class SearchFragment extends Fragment {
                 }
 
                 adapter.notifyDataSetChanged();
-                actv.showDropDown();
             }
 
             super.onPostExecute(aVoid);

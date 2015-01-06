@@ -4,7 +4,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -103,13 +102,13 @@ public class ListingFragment extends Fragment {
 
                 JSONObject json = null;
 
-                if (JSONRetriever.getJSON(query.toString()) == null) { // No results found
+                if (JSONRetriever.getRequest(query.toString()) == null) { // No results found
                     return null;
                 }
 
                 // On first run, calculate total number of pages
                 if (pagesLoaded == 0) {
-                    json = JSONRetriever.getJSON(query.toString()).getJSONObject("setlists");
+                    json = JSONRetriever.getRequest(query.toString()).getJSONObject("setlists");
                     int numShows = Integer.parseInt(json.getString("@total"));
 
                     // One 20-item array per page
@@ -131,7 +130,7 @@ public class ListingFragment extends Fragment {
                 while (numShowsAdded < 12 && pagesLoaded < numPages) {
                     String currentPageQuery = query.toString() + "&p=" + (pagesLoaded + 1);
                     Log.d("URL IS: ", currentPageQuery);
-                    json = JSONRetriever.getJSON(currentPageQuery).getJSONObject("setlists");
+                    json = JSONRetriever.getRequest(currentPageQuery).getJSONObject("setlists");
                     JSONArray items = json.getJSONArray("setlist");
 
                     for (int i = 0; i < items.length(); i++) {

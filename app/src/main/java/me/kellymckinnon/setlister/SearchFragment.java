@@ -8,8 +8,6 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.method.KeyListener;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -20,8 +18,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -85,8 +81,7 @@ public class SearchFragment extends Fragment {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
 
-
-                if(keyCode == KeyEvent.KEYCODE_ENTER || keyCode == EditorInfo.IME_ACTION_SEARCH) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == EditorInfo.IME_ACTION_SEARCH) {
                     Intent intent = new Intent(getActivity(), ListingActivity.class);
                     intent.putExtra("ARTIST_NAME", actv.getText().toString());
                     startActivity(intent);
@@ -113,8 +108,9 @@ public class SearchFragment extends Fragment {
     @Override
     public void onStop() {
         //check the state of the task
-        if(search != null && search.getStatus() == AsyncTask.Status.RUNNING)
+        if (search != null && search.getStatus() == AsyncTask.Status.RUNNING) {
             search.cancel(true);
+        }
 
         super.onStop();
 
@@ -124,6 +120,28 @@ public class SearchFragment extends Fragment {
 
         List<Artist> artists = new ArrayList<Artist>();
 
+        public void populateArtist(JSONObject currentArtist) throws JSONException {
+            String name = currentArtist.getString("@name");
+            Artist artist = new Artist();
+            artist.name = currentArtist.getString("@name");
+            artist.mbid = currentArtist.getString("@mbid");
+
+            try {
+                artist.genre = currentArtist.getString("@disambiguation");
+            } catch (JSONException e) {
+                artist.genre = "";
+            }
+
+            // If the artist has no setlists, don't add it to the list of choices
+            JSONObject json = JSONRetriever.getRequest(
+                    "http://api.setlist.fm/rest/0.1/artist/" + artist.mbid + "/setlists.json");
+
+            if (json == null) {
+                return;
+            }
+
+            artists.add(artist);
+        }
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -138,11 +156,11 @@ public class SearchFragment extends Fragment {
 
                 JSONObject json = null;
 
-                if (JSONRetriever.getJSON(query.toString()) == null) { // No results found
+                if (JSONRetriever.getRequest(query.toString()) == null) { // No results found
                     return null;
                 }
 
-                json = JSONRetriever.getJSON(query.toString()).getJSONObject("artists");
+                json = JSONRetriever.getRequest(query.toString()).getJSONObject("artists");
 
                 // If only one result, it's a JSONObject, else an array
                 if (json.getString("@total").equals("1")) {
@@ -183,28 +201,6 @@ public class SearchFragment extends Fragment {
             }
 
             super.onPostExecute(aVoid);
-        }
-
-        public void populateArtist(JSONObject currentArtist) throws JSONException {
-            String name = currentArtist.getString("@name");
-            Artist artist = new Artist();
-            artist.name = currentArtist.getString("@name");
-            artist.mbid = currentArtist.getString("@mbid");
-
-            try {
-                artist.genre = currentArtist.getString("@disambiguation");
-            } catch (JSONException e) {
-                artist.genre = "";
-            }
-
-            // If the artist has no setlists, don't add it to the list of choices
-            JSONObject json = JSONRetriever.getJSON("http://api.setlist.fm/rest/0.1/artist/"+artist.mbid+"/setlists.json");
-
-            if(json == null) {
-                return;
-            }
-
-            artists.add(artist);
         }
     }
 }

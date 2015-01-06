@@ -1,50 +1,23 @@
 package me.kellymckinnon.setlister;
 
-import com.spotify.sdk.android.Spotify;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.authentication.SpotifyAuthentication;
-import com.spotify.sdk.android.playback.Player;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.animation.StateListAnimator;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Config;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class SetlistActivity extends ActionBarActivity {
@@ -55,6 +28,7 @@ public class SetlistActivity extends ActionBarActivity {
     String venue;
     String tour;
     String accessToken;
+    ArrayList<String> failedSpotifySongs = new ArrayList<String>();
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -98,8 +72,8 @@ public class SetlistActivity extends ActionBarActivity {
 
         ActionBar ab = getSupportActionBar();
         if (ab != null) {
-            date = Utility.formatDate(date, "MM/dd/yyyy", "MMMM d, yyyy");
-            ab.setTitle(date);
+            String formattedDate = Utility.formatDate(date, "MM/dd/yyyy", "MMMM d, yyyy");
+            ab.setTitle(formattedDate);
             ab.setSubtitle(artist);
         }
 
@@ -120,17 +94,6 @@ public class SetlistActivity extends ActionBarActivity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putStringArray("SONGS", songs);
-        outState.putString("ARTIST", artist);
-        outState.putString("DATE", date);
-        outState.putString("TOUR", tour);
-        outState.putString("VENUE", venue);
-    }
-
-
-    @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
@@ -148,88 +111,102 @@ public class SetlistActivity extends ActionBarActivity {
         AuthenticationResponse response = SpotifyAuthentication.parseOauthResponse(uri);
 
         // THIS IS WHAT'S IMPORTANT
-        // TODO: Save this so authentication is not necessary every time -- needs a refresh token (see web API)
+        // TODO: Save this so authentication is not necessary every time -- needs a refresh token
+        // (see web API)
         accessToken = response.getAccessToken();
 
         new PlaylistCreator().execute();
 
+    }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putStringArray("SONGS", songs);
+        outState.putString("ARTIST", artist);
+        outState.putString("DATE", date);
+        outState.putString("TOUR", tour);
+        outState.putString("VENUE", venue);
     }
 
     public class PlaylistCreator extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {
-//            HttpClient client = new DefaultHttpClient(new BasicHttpParams());
-//            HttpGet httpGet = new HttpGet("https://api.spotify.com/v1/me");
-//            httpGet.setHeader("Content-type", "application/json");
-//            httpGet.addHeader("Authorization", "Bearer " + accessToken);
-
-            String username = "";
-
-            JSONObject userJson = JSONRetriever.getJSON("https://api.spotify.com/v1/me", "Bearer", accessToken);
-
             try {
-                username = userJson.getString("id");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+                // Get username, which we need to create a playlist
+                JSONObject userJson = JSONRetriever.getRequest("https://api.spotify.com/v1/me",
+                        "Bearer", accessToken);
 
-            System.out.println("THE USERNAME IS " + username);
+                String username = userJson.getString("id");
 
-            JSONObject createPlaylistJson;
-            //TODO: refactor POST logic into JSONRetriever
-            try {
-                StringBuilder response  = new StringBuilder();
-                URL url = new URL("https://api.spotify.com/v1/users/"+username+"/playlists");
-                HttpURLConnection httpconn = (HttpURLConnection)url.openConnection();
-                httpconn.setRequestProperty("Authorization", "Bearer " + accessToken);
-                httpconn.setRequestProperty("Content-Type", "application/json");
-                httpconn.setRequestMethod("POST");
+                System.out.println("THE USERNAME IS " + username);
+
+                // Create an empty playlist for the authenticated user
+                String createPlaylistUrl = "https://api.spotify.com/v1/users/" + username
+                        + "/playlists";
 
                 JSONObject playlistInfo = new JSONObject();
-                playlistInfo.put("name", "Test Playlist");
+                playlistInfo.put("name", artist + ", " + date);
                 playlistInfo.put("public", "true");
 
-                OutputStreamWriter os = new OutputStreamWriter(httpconn.getOutputStream());
-                os.write(playlistInfo.toString());
-                os.close();
+                JSONObject createPlaylistJson = JSONRetriever.postRequest(createPlaylistUrl,
+                        "Bearer", accessToken, playlistInfo);
 
-                if (httpconn.getResponseCode() == HttpURLConnection.HTTP_CREATED)
-                {
-                    BufferedReader input = new BufferedReader(new InputStreamReader(httpconn.getInputStream()),8192);
-                    String strLine = null;
-                    while ((strLine = input.readLine()) != null)
-                    {
-                        response.append(strLine);
+                System.out.println("The playlist name is: " + createPlaylistJson.getString("name"));
+
+                String playlistId = createPlaylistJson.getString("id");
+                StringBuilder tracks = new StringBuilder();
+
+                int numSongsAdded = 0;
+                for (String s : songs) {
+                    if(numSongsAdded > 100) {
+                        failedSpotifySongs.add(s);
                     }
-                    input.close();
 
-                    createPlaylistJson = new JSONObject(response.toString());
-                    System.out.println("THE PLAYLIST ID IS " + createPlaylistJson.getString("id"));
-                } else {
-                    Log.e("SetlistActivity", "Playlist creation request received response code " + httpconn.getResponseCode() + "");
+                    String songQuery = s.replace(' ', '+');
+                    String artistQuery = artist.replace(' ', '+');
+                    try {
+                        //TODO: Make the limit 2, and compare the popularity so we don't actually
+                        // get
+                        //Digital Renegade (instrumental) instead of Digital Renegade
+                        JSONObject trackJson = JSONRetriever.getRequest(
+                                "https://api.spotify.com/v1/search?q=track:" + songQuery
+                                        + "%20artist:" + artistQuery + "&type=track&limit=1");
+                        JSONObject tracking = trackJson.getJSONObject("tracks");
+                        JSONArray items = tracking.getJSONArray("items");
+
+                        tracks.append(((JSONObject) items.get(0)).getString("uri"));
+                        tracks.append(",");
+                        numSongsAdded++;
+                    } catch (JSONException e) {
+                        Log.e("SetlistActivity",
+                                "Track: " + s + " for artist: " + artist + " was not found.");
+                        failedSpotifySongs.add(s);
+                        //TODO: Implement error message that shows which songs were not added to
+                        // the playlist
+                    }
                 }
-            } catch (IOException e) {
-                Log.e("JSONRetriever", "IOException");
-                e.printStackTrace();
-                return null;
+
+                tracks.deleteCharAt(tracks.length() - 1); // Delete last comma
+
+                String addSongsUrl = createPlaylistUrl + "/" + playlistId + "/tracks?uris=" + tracks
+                        .toString();
+                System.out.println("The add songs URL is: " + addSongsUrl);
+
+                JSONRetriever.postRequest(addSongsUrl, "Bearer", accessToken, null);
+
             } catch (JSONException e) {
-                Log.e("JSONRetriever", "JSONException");
+                Log.e("SetlistActivity", "JSONException");
                 e.printStackTrace();
-                return null;
             }
-
-            //TODO: Add test URIs and add them to the playlist
-            //TODO: Get actual URIs of tracks using search
-
-
 
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            //TODO: Add successfully created message with list of failed songs
             super.onPostExecute(aVoid);
         }
 

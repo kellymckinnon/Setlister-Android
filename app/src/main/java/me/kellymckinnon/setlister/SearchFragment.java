@@ -8,6 +8,8 @@ import org.json.JSONObject;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,10 +24,9 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.Filter;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -39,9 +40,9 @@ import java.util.List;
 public class SearchFragment extends Fragment {
 
     private MaterialEditText searchBar;
-    private Filter filter;
     private ArrayAdapter<String> adapter;
     private ArtistSearch search;
+    private String searchType;
 
     private final int TRIGGER_SEARCH = 1;
     private final long SEARCH_DELAY_IN_MS = 500;
@@ -50,8 +51,60 @@ public class SearchFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_search, container, false);
+
+        final TextView artistSelect = (TextView) rootView.findViewById(R.id.artistSelect);
+        final TextView venueSelect = (TextView) rootView.findViewById(R.id.venueSelect);
+        final TextView citySelect = (TextView) rootView.findViewById(R.id.citySelect);
+
+        final int accentColor = artistSelect.getCurrentTextColor();
+        final int normalColor = venueSelect.getCurrentTextColor();
+        searchType = "artist";
+
+        artistSelect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                artistSelect.setTextColor(accentColor);
+                venueSelect.setTextColor(normalColor);
+                citySelect.setTextColor(normalColor);
+
+                artistSelect.setTypeface(Typeface.DEFAULT_BOLD);
+                venueSelect.setTypeface(Typeface.DEFAULT);
+                citySelect.setTypeface(Typeface.DEFAULT);
+                searchType = "artist";
+            }
+        });
+
+        venueSelect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                artistSelect.setTextColor(normalColor);
+                venueSelect.setTextColor(accentColor);
+                citySelect.setTextColor(normalColor);
+
+                artistSelect.setTypeface(Typeface.DEFAULT);
+                venueSelect.setTypeface(Typeface.DEFAULT_BOLD);
+                citySelect.setTypeface(Typeface.DEFAULT);
+                searchType = "venue";
+            }
+        });
+
+        citySelect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                artistSelect.setTextColor(normalColor);
+                venueSelect.setTextColor(normalColor);
+                citySelect.setTextColor(accentColor);
+
+                artistSelect.setTypeface(Typeface.DEFAULT);
+                venueSelect.setTypeface(Typeface.DEFAULT);
+                citySelect.setTypeface(Typeface.DEFAULT_BOLD);
+                searchType = "city";
+            }
+        });
+
         searchBar = (MaterialEditText) rootView.findViewById(R.id.searchBar);
 
+        // Delays search until user has stopped typing
         final Handler handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -80,9 +133,13 @@ public class SearchFragment extends Fragment {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
 
-                if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == EditorInfo.IME_ACTION_SEARCH) {
+                String text = searchBar.getText().toString();
+
+                if ((keyCode == KeyEvent.KEYCODE_ENTER || keyCode == EditorInfo.IME_ACTION_SEARCH) && text.length() != 0) {
                     Intent intent = new Intent(getActivity(), ListingActivity.class);
-                    intent.putExtra("ARTIST_NAME", searchBar.getText().toString());
+
+                    intent.putExtra("ARTIST_NAME", text.substring(0,1).toUpperCase() + text.substring(1));
+
                     startActivity(intent);
                     return true;
                 }
@@ -98,8 +155,7 @@ public class SearchFragment extends Fragment {
             }
         });
 
-
-        ListView suggestionList = (ListView) rootView.findViewById(R.id.suggestionList);
+        final ListView suggestionList = (ListView) rootView.findViewById(R.id.suggestionList);
 
         adapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_list_item_1);
@@ -111,7 +167,7 @@ public class SearchFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //FIXME: Change to MBID implementation -- will need a HashMap of Name -> MBID
                 Intent intent = new Intent(getActivity(), ListingActivity.class);
-                intent.putExtra("ARTIST_NAME", searchBar.getText().toString());
+                intent.putExtra("ARTIST_NAME", (String) suggestionList.getItemAtPosition(position));
                 startActivity(intent);
             }
         });
@@ -122,7 +178,7 @@ public class SearchFragment extends Fragment {
 
     @Override
     public void onStop() {
-        //check the state of the task
+        // Check the state of the task
         if (search != null && search.getStatus() == AsyncTask.Status.RUNNING) {
             search.cancel(true);
         }
@@ -136,7 +192,6 @@ public class SearchFragment extends Fragment {
         List<Artist> artists = new ArrayList<Artist>();
 
         public void populateArtist(JSONObject currentArtist) throws JSONException {
-            String name = currentArtist.getString("@name");
             Artist artist = new Artist();
             artist.name = currentArtist.getString("@name");
             artist.mbid = currentArtist.getString("@mbid");

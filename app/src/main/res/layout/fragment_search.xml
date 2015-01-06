@@ -19,7 +19,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="SEARCH FOR:"
+                android:text="SEARCH BY:"
                 android:layout_marginTop="5dp"
                 android:layout_marginLeft="5dp"
                 android:id="@+id/searchFor"
@@ -56,7 +56,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ARTISTS"
+                android:text="ARTIST"
                 android:id="@+id/artistSelect"
                 android:textColor="@color/my_accent"
                 android:textStyle="bold"
@@ -69,8 +69,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TOURS"
-                android:id="@+id/tourSelect"
+                android:text="VENUE"
+                android:id="@+id/venueSelect"
                 android:layout_above="@+id/searchBar"
                 android:layout_toRightOf="@id/artistSelect"
                 android:layout_toEndOf="@id/artistSelect"
@@ -80,11 +80,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="VENUES"
-                android:id="@+id/venueSelect"
+                android:text="CITY"
+                android:id="@+id/citySelect"
                 android:layout_above="@+id/searchBar"
-                android:layout_toRightOf="@id/tourSelect"
-                android:layout_toEndOf="@id/tourSelect"
+                android:layout_toRightOf="@id/venueSelect"
+                android:layout_toEndOf="@id/venueSelect"
                 android:layout_marginLeft="15dp"
                 android:layout_marginStart="15dp"/>
 

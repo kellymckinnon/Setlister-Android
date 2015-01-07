@@ -2,13 +2,10 @@ package me.kellymckinnon.setlister;
 
 import com.rengwuxian.materialedittext.MaterialEditText;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,7 +13,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,120 +22,213 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 /**
  * Fragment opened by SearchActivity that holds a search bar
- * and displays recent results as well as suggestions
+ * and displays recent results as well as suggestions as the user types
  */
 public class SearchFragment extends Fragment {
 
-    private MaterialEditText searchBar;
-    private ArrayAdapter<String> adapter;
-    private ArtistSearch search;
+    private static final String PREFS_NAME = "RecentSearchesFile";
+    private static final int TRIGGER_SEARCH = 1;
+    private static final long SEARCH_DELAY_IN_MS = 500;
+    private static final int NUM_RECENT_SEARCHES = 5;
+    private static final String SEARCH_TYPE_ARTIST = "Artist";
+    private static final String SEARCH_TYPE_VENUE = "Venue";
+    private static final String SEARCH_TYPE_CITY = "City";
+    protected ProgressBar loadingSpinner;
+    protected MaterialEditText searchBar;
+    protected ListView suggestionList;
+    protected ArrayAdapter<String> listAdapter;
+    protected TextView noResultsText;
+    protected HashMap<String, String> nameIdMap;
+    private AsyncTask<Void, Void, Void> searchTask;
     private String searchType;
-
-    private final int TRIGGER_SEARCH = 1;
-    private final long SEARCH_DELAY_IN_MS = 500;
+    private ArrayList<String> recentSearches;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_search, container, false);
 
-        final TextView artistSelect = (TextView) rootView.findViewById(R.id.artistSelect);
-        final TextView venueSelect = (TextView) rootView.findViewById(R.id.venueSelect);
-        final TextView citySelect = (TextView) rootView.findViewById(R.id.citySelect);
+        suggestionList = (ListView) rootView.findViewById(R.id.suggestion_list);
+        loadingSpinner = (ProgressBar) rootView.findViewById(R.id.loading_suggestions);
+        noResultsText = (TextView) rootView.findViewById(R.id.no_results_text);
+        searchBar = (MaterialEditText) rootView.findViewById(R.id.search_bar);
 
-        final int accentColor = artistSelect.getCurrentTextColor();
-        final int normalColor = venueSelect.getCurrentTextColor();
-        searchType = "artist";
+        final TextView suggestionHeader = (TextView) rootView.findViewById(R.id.suggestion_header);
+        final TextView noRecentSearchesText = (TextView) rootView.findViewById(
+                R.id.no_searches_text);
+        final TextView artistSelectionText = (TextView) rootView.findViewById(R.id.artist_selection);
+        final TextView venueSelectionText = (TextView) rootView.findViewById(R.id.venue_selection);
+        final TextView citySelectionText = (TextView) rootView.findViewById(R.id.city_selection);
 
-        artistSelect.setOnClickListener(new View.OnClickListener() {
+        final ImageButton clearSearchButton = (ImageButton) rootView.findViewById(
+                R.id.clear_search);
+        clearSearchButton.setOnClickListener(new ImageButton.OnClickListener() {
             @Override
             public void onClick(View v) {
-                artistSelect.setTextColor(accentColor);
-                venueSelect.setTextColor(normalColor);
-                citySelect.setTextColor(normalColor);
-
-                artistSelect.setTypeface(Typeface.DEFAULT_BOLD);
-                venueSelect.setTypeface(Typeface.DEFAULT);
-                citySelect.setTypeface(Typeface.DEFAULT);
-                searchType = "artist";
+                searchBar.setText("");
             }
         });
 
-        venueSelect.setOnClickListener(new View.OnClickListener() {
+        final int accentColor = artistSelectionText.getCurrentTextColor();
+        final int normalColor = venueSelectionText.getCurrentTextColor();
+        searchType = SEARCH_TYPE_ARTIST;
+
+        artistSelectionText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                artistSelect.setTextColor(normalColor);
-                venueSelect.setTextColor(accentColor);
-                citySelect.setTextColor(normalColor);
+                artistSelectionText.setTextColor(accentColor);
+                venueSelectionText.setTextColor(normalColor);
+                citySelectionText.setTextColor(normalColor);
 
-                artistSelect.setTypeface(Typeface.DEFAULT);
-                venueSelect.setTypeface(Typeface.DEFAULT_BOLD);
-                citySelect.setTypeface(Typeface.DEFAULT);
-                searchType = "venue";
+                artistSelectionText.setTypeface(Typeface.DEFAULT_BOLD);
+                venueSelectionText.setTypeface(Typeface.DEFAULT);
+                citySelectionText.setTypeface(Typeface.DEFAULT);
+                searchType = SEARCH_TYPE_ARTIST;
             }
         });
 
-        citySelect.setOnClickListener(new View.OnClickListener() {
+        venueSelectionText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                artistSelect.setTextColor(normalColor);
-                venueSelect.setTextColor(normalColor);
-                citySelect.setTextColor(accentColor);
-
-                artistSelect.setTypeface(Typeface.DEFAULT);
-                venueSelect.setTypeface(Typeface.DEFAULT);
-                citySelect.setTypeface(Typeface.DEFAULT_BOLD);
-                searchType = "city";
+                artistSelectionText.setTextColor(normalColor);
+                venueSelectionText.setTextColor(accentColor);
+                citySelectionText.setTextColor(normalColor);
+                artistSelectionText.setTypeface(Typeface.DEFAULT);
+                venueSelectionText.setTypeface(Typeface.DEFAULT_BOLD);
+                citySelectionText.setTypeface(Typeface.DEFAULT);
+                searchType = SEARCH_TYPE_VENUE;
             }
         });
 
-        searchBar = (MaterialEditText) rootView.findViewById(R.id.searchBar);
+        citySelectionText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                artistSelectionText.setTextColor(normalColor);
+                venueSelectionText.setTextColor(normalColor);
+                citySelectionText.setTextColor(accentColor);
+                artistSelectionText.setTypeface(Typeface.DEFAULT);
+                venueSelectionText.setTypeface(Typeface.DEFAULT);
+                citySelectionText.setTypeface(Typeface.DEFAULT_BOLD);
+                searchType = SEARCH_TYPE_CITY;
+            }
+        });
 
-        // Delays search until user has stopped typing
+        SharedPreferences recentFile = getActivity().getSharedPreferences(PREFS_NAME,
+                Context.MODE_PRIVATE);
+        recentSearches = new ArrayList<>();
+        nameIdMap = new HashMap<>();
+
+        // Recent searches are stored as search0, search1, search2, etc up to search4 (5 maximum)
+        for (int i = 0; i < NUM_RECENT_SEARCHES; i++) {
+            if (recentFile.contains("search" + i)) {
+                String query = recentFile.getString("search" + i, "");
+                String id = recentFile.getString("id" + i, "0");
+                recentSearches.add(query);
+                nameIdMap.put(query, id);
+            }
+        }
+
+        if (recentSearches.isEmpty()) {
+            noRecentSearchesText.setVisibility(View.VISIBLE);
+            suggestionList.setVisibility(View.GONE);
+        }
+
+        // Don't search until user has stopped typing
         final Handler handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                if (msg.what == TRIGGER_SEARCH) {
-                    search = new ArtistSearch();
-                    search.execute();
+                if (msg.what == TRIGGER_SEARCH && searchBar.getText().toString().length() != 0) {
+                    noResultsText.setVisibility(View.GONE);
+                    loadingSpinner.setVisibility(View.VISIBLE);
+                    suggestionList.setVisibility(View.GONE);
+
+                    if (searchType.equals(SEARCH_TYPE_ARTIST)) {
+                        searchTask = new ArtistSearch(SearchFragment.this);
+                    } else if (searchType.equals(SEARCH_TYPE_VENUE)) {
+                        searchTask = new VenueSearch(SearchFragment.this);
+                    } else if (searchType.equals(SEARCH_TYPE_CITY)) {
+                        searchTask = new CitySearch(SearchFragment.this);
+                    } else {
+                        // This should never happen
+                        throw new IllegalArgumentException("Search type not specified.");
+                    }
+
+                    searchTask.execute();
                 }
             }
         };
 
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(Editable s) {
-                handler.removeMessages(TRIGGER_SEARCH);
-                handler.sendEmptyMessageDelayed(TRIGGER_SEARCH, SEARCH_DELAY_IN_MS);
+                if (s.length() == 0) { // Empty search, show recent searches
+                    suggestionHeader.setText(getString(R.string.recent_searches_header));
+                    loadingSpinner.setVisibility(View.GONE);
+                    noResultsText.setVisibility(View.GONE);
+
+                    if (recentSearches.isEmpty()) {
+                        suggestionList.setVisibility(View.GONE);
+                        noRecentSearchesText.setVisibility(View.VISIBLE);
+                    } else {
+                        suggestionList.setVisibility(View.VISIBLE);
+                    }
+
+                    // Stop any current searches
+                    handler.removeMessages(TRIGGER_SEARCH);
+                    if (searchTask != null && searchTask.getStatus() == AsyncTask.Status.RUNNING) {
+                        searchTask.cancel(true);
+                    }
+
+                    if (listAdapter != null) {
+                        listAdapter.clear();
+                        listAdapter.addAll(recentSearches);
+                    }
+                } else { // There is a query, get suggestions
+                    noRecentSearchesText.setVisibility(View.GONE);
+                    noResultsText.setVisibility(View.GONE);
+                    loadingSpinner.setVisibility(View.VISIBLE);
+                    suggestionList.setVisibility(View.GONE);
+                    suggestionHeader.setText(getString(R.string.best_matches_header));
+                    handler.removeMessages(TRIGGER_SEARCH);
+                    handler.sendEmptyMessageDelayed(TRIGGER_SEARCH, SEARCH_DELAY_IN_MS);
+                }
+
             }
         });
 
+        // Search when enter is pressed
         searchBar.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
-
                 String text = searchBar.getText().toString();
 
-                if ((keyCode == KeyEvent.KEYCODE_ENTER || keyCode == EditorInfo.IME_ACTION_SEARCH) && text.length() != 0) {
+                // We only want to do this once
+                if (event.getAction()!=KeyEvent.ACTION_UP) {
+                    return false;
+                }
+
+                if ((keyCode == KeyEvent.KEYCODE_ENTER || keyCode == EditorInfo.IME_ACTION_SEARCH)
+                        && text.length() != 0) {
                     Intent intent = new Intent(getActivity(), ListingActivity.class);
-
-                    intent.putExtra("ARTIST_NAME", text.substring(0,1).toUpperCase() + text.substring(1));
-
+                    String formattedQuery = text.substring(0, 1).toUpperCase() + text.substring(1);
+                    intent.putExtra("QUERY", formattedQuery);
+                    addRecentSearch(formattedQuery, "0");
                     startActivity(intent);
                     return true;
                 }
@@ -147,130 +236,84 @@ public class SearchFragment extends Fragment {
             }
         });
 
-        final ImageButton clearSearch = (ImageButton) rootView.findViewById(R.id.clear_search);
-        clearSearch.setOnClickListener(new ImageButton.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                searchBar.setText("");
-            }
-        });
-
-        final ListView suggestionList = (ListView) rootView.findViewById(R.id.suggestionList);
-
-        adapter = new ArrayAdapter<>(getActivity(),
+        // Populate list with recent searches
+        listAdapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_list_item_1);
-
-        suggestionList.setAdapter(adapter);
+        suggestionList.setAdapter(listAdapter);
+        listAdapter.addAll(recentSearches);
 
         suggestionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //FIXME: Change to MBID implementation -- will need a HashMap of Name -> MBID
+                String query = (String) suggestionList.getItemAtPosition(position);
+                String searchId = nameIdMap.get(query);
+
+                // Remove info from recent searches before sending to search
+                if(query.contains("(Venue)")) {
+                    query = query.substring(0, query.length() - 8);
+                } else if(query.contains("(Artist)")) {
+                    query = query.substring(0, query.length() - 9);
+                } else if(query.contains("(Tour)")) {
+                    query = query.substring(0, query.length() - 7);
+                }
+
+                addRecentSearch(query, searchId);
+
                 Intent intent = new Intent(getActivity(), ListingActivity.class);
-                intent.putExtra("ARTIST_NAME", (String) suggestionList.getItemAtPosition(position));
+                intent.putExtra("QUERY", query);
+                if(!searchId.equals("0")) {
+                    intent.putExtra("ID", searchId);
+                }
                 startActivity(intent);
             }
         });
 
         return rootView;
-
     }
 
     @Override
     public void onStop() {
         // Check the state of the task
-        if (search != null && search.getStatus() == AsyncTask.Status.RUNNING) {
-            search.cancel(true);
+        if (searchTask != null && searchTask.getStatus() == AsyncTask.Status.RUNNING) {
+            searchTask.cancel(true);
         }
 
         super.onStop();
-
     }
 
-    public class ArtistSearch extends AsyncTask<Void, Void, Void> {
+    /**
+     * Add the given search to the top of the recent searches list, pushing off the oldest entry.
+     * Both names and ids are stored, under search0 (most recent), search1, ... and id0, id1, ...
+     * up to a maximum of five entries.
+     *
+     * If the id for a recent search is 0, this indicates that the search was done via the enter
+     * key and since no specific result was chosen, there is no associated id.
+     */
+    public void addRecentSearch(String query, String id) {
+        SharedPreferences recentFile = getActivity().getSharedPreferences(PREFS_NAME,
+                Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = recentFile.edit();
 
-        List<Artist> artists = new ArrayList<Artist>();
+        String formattedRecentSearch = query + " (" + searchType + ")";
 
-        public void populateArtist(JSONObject currentArtist) throws JSONException {
-            Artist artist = new Artist();
-            artist.name = currentArtist.getString("@name");
-            artist.mbid = currentArtist.getString("@mbid");
-
-            try {
-                artist.genre = currentArtist.getString("@disambiguation");
-            } catch (JSONException e) {
-                artist.genre = "";
-            }
-
-            // If the artist has no setlists, don't add it to the list of choices
-            JSONObject json = JSONRetriever.getRequest(
-                    "http://api.setlist.fm/rest/0.1/artist/" + artist.mbid + "/setlists.json");
-
-            if (json == null) {
+        for(String s : recentSearches) {
+            if(s.equalsIgnoreCase(formattedRecentSearch)) {
+                //TODO: Instead of doing nothing, move the search to the top
+                //And replace the ID if necessary
                 return;
             }
-
-            artists.add(artist);
         }
 
-        @Override
-        protected Void doInBackground(Void... params) {
-            String artistName = searchBar.getText().toString();
-
-            StringBuilder query = new StringBuilder();
-            query.append("http://api.setlist.fm/rest/0.1/search/artists.json?artistName=");
-            try {
-                query.append(URLEncoder.encode(artistName, "UTF-8"));
-
-                Log.d("URL IS: ", query.toString());
-
-                JSONObject json = null;
-
-                if (JSONRetriever.getRequest(query.toString()) == null) { // No results found
-                    return null;
-                }
-
-                json = JSONRetriever.getRequest(query.toString()).getJSONObject("artists");
-
-                // If only one result, it's a JSONObject, else an array
-                if (json.getString("@total").equals("1")) {
-                    JSONObject currentArtist = json.getJSONObject("artist");
-                    populateArtist(currentArtist);
-                } else {
-                    JSONArray items = json.getJSONArray("artist");
-
-                    for (int i = 0; i < items.length(); i++) {
-                        JSONObject currentArtist = items.getJSONObject(i);
-                        populateArtist(currentArtist);
-                    }
-                }
-            } catch (JSONException e) {
-                Log.e("ArtistSearch", "JSONException");
-                e.printStackTrace();
-            } catch (UnsupportedEncodingException e) {
-                Log.e("ArtistSearch", "UEE");
-                e.printStackTrace();
+        for (int i = NUM_RECENT_SEARCHES - 2; i >= 0; i--) {
+            if (recentFile.contains("search" + i)) {
+                editor.putString("search" + (i + 1), recentFile.getString("search" + i, ""));
+                editor.putString("id" + (i + 1), recentFile.getString("id" + i, "0"));
             }
-
-            return null;
         }
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            int size = artists.size();
-            if (size > 0) {
-                adapter.clear();
-
-                for (int i = 0; i < size; i++) {
-                    adapter.add(artists.get(i).name);
-                    Log.i("ADDED", artists.get(i).name + " " + artists.get(i).mbid);
-                }
-
-                adapter.notifyDataSetChanged();
-            }
-
-            super.onPostExecute(aVoid);
-        }
+        editor.putString("search" + 0, formattedRecentSearch);
+        editor.putString("id" + 0, id);
+        editor.commit();
     }
 }
 

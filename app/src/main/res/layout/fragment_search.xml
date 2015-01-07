@@ -2,12 +2,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:padding="8dp"
     android:orientation="vertical">
 
+    <!-- Top card that holds the search bar/search type -->
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -19,10 +17,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="SEARCH BY:"
+                android:text="@string/search_header"
+                android:textColor="@color/primary_text_default_material_light"
                 android:layout_marginTop="5dp"
                 android:layout_marginLeft="5dp"
-                android:id="@+id/searchFor"
+                android:layout_marginStart="5dp"
+                android:id="@+id/search_header"
                 android:textStyle="bold" />
 
             <com.rengwuxian.materialedittext.MaterialEditText
@@ -35,12 +35,12 @@
                 android:focusableInTouchMode="true"
                 android:textColorHint="@color/secondary_text_default_material_light"
                 android:inputType="text"
-                android:hint="Results powered by setlist.fm"
-                android:layout_below="@+id/searchFor"
+                android:hint="@string/search_bar_hint"
+                android:layout_below="@id/search_header"
                 android:layout_centerHorizontal="true"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
-                android:id="@+id/searchBar" />
+                android:id="@+id/search_bar" />
 
             <ImageButton
                 android:layout_width="wrap_content"
@@ -48,8 +48,7 @@
                 android:id="@+id/clear_search"
                 android:layout_gravity="center_vertical|end"
                 android:background="@android:drawable/ic_menu_close_clear_cancel"
-                android:visibility="visible"
-                android:layout_alignTop="@+id/searchBar"
+                android:layout_alignTop="@id/search_bar"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true" />
 
@@ -57,12 +56,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="ARTIST"
-                android:id="@+id/artistSelect"
+                android:id="@+id/artist_selection"
                 android:textColor="@color/my_accent"
                 android:textStyle="bold"
-                android:layout_above="@+id/searchBar"
-                android:layout_toRightOf="@id/searchFor"
-                android:layout_toEndOf="@id/searchFor"
+                android:layout_above="@id/search_bar"
+                android:layout_toRightOf="@id/search_header"
+                android:layout_toEndOf="@id/search_header"
                 android:layout_marginLeft="15dp"
                 android:layout_marginStart="15dp" />
 
@@ -70,10 +69,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="VENUE"
-                android:id="@+id/venueSelect"
-                android:layout_above="@+id/searchBar"
-                android:layout_toRightOf="@id/artistSelect"
-                android:layout_toEndOf="@id/artistSelect"
+                android:id="@+id/venue_selection"
+                android:textColor="@color/secondary_text_default_material_light"
+                android:layout_above="@id/search_bar"
+                android:layout_toRightOf="@id/artist_selection"
+                android:layout_toEndOf="@id/artist_selection"
                 android:layout_marginLeft="15dp"
                 android:layout_marginStart="15dp" />
 
@@ -81,10 +81,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="CITY"
-                android:id="@+id/citySelect"
-                android:layout_above="@+id/searchBar"
-                android:layout_toRightOf="@id/venueSelect"
-                android:layout_toEndOf="@id/venueSelect"
+                android:id="@+id/city_selection"
+                android:textColor="@color/secondary_text_default_material_light"
+                android:layout_above="@id/search_bar"
+                android:layout_toRightOf="@id/venue_selection"
+                android:layout_toEndOf="@id/venue_selection"
                 android:layout_marginLeft="15dp"
                 android:layout_marginStart="15dp"/>
 
@@ -94,7 +95,6 @@
     <!-- Suggestions card that displays recent searches if no query is entered,
      or search suggestions if a query is entered.-->
     <android.support.v7.widget.CardView
-        android:id="@+id/suggestions"
         android:layout_marginTop="5dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -108,17 +108,50 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="5dp"
                 android:paddingTop="5dp"
-                android:text="BEST MATCHES"
+                android:text="@string/recent_searches_header"
+                android:textColor="@color/primary_text_default_material_light"
                 android:textStyle="bold"
-                android:id="@+id/suggestionText" />
+                android:id="@+id/suggestion_header" />
+
+            <TextView
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/suggestion_header"
+                android:id="@+id/no_searches_text"
+                android:padding="20dp"
+                android:layout_centerHorizontal="true"
+                android:textColor="@color/secondary_text_default_material_light"
+                android:text="@string/no_recent_searches"/>
+
+            <TextView
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/suggestion_header"
+                android:id="@+id/no_results_text"
+                android:padding="20dp"
+                android:layout_centerHorizontal="true"
+                android:textColor="@color/secondary_text_default_material_light"
+                android:text="@string/no_results_found"/>
 
             <ListView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/suggestionList"
-                android:layout_below="@id/suggestionText"
+                android:id="@+id/suggestion_list"
+                android:layout_below="@id/suggestion_header"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true" />
+
+            <ProgressBar
+                android:visibility="gone"
+                android:id="@+id/loading_suggestions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/suggestion_header"
+                android:padding="20dp"/>
 
         </RelativeLayout>
 

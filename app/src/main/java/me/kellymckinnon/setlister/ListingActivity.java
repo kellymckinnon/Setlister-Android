@@ -36,7 +36,12 @@ public class ListingActivity extends ActionBarActivity {
 
         setContentView(R.layout.activity_list);
 
-        String artist = getIntent().getStringExtra("ARTIST_NAME");
+        String artist = getIntent().getStringExtra("QUERY");
+
+        if(getIntent().getStringExtra("ID") != null) {
+            // TODO: implement search by ID if it's given (via suggestion click)
+            System.out.println("THE SEARCHED FOR ID IS: " + getIntent().getStringExtra("ID"));
+        }
 
         getSupportActionBar().setTitle(artist);
 

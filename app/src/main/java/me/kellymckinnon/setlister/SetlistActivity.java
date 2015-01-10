@@ -1,5 +1,6 @@
 package me.kellymckinnon.setlister;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -118,6 +119,8 @@ public class SetlistActivity extends ActionBarActivity {
 
         AuthenticationResponse response = SpotifyAuthentication.parseOauthResponse(uri);
         accessToken = response.getAccessToken();
+        Snackbar.with(getApplicationContext()).text("Creating playlist...").show(SetlistActivity.this);
+        failedSpotifySongs = new ArrayList<String>();
         new PlaylistCreator().execute();
     }
 
@@ -214,7 +217,19 @@ public class SetlistActivity extends ActionBarActivity {
                 s.actionListener(new ActionClickListener() {
                     @Override
                     public void onActionClicked(Snackbar snackbar) {
-                        // TODO: Display failedSpotifySongs in a list in a dialog
+                        StringBuilder content = new StringBuilder();
+                        content.append("The following songs were not found on Spotify:\n");
+                        for(String s : failedSpotifySongs) {
+                            content.append("\n");
+                            content.append("• ");
+                            content.append(s);
+                        }
+
+                        new MaterialDialog.Builder(SetlistActivity.this)
+                                .title("Missing songs")
+                                .content(content)
+                                .positiveText("OK")
+                                .show();
                     }
                 });
             }

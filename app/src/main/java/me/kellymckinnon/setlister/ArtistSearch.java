@@ -8,10 +8,16 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by kelly on 1/6/15.
@@ -39,11 +45,17 @@ public class ArtistSearch extends AsyncTask<Void, Void, Void> {
         }
 
         // If the artist has no setlists, don't add it to the list of choices
-        JSONObject json = JSONRetriever.getRequest(
-                "http://api.setlist.fm/rest/0.1/artist/" + artist.mbid + "/setlists.json");
-
-        if (json == null) {
-            return;
+        try {
+            URL url = new URL("http://api.setlist.fm/rest/0.1/artist/" + artist.mbid + "/setlists.json");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            int responseCode = connection.getResponseCode();
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                return;
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         artists.add(artist);

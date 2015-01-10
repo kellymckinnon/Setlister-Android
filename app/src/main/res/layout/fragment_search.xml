@@ -47,8 +47,9 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/clear_search"
                 android:layout_gravity="center_vertical|end"
-                android:background="@android:drawable/ic_menu_close_clear_cancel"
-                android:layout_alignTop="@id/search_bar"
+                android:background="@drawable/ic_clear_grey600_36dp"
+                android:layout_marginTop="8dp"
+                android:layout_alignTop="@+id/search_bar"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true" />
 

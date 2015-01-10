@@ -59,6 +59,10 @@ public class Utility {
      * Check if the network is connected.
      */
     public static boolean isNetworkConnected(Context context) {
+        if(context == null) {
+            return true;
+        }
+
         ConnectivityManager cm =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 

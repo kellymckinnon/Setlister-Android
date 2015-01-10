@@ -154,18 +154,7 @@ public class SearchFragment extends Fragment {
                     loadingSpinner.setVisibility(View.VISIBLE);
                     suggestionList.setVisibility(View.GONE);
 
-                    if (searchType.equals(SEARCH_TYPE_ARTIST)) {
-                        searchTask = new ArtistSearch(SearchFragment.this);
-                    } else if (searchType.equals(SEARCH_TYPE_VENUE)) {
-                        searchTask = new VenueSearch(SearchFragment.this);
-                    } else if (searchType.equals(SEARCH_TYPE_CITY)) {
-                        searchTask = new CitySearch(SearchFragment.this);
-                    } else {
-                        // This should never happen
-                        throw new IllegalArgumentException("Search type not specified.");
-                    }
-
-                    searchTask.execute();
+                    startSearch();
                 }
             }
         };
@@ -280,6 +269,36 @@ public class SearchFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        // If previous search (still showing) was done before results finished, re-search
+        if(searchBar != null && searchBar.getText().toString().length() != 0 && loadingSpinner != null && loadingSpinner.getVisibility() == View.VISIBLE) {
+            startSearch();
+        }
+
+        // Reload shared preferences
+        SharedPreferences recentFile = getActivity().getSharedPreferences(PREFS_NAME,
+                Context.MODE_PRIVATE);
+
+        recentSearches = new ArrayList<>();
+
+        if(nameIdMap == null) {
+            nameIdMap = new HashMap<>();
+        }
+
+        // Recent searches are stored as search0, search1, search2, etc up to search4 (5 maximum)
+        for (int i = 0; i < NUM_RECENT_SEARCHES; i++) {
+            if (recentFile.contains("search" + i)) {
+                String query = recentFile.getString("search" + i, "");
+                String id = recentFile.getString("id" + i, "0");
+                recentSearches.add(query);
+                nameIdMap.put(query, id);
+            }
+        }
+    }
+
+    @Override
     public void onStop() {
         // Check the state of the task
         if (searchTask != null && searchTask.getStatus() == AsyncTask.Status.RUNNING) {
@@ -287,6 +306,21 @@ public class SearchFragment extends Fragment {
         }
 
         super.onStop();
+    }
+
+    public void startSearch() {
+        if (searchType.equals(SEARCH_TYPE_ARTIST)) {
+            searchTask = new ArtistSearch(SearchFragment.this);
+        } else if (searchType.equals(SEARCH_TYPE_VENUE)) {
+            searchTask = new VenueSearch(SearchFragment.this);
+        } else if (searchType.equals(SEARCH_TYPE_CITY)) {
+            searchTask = new CitySearch(SearchFragment.this);
+        } else {
+            // This should never happen
+            throw new IllegalArgumentException("Search type not specified.");
+        }
+
+        searchTask.execute();
     }
 
     /**
@@ -321,7 +355,7 @@ public class SearchFragment extends Fragment {
 
         editor.putString("search" + 0, formattedRecentSearch);
         editor.putString("id" + 0, id);
-        editor.commit();
+        editor.apply();
     }
 }
 

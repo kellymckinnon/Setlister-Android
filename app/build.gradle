@@ -31,7 +31,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.android.support:recyclerview-v7:21.0.3'
     compile 'com.android.support:cardview-v7:21.0.3'
-    compile 'com.getbase:floatingactionbutton:1.4.0'
+    compile 'com.getbase:floatingactionbutton:1.5.1'
     compile 'com.spotify.sdk:spotifysdk:1.0.0-beta6@aar'
     compile 'com.rengwuxian.materialedittext:library:1.7.1'
     compile 'com.afollestad:material-dialogs:0.5.9'

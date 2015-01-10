@@ -1,5 +1,7 @@
 package me.kellymckinnon.setlister;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,6 +26,11 @@ public class SearchActivity extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_about) {
+            new MaterialDialog.Builder(this)
+                    .title("About Setlister")
+                    .customView(R.layout.about_dialog, true)
+                    .positiveText("OK")
+                    .show();
             return true;
         } else if (id == R.id.action_feedback) {
             Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(

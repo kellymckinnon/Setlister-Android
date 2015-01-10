@@ -242,6 +242,26 @@ public class ListingFragment extends Fragment {
                     setlist[i] = songs.getJSONObject(i).getString("@name");
                 }
                 show.setlist = setlist;
+                numShowsAdded++;
+                shows.add(show);
+                return;
+            } catch (JSONException e) {
+                // If there are multiple sets (set is an array)
+            }
+
+            try {
+                JSONArray sets = currentSetlist.getJSONObject("sets")
+                        .getJSONArray("set");
+                ArrayList<String> setlist = new ArrayList<String>();
+                for(int i = 0; i < sets.length(); i++) {
+                    JSONArray songs = sets.getJSONObject(i).getJSONArray("song");
+                    for(int j = 0; j < songs.length(); j++) {
+                        setlist.add(songs.getJSONObject(j).getString("@name"));
+                    }
+                }
+                show.setlist = setlist.toArray(new String[setlist.size()]);
+                numShowsAdded++;
+                shows.add(show);
             } catch (JSONException e) {
                 // Usually, this just means there are no songs in the setlist, and "sets"
                 // is an empty string instead of an object.
@@ -250,11 +270,7 @@ public class ListingFragment extends Fragment {
                 } catch (JSONException f) {
                     e.printStackTrace();
                 }
-                return;
             }
-
-            numShowsAdded++;
-            shows.add(show);
         }
     }
 

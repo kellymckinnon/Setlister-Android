@@ -101,7 +101,7 @@ public class ListingFragment extends Fragment {
             url.append("http://api.setlist.fm/rest/0.1/search/setlists.json?");
             try {
                 String parameter;
-                if(searchType.equals("Artist")) {
+                if (searchType.equals("Artist")) {
                     if (id != null) {
                         parameter = "artistMbid=" + id;
                     } else {
@@ -181,6 +181,9 @@ public class ListingFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             if (shows.size() == 0 && adapter.getItemCount() == 0) {
+                if (!Utility.isNetworkConnected(getActivity())) {
+                    noShows.setText(R.string.no_connection);
+                }
                 noShows.setVisibility(View.VISIBLE);
                 rv.setVisibility(View.GONE);
                 Log.e("ShowSearch", "No shows found.");
@@ -253,9 +256,9 @@ public class ListingFragment extends Fragment {
                 JSONArray sets = currentSetlist.getJSONObject("sets")
                         .getJSONArray("set");
                 ArrayList<String> setlist = new ArrayList<String>();
-                for(int i = 0; i < sets.length(); i++) {
+                for (int i = 0; i < sets.length(); i++) {
                     JSONArray songs = sets.getJSONObject(i).getJSONArray("song");
-                    for(int j = 0; j < songs.length(); j++) {
+                    for (int j = 0; j < songs.length(); j++) {
                         setlist.add(songs.getJSONObject(j).getString("@name"));
                     }
                 }

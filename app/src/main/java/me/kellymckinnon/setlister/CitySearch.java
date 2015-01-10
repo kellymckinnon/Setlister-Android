@@ -11,7 +11,6 @@ import android.view.View;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -84,23 +83,30 @@ public class CitySearch extends AsyncTask<Void, Void, Void> {
             for (int i = 0; i < size; i++) {
                 int insertionIndex = i;
 
-                // Hack to get more pleasing city results, for some reason they're really out of order
-                if(cities.get(i).name.equalsIgnoreCase(
+                // Hack to get more pleasing city results, for some reason they're really out of
+                // order
+                if (cities.get(i).name.equalsIgnoreCase(
                         mSearchFragment.searchBar.getText().toString())) {
                     insertionIndex = 0;
                 }
 
-                mSearchFragment.nameIdMap.put(cities.get(i).name + ", " + cities.get(i).state, cities.get(i).id);
+                mSearchFragment.nameIdMap.put(cities.get(i).name + ", " + cities.get(i).state,
+                        cities.get(i).id);
 
-                mSearchFragment.listAdapter.insert(cities.get(i).name + ", " + cities.get(i).state, insertionIndex);
+                mSearchFragment.listAdapter.insert(cities.get(i).name + ", " + cities.get(i).state,
+                        insertionIndex);
                 Log.i("ADDED", cities.get(i).name + " " + cities.get(i).id);
             }
 
             mSearchFragment.listAdapter.notifyDataSetChanged();
             mSearchFragment.suggestionList.setVisibility(View.VISIBLE);
         } else {
-            mSearchFragment.noResultsText.setVisibility(View.VISIBLE);
             mSearchFragment.suggestionList.setVisibility(View.GONE);
+            if (Utility.isNetworkConnected(mSearchFragment.getActivity())) {
+                mSearchFragment.noResultsText.setVisibility(View.VISIBLE);
+            } else {
+                mSearchFragment.noConnectionText.setVisibility(View.VISIBLE);
+            }
         }
 
         mSearchFragment.loadingSpinner.setVisibility(View.GONE);

@@ -11,12 +11,11 @@ import android.view.View;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
-* Created by kelly on 1/6/15.
-*/
+ * Created by kelly on 1/6/15.
+ */
 public class ArtistSearch extends AsyncTask<Void, Void, Void> {
 
     private SearchFragment mSearchFragment;
@@ -106,8 +105,12 @@ public class ArtistSearch extends AsyncTask<Void, Void, Void> {
             mSearchFragment.listAdapter.notifyDataSetChanged();
             mSearchFragment.suggestionList.setVisibility(View.VISIBLE);
         } else {
-            mSearchFragment.noResultsText.setVisibility(View.VISIBLE);
             mSearchFragment.suggestionList.setVisibility(View.GONE);
+            if (Utility.isNetworkConnected(mSearchFragment.getActivity())) {
+                mSearchFragment.noResultsText.setVisibility(View.VISIBLE);
+            } else {
+                mSearchFragment.noConnectionText.setVisibility(View.VISIBLE);
+            }
         }
 
         mSearchFragment.loadingSpinner.setVisibility(View.GONE);

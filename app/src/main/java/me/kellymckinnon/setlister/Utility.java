@@ -1,6 +1,8 @@
 package me.kellymckinnon.setlister;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -35,6 +37,7 @@ public class Utility {
 
     /**
      * Change the first letter of all words to uppercase.
+     *
      * @param str string to alter
      *
      * @return altered string
@@ -42,13 +45,25 @@ public class Utility {
     public static String capitalizeFirstLetters(String str) {
         String[] words = str.split(" ");
         StringBuilder ret = new StringBuilder();
-        for(int i = 0; i < words.length; i++) {
+        for (int i = 0; i < words.length; i++) {
             ret.append(Character.toUpperCase(words[i].charAt(0)));
             ret.append(words[i].substring(1));
-            if(i < words.length - 1) {
+            if (i < words.length - 1) {
                 ret.append(' ');
             }
         }
         return ret.toString();
+    }
+
+    /**
+     * Check if the network is connected.
+     */
+    public static boolean isNetworkConnected(Context context) {
+        ConnectivityManager cm =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
     }
 }

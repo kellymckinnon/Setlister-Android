@@ -35,4 +35,5 @@ dependencies {
     compile 'com.spotify.sdk:spotifysdk:1.0.0-beta6@aar'
     compile 'com.rengwuxian.materialedittext:library:1.7.1'
     compile 'com.afollestad:material-dialogs:0.5.9'
+    compile 'com.nispok:snackbar:2.7.3'
 }

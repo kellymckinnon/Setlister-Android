@@ -77,6 +77,11 @@ public class ShowAdapter extends Adapter {
 
         @Override
         public void onClick(View view) {
+            if (((ListingActivity) context).listClicked) {
+                return;
+            }
+
+            ((ListingActivity) context).listClicked = true;
             Intent intent = new Intent(context, SetlistActivity.class);
             intent.putExtra("SONGS", show.setlist);
             intent.putExtra("ARTIST", show.band);

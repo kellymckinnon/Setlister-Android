@@ -47,6 +47,7 @@ public class SearchFragment extends Fragment {
     protected ArrayAdapter<String> listAdapter;
     protected TextView noResultsText;
     protected HashMap<String, String> nameIdMap;
+    protected TextView noConnectionText;
     private AsyncTask<Void, Void, Void> searchTask;
     private String searchType;
     private ArrayList<String> recentSearches;
@@ -59,12 +60,14 @@ public class SearchFragment extends Fragment {
         suggestionList = (ListView) rootView.findViewById(R.id.suggestion_list);
         loadingSpinner = (ProgressBar) rootView.findViewById(R.id.loading_suggestions);
         noResultsText = (TextView) rootView.findViewById(R.id.no_results_text);
+        noConnectionText = (TextView) rootView.findViewById(R.id.no_connection_text);
         searchBar = (MaterialEditText) rootView.findViewById(R.id.search_bar);
 
         final TextView suggestionHeader = (TextView) rootView.findViewById(R.id.suggestion_header);
         final TextView noRecentSearchesText = (TextView) rootView.findViewById(
                 R.id.no_searches_text);
-        final TextView artistSelectionText = (TextView) rootView.findViewById(R.id.artist_selection);
+        final TextView artistSelectionText = (TextView) rootView.findViewById(
+                R.id.artist_selection);
         final TextView venueSelectionText = (TextView) rootView.findViewById(R.id.venue_selection);
         final TextView citySelectionText = (TextView) rootView.findViewById(R.id.city_selection);
 
@@ -147,6 +150,7 @@ public class SearchFragment extends Fragment {
             public void handleMessage(Message msg) {
                 if (msg.what == TRIGGER_SEARCH && searchBar.getText().toString().length() != 0) {
                     noResultsText.setVisibility(View.GONE);
+                    noConnectionText.setVisibility(View.GONE);
                     loadingSpinner.setVisibility(View.VISIBLE);
                     suggestionList.setVisibility(View.GONE);
 
@@ -181,6 +185,7 @@ public class SearchFragment extends Fragment {
                     suggestionHeader.setText(getString(R.string.recent_searches_header));
                     loadingSpinner.setVisibility(View.GONE);
                     noResultsText.setVisibility(View.GONE);
+                    noConnectionText.setVisibility(View.GONE);
 
                     if (recentSearches.isEmpty()) {
                         suggestionList.setVisibility(View.GONE);
@@ -202,6 +207,7 @@ public class SearchFragment extends Fragment {
                 } else { // There is a query, get suggestions
                     noRecentSearchesText.setVisibility(View.GONE);
                     noResultsText.setVisibility(View.GONE);
+                    noConnectionText.setVisibility(View.GONE);
                     loadingSpinner.setVisibility(View.VISIBLE);
                     suggestionList.setVisibility(View.GONE);
                     suggestionHeader.setText(getString(R.string.best_matches_header));
@@ -219,7 +225,7 @@ public class SearchFragment extends Fragment {
                 String text = searchBar.getText().toString();
 
                 // We only want to do this once
-                if (event.getAction()!=KeyEvent.ACTION_UP) {
+                if (event.getAction() != KeyEvent.ACTION_UP) {
                     return false;
                 }
 
@@ -250,11 +256,11 @@ public class SearchFragment extends Fragment {
                 String searchId = nameIdMap.get(query);
 
                 // Remove info from recent searches before sending to search
-                if(query.contains("(Venue)")) {
+                if (query.contains("(Venue)")) {
                     query = query.substring(0, query.length() - 8);
-                } else if(query.contains("(Artist)")) {
+                } else if (query.contains("(Artist)")) {
                     query = query.substring(0, query.length() - 9);
-                } else if(query.contains("(Tour)")) {
+                } else if (query.contains("(Tour)")) {
                     query = query.substring(0, query.length() - 7);
                 }
 
@@ -263,7 +269,7 @@ public class SearchFragment extends Fragment {
                 Intent intent = new Intent(getActivity(), ListingActivity.class);
                 intent.putExtra("QUERY", query);
                 intent.putExtra("SEARCH_TYPE", searchType);
-                if(!searchId.equals("0")) {
+                if (!searchId.equals("0")) {
                     intent.putExtra("ID", searchId);
                 }
                 startActivity(intent);
@@ -287,7 +293,7 @@ public class SearchFragment extends Fragment {
      * Add the given search to the top of the recent searches list, pushing off the oldest entry.
      * Both names and ids are stored, under search0 (most recent), search1, ... and id0, id1, ...
      * up to a maximum of five entries.
-     *
+     * <p/>
      * If the id for a recent search is 0, this indicates that the search was done via the enter
      * key and since no specific result was chosen, there is no associated id.
      */
@@ -298,8 +304,8 @@ public class SearchFragment extends Fragment {
 
         String formattedRecentSearch = query + " (" + searchType + ")";
 
-        for(String s : recentSearches) {
-            if(s.equalsIgnoreCase(formattedRecentSearch)) {
+        for (String s : recentSearches) {
+            if (s.equalsIgnoreCase(formattedRecentSearch)) {
                 //TODO: Instead of doing nothing, move the search to the top
                 //And replace the ID if necessary
                 return;

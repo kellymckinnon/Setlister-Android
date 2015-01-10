@@ -11,12 +11,11 @@ import android.view.View;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
-* Created by kelly on 1/6/15.
-*/
+ * Created by kelly on 1/6/15.
+ */
 public class VenueSearch extends AsyncTask<Void, Void, Void> {
 
     private SearchFragment mSearchFragment;
@@ -86,7 +85,8 @@ public class VenueSearch extends AsyncTask<Void, Void, Void> {
             mSearchFragment.listAdapter.clear();
 
             for (int i = 0; i < size; i++) {
-                mSearchFragment.nameIdMap.put(venues.get(i).name + ", " + venues.get(i).city, venues.get(i).id);
+                mSearchFragment.nameIdMap.put(venues.get(i).name + ", " + venues.get(i).city,
+                        venues.get(i).id);
                 mSearchFragment.listAdapter.add(venues.get(i).name + ", " + venues.get(i).city);
                 Log.i("ADDED", venues.get(i).name + " " + venues.get(i).id);
             }
@@ -95,8 +95,12 @@ public class VenueSearch extends AsyncTask<Void, Void, Void> {
             mSearchFragment.listAdapter.notifyDataSetChanged();
             mSearchFragment.suggestionList.setVisibility(View.VISIBLE);
         } else {
-            mSearchFragment.noResultsText.setVisibility(View.VISIBLE);
             mSearchFragment.suggestionList.setVisibility(View.GONE);
+            if (Utility.isNetworkConnected(mSearchFragment.getActivity())) {
+                mSearchFragment.noResultsText.setVisibility(View.VISIBLE);
+            } else {
+                mSearchFragment.noConnectionText.setVisibility(View.VISIBLE);
+            }
         }
 
         mSearchFragment.loadingSpinner.setVisibility(View.GONE);

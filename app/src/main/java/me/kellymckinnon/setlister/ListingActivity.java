@@ -10,6 +10,8 @@ import android.view.MenuItem;
 
 public class ListingActivity extends ActionBarActivity {
 
+    public boolean listClicked = false;
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -60,5 +62,11 @@ public class ListingActivity extends ActionBarActivity {
                 .add(R.id.activity_list, lf)
                 .commit();
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        listClicked = false;
     }
 }

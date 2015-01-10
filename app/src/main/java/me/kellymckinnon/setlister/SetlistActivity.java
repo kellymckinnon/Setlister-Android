@@ -1,5 +1,7 @@
 package me.kellymckinnon.setlister;
 
+import com.nispok.snackbar.Snackbar;
+import com.nispok.snackbar.listeners.ActionClickListener;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.authentication.SpotifyAuthentication;
 
@@ -45,7 +47,7 @@ public class SetlistActivity extends ActionBarActivity {
             return true;
         } else if (id == R.id.action_feedback) {
             Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                    "mailto","setlisterapp@gmail.com", null));
+                    "mailto", "setlisterapp@gmail.com", null));
             emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Setlister Feedback");
             startActivity(Intent.createChooser(emailIntent, "Send email..."));
             return true;
@@ -107,13 +109,16 @@ public class SetlistActivity extends ActionBarActivity {
         Uri uri = intent.getData();
 
         if (uri == null) {
-            //TODO: replace this with user error message
-            throw new RuntimeException("Connecting to Spotify failed.");
+            Snackbar.with(getApplicationContext())
+                    .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
+                    .text("Connecting to Spotify failed. Try again.")
+                    .show(this);
+            return;
         }
+
         AuthenticationResponse response = SpotifyAuthentication.parseOauthResponse(uri);
         accessToken = response.getAccessToken();
         new PlaylistCreator().execute();
-
     }
 
     @Override
@@ -157,7 +162,7 @@ public class SetlistActivity extends ActionBarActivity {
 
                 int numSongsAdded = 0;
                 for (String s : songs) {
-                    if(numSongsAdded > 100) {
+                    if (numSongsAdded > 100) {
                         failedSpotifySongs.add(s);
                     }
 
@@ -180,8 +185,6 @@ public class SetlistActivity extends ActionBarActivity {
                         Log.e("SetlistActivity",
                                 "Track: " + s + " for artist: " + artist + " was not found.");
                         failedSpotifySongs.add(s);
-                        //TODO: Implement error message that shows which songs were not added to
-                        // the playlist
                     }
                 }
 
@@ -203,7 +206,19 @@ public class SetlistActivity extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            //TODO: Add successfully created message with list of failed songs
+            Snackbar s = Snackbar.with(getApplicationContext()).text("Playlist created!");
+            if (!failedSpotifySongs.isEmpty()) {
+                s.duration(Snackbar.SnackbarDuration.LENGTH_LONG);
+                s.actionLabel("Show " + failedSpotifySongs.size() + " missing songs");
+                s.actionColorResource(R.color.my_accent);
+                s.actionListener(new ActionClickListener() {
+                    @Override
+                    public void onActionClicked(Snackbar snackbar) {
+                        // TODO: Display failedSpotifySongs in a list in a dialog
+                    }
+                });
+            }
+            s.show(SetlistActivity.this);
             super.onPostExecute(aVoid);
         }
 

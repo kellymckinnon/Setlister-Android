@@ -28,20 +28,24 @@ public class ListingFragment extends Fragment {
 
     private LinearLayoutManager llm;
     private RecyclerView rv;
-    private String artist;
+    private String query;
     private TextView noShows;
     private int pagesLoaded;
     private int firstVisibleItem, visibleItemCount, totalItemCount;
     private boolean loading = true;
     private ShowAdapter adapter;
     private int numPages; // Number of pages of setlists from API
+    private String searchType;
+    private String id;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_listing, container, false);
-        artist = getArguments().getString("ARTIST_NAME");
+        query = getArguments().getString("QUERY");
+        searchType = getArguments().getString("SEARCH_TYPE");
+        id = getArguments().getString("ID");
         noShows = (TextView) rootView.findViewById(R.id.no_shows);
         rv = (RecyclerView) rootView.findViewById(R.id.show_list);
 
@@ -93,22 +97,45 @@ public class ListingFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... params) {
             loading = true;
-            StringBuilder query = new StringBuilder();
-            query.append("http://api.setlist.fm/rest/0.1/search/setlists.json?artistName=");
+            StringBuilder url = new StringBuilder();
+            url.append("http://api.setlist.fm/rest/0.1/search/setlists.json?");
             try {
-                query.append(URLEncoder.encode(artist, "UTF-8"));
+                String parameter;
+                if(searchType.equals("Artist")) {
+                    if (id != null) {
+                        parameter = "artistMbid=" + id;
+                    } else {
+                        parameter = "artistName=" + URLEncoder.encode(query, "UTF-8");
+                    }
+                } else if (searchType.equals("Venue")) {
+                    if (id != null) {
+                        parameter = "venueId=" + id;
+                    } else {
+                        parameter = "venueName=" + URLEncoder.encode(query, "UTF-8");
+                    }
+                } else if (searchType.equals("City")) {
+                    if (id != null) {
+                        parameter = "cityId=" + id;
+                    } else {
+                        parameter = "cityName=" + URLEncoder.encode(query, "UTF-8");
+                    }
+                } else {
+                    throw new RuntimeException("Invalid search type");
+                }
 
-                Log.d("URL IS: ", query.toString());
+                url.append(parameter);
+
+                Log.d("URL IS: ", url.toString());
 
                 JSONObject json = null;
 
-                if (JSONRetriever.getRequest(query.toString()) == null) { // No results found
+                if (JSONRetriever.getRequest(url.toString()) == null) { // No results found
                     return null;
                 }
 
                 // On first run, calculate total number of pages
                 if (pagesLoaded == 0) {
-                    json = JSONRetriever.getRequest(query.toString()).getJSONObject("setlists");
+                    json = JSONRetriever.getRequest(url.toString()).getJSONObject("setlists");
                     int numShows = Integer.parseInt(json.getString("@total"));
 
                     // One 20-item array per page
@@ -128,7 +155,7 @@ public class ListingFragment extends Fragment {
 
                 // Add at least 12 shows (or one page, whichever's bigger) on each scroll
                 while (numShowsAdded < 12 && pagesLoaded < numPages) {
-                    String currentPageQuery = query.toString() + "&p=" + (pagesLoaded + 1);
+                    String currentPageQuery = url.toString() + "&p=" + (pagesLoaded + 1);
                     Log.d("URL IS: ", currentPageQuery);
                     json = JSONRetriever.getRequest(currentPageQuery).getJSONObject("setlists");
                     JSONArray items = json.getJSONArray("setlist");

@@ -1,5 +1,7 @@
 package me.kellymckinnon.setlister;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -22,8 +24,13 @@ public class ListingActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_about) {
+            return true;
+        } else if (id == R.id.action_feedback) {
+            Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                    "mailto", "setlisterapp@gmail.com", null));
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Setlister Feedback");
+            startActivity(Intent.createChooser(emailIntent, "Send email..."));
             return true;
         }
 
@@ -36,24 +43,22 @@ public class ListingActivity extends ActionBarActivity {
 
         setContentView(R.layout.activity_list);
 
-        String artist = getIntent().getStringExtra("QUERY");
+        String query = getIntent().getStringExtra("QUERY");
+        String searchType = getIntent().getStringExtra("SEARCH_TYPE");
 
-        if(getIntent().getStringExtra("ID") != null) {
-            // TODO: implement search by ID if it's given (via suggestion click)
-            System.out.println("THE SEARCHED FOR ID IS: " + getIntent().getStringExtra("ID"));
-        }
+        getSupportActionBar().setTitle(query);
 
-        getSupportActionBar().setTitle(artist);
+        ListingFragment lf = new ListingFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("QUERY", query);
+        bundle.putString("SEARCH_TYPE", searchType);
 
-        if (savedInstanceState == null) {
-            ListingFragment lf = new ListingFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString("ARTIST_NAME", artist);
-            lf.setArguments(bundle);
-            getFragmentManager().beginTransaction()
-                    .add(R.id.activity_list, lf)
-                    .commit();
-        }
+        // If search is not through suggestion, this will be null
+        bundle.putString("ID", getIntent().getStringExtra("ID"));
+        lf.setArguments(bundle);
+        getFragmentManager().beginTransaction()
+                .add(R.id.activity_list, lf)
+                .commit();
 
     }
 }

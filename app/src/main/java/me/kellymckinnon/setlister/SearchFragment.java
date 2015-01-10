@@ -226,8 +226,9 @@ public class SearchFragment extends Fragment {
                 if ((keyCode == KeyEvent.KEYCODE_ENTER || keyCode == EditorInfo.IME_ACTION_SEARCH)
                         && text.length() != 0) {
                     Intent intent = new Intent(getActivity(), ListingActivity.class);
-                    String formattedQuery = text.substring(0, 1).toUpperCase() + text.substring(1);
+                    String formattedQuery = Utility.capitalizeFirstLetters(text);
                     intent.putExtra("QUERY", formattedQuery);
+                    intent.putExtra("SEARCH_TYPE", searchType);
                     addRecentSearch(formattedQuery, "0");
                     startActivity(intent);
                     return true;
@@ -261,6 +262,7 @@ public class SearchFragment extends Fragment {
 
                 Intent intent = new Intent(getActivity(), ListingActivity.class);
                 intent.putExtra("QUERY", query);
+                intent.putExtra("SEARCH_TYPE", searchType);
                 if(!searchId.equals("0")) {
                     intent.putExtra("ID", searchId);
                 }

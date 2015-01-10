@@ -1,5 +1,7 @@
 package me.kellymckinnon.setlister;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -21,7 +23,13 @@ public class SearchActivity extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_about) {
+            return true;
+        } else if (id == R.id.action_feedback) {
+            Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                    "mailto", "setlisterapp@gmail.com", null));
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Setlister Feedback");
+            startActivity(Intent.createChooser(emailIntent, "Send email..."));
             return true;
         }
 

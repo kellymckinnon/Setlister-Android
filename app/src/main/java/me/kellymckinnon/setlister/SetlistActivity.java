@@ -39,13 +39,15 @@ public class SetlistActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_about) {
+            return true;
+        } else if (id == R.id.action_feedback) {
+            Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                    "mailto","setlisterapp@gmail.com", null));
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Setlister Feedback");
+            startActivity(Intent.createChooser(emailIntent, "Send email..."));
             return true;
         }
 
@@ -109,12 +111,7 @@ public class SetlistActivity extends ActionBarActivity {
             throw new RuntimeException("Connecting to Spotify failed.");
         }
         AuthenticationResponse response = SpotifyAuthentication.parseOauthResponse(uri);
-
-        // THIS IS WHAT'S IMPORTANT
-        // TODO: Save this so authentication is not necessary every time -- needs a refresh token
-        // (see web API)
         accessToken = response.getAccessToken();
-
         new PlaylistCreator().execute();
 
     }

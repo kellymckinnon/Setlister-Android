@@ -13,5 +13,7 @@
     <string name="search_header">SEARCH BY:</string>
     <string name="search_bar_hint">Results powered by setlist.fm</string>
     <string name="best_matches_header">BEST MATCHES</string>
+    <string name="about">About</string>
+    <string name="send_feedback">Send Feedback</string>
 
 </resources>

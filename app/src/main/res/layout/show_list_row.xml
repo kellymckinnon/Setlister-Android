@@ -10,11 +10,10 @@
     android:background="?android:attr/selectableItemBackground"
     android:paddingBottom="12dp">
 
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="01/01/1999"
+        android:text="@string/default_date"
         android:id="@+id/date"
         android:textStyle="bold"
         android:textColor="@color/my_accent"
@@ -25,7 +24,6 @@
         android:id="@+id/band"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Band Name"
         android:textSize="16sp"
         android:textStyle="bold"
         android:textColor="@color/primary_text_default_material_light"
@@ -39,13 +37,13 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/primary_text_default_material_light"
-        android:text="Venue"
+        android:text="@string/venue"
         android:layout_below="@id/band" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="0 songs"
+        android:text="@string/default_num_songs"
         android:textColor="@color/secondary_text_default_material_light"
         android:id="@+id/num_songs"
         android:textSize="12sp"
@@ -57,7 +55,7 @@
         android:id="@+id/tour"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Tour"
+        android:text="@string/tour"
         android:layout_toLeftOf="@id/num_songs"
         android:textColor="@color/secondary_text_default_material_light"
         android:singleLine="true"

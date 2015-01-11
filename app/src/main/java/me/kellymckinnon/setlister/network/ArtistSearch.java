@@ -1,11 +1,10 @@
-package me.kellymckinnon.setlister;
+package me.kellymckinnon.setlister.network;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
-import android.util.Log;
 import android.view.View;
 
 import java.io.IOException;
@@ -17,13 +16,24 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.kellymckinnon.setlister.fragments.SearchFragment;
+import me.kellymckinnon.setlister.models.Artist;
+import me.kellymckinnon.setlister.utils.JSONRetriever;
+import me.kellymckinnon.setlister.utils.Utility;
+
 /**
- * Created by kelly on 1/6/15.
+ * Uses the setlist.fm API to get all artists matching the
+ * query, and returns any that actually have listed sets.
+ *
+ * Unfortunately, this is a minority of them (setlist.fm uses
+ * MusicBrainz to get artists, and most have no sets), so artist
+ * search is significantly slower than any other search. The
+ * alternative, however, is to have pages and pages of useless suggestions.
  */
 public class ArtistSearch extends AsyncTask<Void, Void, Void> {
 
     private SearchFragment mSearchFragment;
-    private List<Artist> artists = new ArrayList<Artist>();
+    private List<me.kellymckinnon.setlister.models.Artist> artists = new ArrayList<>();
     private String artistName;
 
     public ArtistSearch(SearchFragment searchFragment) {
@@ -65,10 +75,7 @@ public class ArtistSearch extends AsyncTask<Void, Void, Void> {
         query.append("http://api.setlist.fm/rest/0.1/search/artists.json?artistName=");
         try {
             query.append(URLEncoder.encode(artistName, "UTF-8"));
-
-            Log.d("URL IS: ", query.toString());
-
-            JSONObject json = null;
+            JSONObject json;
 
             if (JSONRetriever.getRequest(query.toString()) == null) { // No results found
                 return null;
@@ -89,10 +96,8 @@ public class ArtistSearch extends AsyncTask<Void, Void, Void> {
                 }
             }
         } catch (JSONException e) {
-            Log.e("ArtistSearch", "JSONException");
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
-            Log.e("ArtistSearch", "UEE");
             e.printStackTrace();
         }
 
@@ -103,18 +108,17 @@ public class ArtistSearch extends AsyncTask<Void, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         int size = artists.size();
 
-        if (size > 0) {
+        if (size > 0) { // Display list of results
             mSearchFragment.listAdapter.clear();
 
             for (int i = 0; i < size; i++) {
                 mSearchFragment.nameIdMap.put(artists.get(i).name, artists.get(i).mbid);
                 mSearchFragment.listAdapter.add(artists.get(i).name);
-                Log.i("ADDED", artists.get(i).name + " " + artists.get(i).mbid);
             }
 
             mSearchFragment.listAdapter.notifyDataSetChanged();
             mSearchFragment.suggestionList.setVisibility(View.VISIBLE);
-        } else {
+        } else { // No results
             mSearchFragment.suggestionList.setVisibility(View.GONE);
             if (Utility.isNetworkConnected(mSearchFragment.getActivity())) {
                 mSearchFragment.noResultsText.setVisibility(View.VISIBLE);
@@ -124,7 +128,6 @@ public class ArtistSearch extends AsyncTask<Void, Void, Void> {
         }
 
         mSearchFragment.loadingSpinner.setVisibility(View.GONE);
-
         super.onPostExecute(aVoid);
     }
 }

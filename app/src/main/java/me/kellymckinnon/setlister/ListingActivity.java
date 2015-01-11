@@ -9,23 +9,23 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import me.kellymckinnon.setlister.fragments.ListingFragment;
 
+/**
+ * Uses a ListingFragment to display list of shows for searched item.
+ */
 public class ListingActivity extends ActionBarActivity {
 
     public boolean listClicked = false;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_list, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         if (id == R.id.action_about) {
@@ -37,8 +37,8 @@ public class ListingActivity extends ActionBarActivity {
             return true;
         } else if (id == R.id.action_feedback) {
             Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                    "mailto", "setlisterapp@gmail.com", null));
-            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Setlister Feedback");
+                    "mailto", getString(R.string.email), null));
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_subject));
             startActivity(Intent.createChooser(emailIntent, "Send email..."));
             return true;
         }
@@ -54,7 +54,6 @@ public class ListingActivity extends ActionBarActivity {
 
         String query = getIntent().getStringExtra("QUERY");
         String searchType = getIntent().getStringExtra("SEARCH_TYPE");
-
         getSupportActionBar().setTitle(query);
 
         ListingFragment lf = new ListingFragment();
@@ -68,7 +67,6 @@ public class ListingActivity extends ActionBarActivity {
         getFragmentManager().beginTransaction()
                 .add(R.id.activity_list, lf)
                 .commit();
-
     }
 
     @Override

@@ -1,4 +1,4 @@
-package me.kellymckinnon.setlister;
+package me.kellymckinnon.setlister.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by kelly on 12/24/14.
+ * General utility class
  */
 public class Utility {
 

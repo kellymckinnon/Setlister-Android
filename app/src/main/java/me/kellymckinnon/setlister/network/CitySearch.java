@@ -1,11 +1,10 @@
-package me.kellymckinnon.setlister;
+package me.kellymckinnon.setlister.network;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
-import android.util.Log;
 import android.view.View;
 
 import java.io.UnsupportedEncodingException;
@@ -13,13 +12,18 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.kellymckinnon.setlister.fragments.SearchFragment;
+import me.kellymckinnon.setlister.models.City;
+import me.kellymckinnon.setlister.utils.JSONRetriever;
+import me.kellymckinnon.setlister.utils.Utility;
+
 /**
- * Created by kelly on 1/6/15.
+ * Uses the setlist.fm API to find cities that match the query.
  */
 public class CitySearch extends AsyncTask<Void, Void, Void> {
 
     private SearchFragment mSearchFragment;
-    private List<City> cities = new ArrayList<City>();
+    private List<City> cities = new ArrayList<>();
     private String cityName;
 
     public CitySearch(SearchFragment searchFragment) {
@@ -41,10 +45,7 @@ public class CitySearch extends AsyncTask<Void, Void, Void> {
         query.append("http://api.setlist.fm/rest/0.1/search/cities.json?name=");
         try {
             query.append(URLEncoder.encode(cityName, "UTF-8"));
-
-            Log.d("URL IS: ", query.toString());
-
-            JSONObject json = null;
+            JSONObject json;
 
             if (JSONRetriever.getRequest(query.toString()) == null) { // No results found
                 return null;
@@ -64,10 +65,8 @@ public class CitySearch extends AsyncTask<Void, Void, Void> {
                 }
             }
         } catch (JSONException e) {
-            Log.e("CitySearch", "JSONException");
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
-            Log.e("CitySearch", "UEE");
             e.printStackTrace();
         }
 
@@ -95,7 +94,6 @@ public class CitySearch extends AsyncTask<Void, Void, Void> {
 
                 mSearchFragment.listAdapter.insert(cities.get(i).name + ", " + cities.get(i).state,
                         insertionIndex);
-                Log.i("ADDED", cities.get(i).name + " " + cities.get(i).id);
             }
 
             mSearchFragment.listAdapter.notifyDataSetChanged();

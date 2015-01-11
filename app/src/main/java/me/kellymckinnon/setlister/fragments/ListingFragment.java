@@ -1,4 +1,4 @@
-package me.kellymckinnon.setlister;
+package me.kellymckinnon.setlister.fragments;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,9 +19,19 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
+import me.kellymckinnon.setlister.R;
+import me.kellymckinnon.setlister.models.Show;
+import me.kellymckinnon.setlister.utils.JSONRetriever;
+import me.kellymckinnon.setlister.utils.Utility;
+import me.kellymckinnon.setlister.views.RecyclerViewDivider;
+import me.kellymckinnon.setlister.views.ShowAdapter;
+
 
 /**
- * Created by kelly on 12/21/14.
+ * Uses the passed in query (either an artist, venue, or city)
+ * to search the setlist.fm database for shows, and displays them
+ * in a list that contains the artist, date, location, tour,
+ * and number of songs in the setlist for that show.
  */
 public class ListingFragment extends Fragment {
 
@@ -48,10 +57,8 @@ public class ListingFragment extends Fragment {
         id = getArguments().getString("ID");
         noShows = (TextView) rootView.findViewById(R.id.no_shows);
         rv = (RecyclerView) rootView.findViewById(R.id.show_list);
-
         rv.addItemDecoration(
-                new RecyclerViewDivider(getActivity(), RecyclerViewDivider.VERTICAL_LIST));
-
+                new me.kellymckinnon.setlister.views.RecyclerViewDivider(getActivity(), RecyclerViewDivider.VERTICAL_LIST));
         llm = new LinearLayoutManager(getActivity());
 
         firstVisibleItem = 0;
@@ -92,7 +99,7 @@ public class ListingFragment extends Fragment {
     private class ShowSearch extends AsyncTask<Void, Void, Void> {
 
         int numShowsAdded = 0; // Shows added on this search only
-        ArrayList<Show> shows = new ArrayList<Show>();
+        ArrayList<Show> shows = new ArrayList<>();
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -100,38 +107,43 @@ public class ListingFragment extends Fragment {
             StringBuilder url = new StringBuilder();
             url.append("http://api.setlist.fm/rest/0.1/search/setlists.json?");
             try {
+                /* If an ID was passed in, use that for the most accurate results.
+                Otherwise, just use the query as artist/venue/city name */
                 String parameter;
-                if (searchType.equals("Artist")) {
-                    if (id != null) {
-                        parameter = "artistMbid=" + id;
-                    } else {
-                        parameter = "artistName=" + URLEncoder.encode(query, "UTF-8");
-                    }
-                } else if (searchType.equals("Venue")) {
-                    if (id != null) {
-                        parameter = "venueId=" + id;
-                    } else {
-                        parameter = "venueName=" + URLEncoder.encode(query, "UTF-8");
-                    }
-                } else if (searchType.equals("City")) {
-                    if (id != null) {
-                        parameter = "cityId=" + id;
-                    } else {
-                        parameter = "cityName=" + URLEncoder.encode(query, "UTF-8");
-                    }
-                } else {
-                    throw new RuntimeException("Invalid search type");
+                switch (searchType) {
+                    case "Artist":
+                        if (id != null) {
+                            parameter = "artistMbid=" + id;
+                        } else {
+                            parameter = "artistName=" + URLEncoder.encode(query, "UTF-8");
+                        }
+                        break;
+                    case "Venue":
+                        if (id != null) {
+                            parameter = "venueId=" + id;
+                        } else {
+                            parameter = "venueName=" + URLEncoder.encode(query, "UTF-8");
+                        }
+                        break;
+                    case "City":
+                        if (id != null) {
+                            parameter = "cityId=" + id;
+                        } else {
+                            parameter = "cityName=" + URLEncoder.encode(query, "UTF-8");
+                        }
+                        break;
+                    default:
+                        throw new RuntimeException("Invalid search type");
                 }
 
                 url.append(parameter);
 
-                Log.d("URL IS: ", url.toString());
-
-                JSONObject json = null;
 
                 if (JSONRetriever.getRequest(url.toString()) == null) { // No results found
                     return null;
                 }
+
+                JSONObject json;
 
                 // On first run, calculate total number of pages
                 if (pagesLoaded == 0) {
@@ -153,10 +165,9 @@ public class ListingFragment extends Fragment {
                     }
                 }
 
-                // Add at least 12 shows (or one page, whichever's bigger) on each scroll
+                // Add at least 12 shows (or one page, whichever is bigger) on each scroll
                 while (numShowsAdded < 12 && pagesLoaded < numPages) {
                     String currentPageQuery = url.toString() + "&p=" + (pagesLoaded + 1);
-                    Log.d("URL IS: ", currentPageQuery);
                     json = JSONRetriever.getRequest(currentPageQuery).getJSONObject("setlists");
                     JSONArray items = json.getJSONArray("setlist");
 
@@ -168,10 +179,8 @@ public class ListingFragment extends Fragment {
                     pagesLoaded++;
                 }
             } catch (JSONException e) {
-                Log.e("ShowSearch", "JSONException");
                 e.printStackTrace();
             } catch (UnsupportedEncodingException e) {
-                Log.e("ShowSearch", "UnsupportedEncodingException");
                 e.printStackTrace();
             }
 
@@ -180,13 +189,12 @@ public class ListingFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if (shows.size() == 0 && adapter.getItemCount() == 0) {
+            if (shows.size() == 0 && adapter.getItemCount() == 0) { // No results
                 if (!Utility.isNetworkConnected(getActivity())) {
-                    noShows.setText(R.string.no_connection);
-                }
+                    noShows.setText(R.string.no_connection); // Because there's no signal
+                } // Or because there are no shows for that query
                 noShows.setVisibility(View.VISIBLE);
                 rv.setVisibility(View.GONE);
-                Log.e("ShowSearch", "No shows found.");
                 return;
             }
 
@@ -195,40 +203,42 @@ public class ListingFragment extends Fragment {
             }
         }
 
-        private void populateShow(JSONObject currentSetlist) {
+        /**
+         * Move data from JSON response into Show objects
+         */
+        private void populateShow(JSONObject currentShow) {
             Show show = new Show();
 
             try {
-                show.band = currentSetlist.getJSONObject("artist").getString("@name");
+                show.band = currentShow.getJSONObject("artist").getString("@name");
             } catch (JSONException e) {
                 show.band = "Unknown band";
             }
             try {
-                show.tour = currentSetlist.getString("@tour");
+                show.tour = currentShow.getString("@tour");
             } catch (JSONException e) {
                 show.tour = "";
             }
 
             try {
-                String year = currentSetlist.getString("@eventDate").substring(6);
-                String day = currentSetlist.getString("@eventDate").substring(0, 2);
-                String month = currentSetlist.getString("@eventDate").substring(3, 5);
+                String year = currentShow.getString("@eventDate").substring(6);
+                String day = currentShow.getString("@eventDate").substring(0, 2);
+                String month = currentShow.getString("@eventDate").substring(3, 5);
                 show.date = month + "/" + day + "/" + year;
             } catch (JSONException e) {
-                Log.e("ShowSearch", "Error processing date");
                 e.printStackTrace();
                 return;
             }
 
             try {
-                show.venue = currentSetlist.getJSONObject("venue").getString("@name") + ", "
-                        + currentSetlist.getJSONObject("venue")
+                show.venue = currentShow.getJSONObject("venue").getString("@name") + ", "
+                        + currentShow.getJSONObject("venue")
                         .getJSONObject("city")
                         .getString("@name") + ", "
-                        + currentSetlist.getJSONObject("venue")
+                        + currentShow.getJSONObject("venue")
                         .getJSONObject("city")
                         .getString("@stateCode") + ", "
-                        + currentSetlist.getJSONObject("venue")
+                        + currentShow.getJSONObject("venue")
                         .getJSONObject("city")
                         .getJSONObject("country")
                         .getString("@code");
@@ -236,8 +246,10 @@ public class ListingFragment extends Fragment {
                 show.venue = "Unknown venue";
             }
 
+            /* First, assume there is exactly ONE set. "sets" will
+            be an object that contains another object, "set".*/
             try {
-                JSONArray songs = currentSetlist.getJSONObject("sets")
+                JSONArray songs = currentShow.getJSONObject("sets")
                         .getJSONObject("set")
                         .getJSONArray("song");
                 String[] setlist = new String[songs.length()];
@@ -249,13 +261,16 @@ public class ListingFragment extends Fragment {
                 shows.add(show);
                 return;
             } catch (JSONException e) {
-                // If there are multiple sets (set is an array)
+                // If this fails, there are multiple sets for the show.
             }
 
+            /* There are multiple sets, so "set" is an array. */
             try {
-                JSONArray sets = currentSetlist.getJSONObject("sets")
+                JSONArray sets = currentShow.getJSONObject("sets")
                         .getJSONArray("set");
-                ArrayList<String> setlist = new ArrayList<String>();
+                ArrayList<String> setlist = new ArrayList<>();
+
+                // Combine all of the sets into one for viewing
                 for (int i = 0; i < sets.length(); i++) {
                     JSONArray songs = sets.getJSONObject(i).getJSONArray("song");
                     for (int j = 0; j < songs.length(); j++) {
@@ -269,12 +284,11 @@ public class ListingFragment extends Fragment {
                 // Usually, this just means there are no songs in the setlist, and "sets"
                 // is an empty string instead of an object.
                 try {
-                    currentSetlist.getString("sets");
+                    currentShow.getString("sets");
                 } catch (JSONException f) {
-                    e.printStackTrace();
+                    e.printStackTrace(); // There was an actual problem
                 }
             }
         }
     }
-
 }

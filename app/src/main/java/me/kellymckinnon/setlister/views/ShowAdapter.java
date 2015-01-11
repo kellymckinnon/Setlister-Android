@@ -1,4 +1,4 @@
-package me.kellymckinnon.setlister;
+package me.kellymckinnon.setlister.views;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,12 +10,17 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import me.kellymckinnon.setlister.ListingActivity;
+import me.kellymckinnon.setlister.R;
+import me.kellymckinnon.setlister.SetlistActivity;
+import me.kellymckinnon.setlister.models.Show;
+
 import static android.support.v7.widget.RecyclerView.Adapter;
 import static android.support.v7.widget.RecyclerView.OnClickListener;
 import static android.support.v7.widget.RecyclerView.ViewHolder;
 
 /**
- * Created by kelly on 12/21/14.
+ * Adapter for ListingFragment to display show information in RecyclerView
  */
 public class ShowAdapter extends Adapter {
 
@@ -23,20 +28,20 @@ public class ShowAdapter extends Adapter {
     private Context context;
 
     public ShowAdapter(Context context) {
-        data = new ArrayList<Show>();
+        data = new ArrayList<>();
         this.context = context;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View v = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.list_row, viewGroup, false);
+                .inflate(R.layout.show_list_row, viewGroup, false);
         return new ShowHolder(v);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
-        /* Get element from dataset at this position and
+        /* Get element from data set at this position and
         replace the contents of the view with that element */
         ((ShowHolder) viewHolder).band.setText(data.get(i).band);
         ((ShowHolder) viewHolder).venue.setText(data.get(i).venue);

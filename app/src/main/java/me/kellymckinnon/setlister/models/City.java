@@ -1,10 +1,9 @@
-package me.kellymckinnon.setlister;
+package me.kellymckinnon.setlister.models;
 
 /**
- * Created by kelly on 1/6/15.
+ * Model for a city on setlist.fm
  */
 public class City {
-
     public String name;
     public String id;
     public String state;

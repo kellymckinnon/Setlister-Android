@@ -17,6 +17,6 @@
         android:textSize="20sp"
         android:visibility="gone"
         android:paddingTop="20dp"
-        android:text="No concerts found."/>
+        android:text="@string/no_results_found"/>
 
 </LinearLayout>

@@ -9,15 +9,16 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import me.kellymckinnon.setlister.fragments.SearchFragment;
+
 /**
  * The launcher activity, which uses a SearchFragment to guide the user
- * to search for an artist, tour, venue, or city.
+ * to search for an artist, venue, or city.
  */
 public class SearchActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_search, menu);
         return true;
     }
@@ -34,8 +35,8 @@ public class SearchActivity extends ActionBarActivity {
             return true;
         } else if (id == R.id.action_feedback) {
             Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                    "mailto", "setlisterapp@gmail.com", null));
-            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Setlister Feedback");
+                    "mailto", getString(R.string.email), null));
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_subject));
             startActivity(Intent.createChooser(emailIntent, "Send email..."));
             return true;
         }

@@ -1,4 +1,4 @@
-package me.kellymckinnon.setlister;
+package me.kellymckinnon.setlister.fragments;
 
 import com.rengwuxian.materialedittext.MaterialEditText;
 
@@ -28,26 +28,29 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import me.kellymckinnon.setlister.ListingActivity;
+import me.kellymckinnon.setlister.R;
+import me.kellymckinnon.setlister.network.ArtistSearch;
+import me.kellymckinnon.setlister.network.CitySearch;
+import me.kellymckinnon.setlister.network.VenueSearch;
+import me.kellymckinnon.setlister.utils.Utility;
+
 /**
  * Fragment opened by SearchActivity that holds a search bar
  * and displays recent results as well as suggestions as the user types
  */
 public class SearchFragment extends Fragment {
 
-    private static final String PREFS_NAME = "RecentSearchesFile";
     private static final int TRIGGER_SEARCH = 1;
     private static final long SEARCH_DELAY_IN_MS = 500;
     private static final int NUM_RECENT_SEARCHES = 5;
-    private static final String SEARCH_TYPE_ARTIST = "Artist";
-    private static final String SEARCH_TYPE_VENUE = "Venue";
-    private static final String SEARCH_TYPE_CITY = "City";
-    protected ProgressBar loadingSpinner;
-    protected MaterialEditText searchBar;
-    protected ListView suggestionList;
-    protected ArrayAdapter<String> listAdapter;
-    protected TextView noResultsText;
-    protected HashMap<String, String> nameIdMap;
-    protected TextView noConnectionText;
+    public ProgressBar loadingSpinner;
+    public MaterialEditText searchBar;
+    public ListView suggestionList;
+    public ArrayAdapter<String> listAdapter;
+    public HashMap<String, String> nameIdMap;
+    public TextView noResultsText;
+    public TextView noConnectionText;
     private AsyncTask<Void, Void, Void> searchTask;
     private String searchType;
     private ArrayList<String> recentSearches;
@@ -82,7 +85,7 @@ public class SearchFragment extends Fragment {
 
         final int accentColor = artistSelectionText.getCurrentTextColor();
         final int normalColor = venueSelectionText.getCurrentTextColor();
-        searchType = SEARCH_TYPE_ARTIST;
+        searchType = getString(R.string.artist);
 
         artistSelectionText.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,7 +97,7 @@ public class SearchFragment extends Fragment {
                 artistSelectionText.setTypeface(Typeface.DEFAULT_BOLD);
                 venueSelectionText.setTypeface(Typeface.DEFAULT);
                 citySelectionText.setTypeface(Typeface.DEFAULT);
-                searchType = SEARCH_TYPE_ARTIST;
+                searchType = getString(R.string.artist);
             }
         });
 
@@ -107,7 +110,7 @@ public class SearchFragment extends Fragment {
                 artistSelectionText.setTypeface(Typeface.DEFAULT);
                 venueSelectionText.setTypeface(Typeface.DEFAULT_BOLD);
                 citySelectionText.setTypeface(Typeface.DEFAULT);
-                searchType = SEARCH_TYPE_VENUE;
+                searchType = getString(R.string.venue);
             }
         });
 
@@ -120,11 +123,11 @@ public class SearchFragment extends Fragment {
                 artistSelectionText.setTypeface(Typeface.DEFAULT);
                 venueSelectionText.setTypeface(Typeface.DEFAULT);
                 citySelectionText.setTypeface(Typeface.DEFAULT_BOLD);
-                searchType = SEARCH_TYPE_CITY;
+                searchType = getString(R.string.city);
             }
         });
 
-        SharedPreferences recentFile = getActivity().getSharedPreferences(PREFS_NAME,
+        SharedPreferences recentFile = getActivity().getSharedPreferences(getString(R.string.prefs_name),
                 Context.MODE_PRIVATE);
         recentSearches = new ArrayList<>();
         nameIdMap = new HashMap<>();
@@ -221,7 +224,8 @@ public class SearchFragment extends Fragment {
                 if ((keyCode == KeyEvent.KEYCODE_ENTER || keyCode == EditorInfo.IME_ACTION_SEARCH)
                         && text.length() != 0) {
                     Intent intent = new Intent(getActivity(), ListingActivity.class);
-                    String formattedQuery = Utility.capitalizeFirstLetters(text);
+                    String formattedQuery = Utility.capitalizeFirstLetters(
+                            text);
                     intent.putExtra("QUERY", formattedQuery);
                     intent.putExtra("SEARCH_TYPE", searchType);
                     addRecentSearch(formattedQuery, "0");
@@ -238,13 +242,14 @@ public class SearchFragment extends Fragment {
         suggestionList.setAdapter(listAdapter);
         listAdapter.addAll(recentSearches);
 
+        // Search for the clicked suggestion/recent search
         suggestionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String query = (String) suggestionList.getItemAtPosition(position);
                 String searchId = nameIdMap.get(query);
 
-                // Remove info from recent searches before sending to search
+                // Remove search type from recent searches before sending to search
                 if (query.contains("(Venue)")) {
                     query = query.substring(0, query.length() - 8);
                 } else if (query.contains("(Artist)")) {
@@ -278,7 +283,7 @@ public class SearchFragment extends Fragment {
         }
 
         // Reload shared preferences
-        SharedPreferences recentFile = getActivity().getSharedPreferences(PREFS_NAME,
+        SharedPreferences recentFile = getActivity().getSharedPreferences(getString(R.string.prefs_name),
                 Context.MODE_PRIVATE);
 
         recentSearches = new ArrayList<>();
@@ -308,12 +313,13 @@ public class SearchFragment extends Fragment {
         super.onStop();
     }
 
+    /** Initiate a search of the selected type */
     public void startSearch() {
-        if (searchType.equals(SEARCH_TYPE_ARTIST)) {
+        if (searchType.equals(getString(R.string.artist))) {
             searchTask = new ArtistSearch(SearchFragment.this);
-        } else if (searchType.equals(SEARCH_TYPE_VENUE)) {
+        } else if (searchType.equals(getString(R.string.venue))) {
             searchTask = new VenueSearch(SearchFragment.this);
-        } else if (searchType.equals(SEARCH_TYPE_CITY)) {
+        } else if (searchType.equals(getString(R.string.city))) {
             searchTask = new CitySearch(SearchFragment.this);
         } else {
             // This should never happen
@@ -332,7 +338,7 @@ public class SearchFragment extends Fragment {
      * key and since no specific result was chosen, there is no associated id.
      */
     public void addRecentSearch(String query, String id) {
-        SharedPreferences recentFile = getActivity().getSharedPreferences(PREFS_NAME,
+        SharedPreferences recentFile = getActivity().getSharedPreferences(getString(R.string.prefs_name),
                 Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = recentFile.edit();
 

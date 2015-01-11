@@ -14,49 +14,43 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ShareActionProvider;
 
 import java.util.ArrayList;
 
+import me.kellymckinnon.setlister.fragments.SetlistFragment;
+import me.kellymckinnon.setlister.utils.JSONRetriever;
+import me.kellymckinnon.setlister.utils.Utility;
 
+/**
+ * Final activity which uses a SetlistFragment to display the
+ * setlist for the selected show, and gives the option to
+ * create a Spotify playlist out of this setlist.
+ */
 public class SetlistActivity extends ActionBarActivity {
 
-    String[] songs;
-    String artist;
-    String date;
-    String venue;
-    String tour;
-    String accessToken;
-    ArrayList<String> failedSpotifySongs = new ArrayList<String>();
+    private String[] songs;
+    private String artist, date, venue, tour;
+    private String accessToken;
+    private ArrayList<String> failedSpotifySongs = new ArrayList<>();
     private android.support.v7.widget.ShareActionProvider mShareActionProvider;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_setlist, menu);
         MenuItem item = menu.findItem(R.id.menu_item_share);
         mShareActionProvider = (android.support.v7.widget.ShareActionProvider) MenuItemCompat.getActionProvider(item);
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
+        mShareActionProvider.setShareIntent(intent); //dummy, in case
         if(artist != null) {
-            intent.putExtra(Intent.EXTRA_SUBJECT, "SETLISTER: " + artist + " on " + date);
-            StringBuilder text = new StringBuilder();
-            text.append("SETLISTER: ").append(artist).append(" on ").append(date).append(" at ").append(venue).append(":\n");
-            for(String s : songs) {
-                text.append("\n");
-                text.append(s);
-            }
-            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-            intent.putExtra(Intent.EXTRA_TEXT, text.toString());
+            updateShareIntent();
         }
-        mShareActionProvider.setShareIntent(intent);
         return true;
     }
 
@@ -73,8 +67,8 @@ public class SetlistActivity extends ActionBarActivity {
             return true;
         } else if (id == R.id.action_feedback) {
             Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                    "mailto", "setlisterapp@gmail.com", null));
-            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Setlister Feedback");
+                    "mailto", getString(R.string.email), null));
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_subject));
             startActivity(Intent.createChooser(emailIntent, "Send email..."));
             return true;
         }
@@ -102,24 +96,14 @@ public class SetlistActivity extends ActionBarActivity {
 
         ActionBar ab = getSupportActionBar();
         if (ab != null) {
-            String formattedDate = Utility.formatDate(date, "MM/dd/yyyy", "MMMM d, yyyy");
+            String formattedDate = Utility.formatDate(date, "MM/dd/yyyy",
+                    "MMMM d, yyyy");
             ab.setTitle(formattedDate);
             ab.setSubtitle(artist);
         }
 
         if(mShareActionProvider != null) {
-            Intent intent = new Intent(android.content.Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_SUBJECT, "SETLISTER: " + artist + " on " + date);
-            StringBuilder text = new StringBuilder();
-            text.append("SETLISTER: ").append(artist).append(" setlist on ").append(date).append(" at ").append(venue).append(":");
-            for(String s : songs) {
-                text.append("\n");
-                text.append(s);
-            }
-            intent.putExtra(Intent.EXTRA_TEXT, text.toString());
-            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-            mShareActionProvider.setShareIntent(intent);
+            updateShareIntent();
         }
 
         setContentView(R.layout.activity_setlist);
@@ -138,17 +122,31 @@ public class SetlistActivity extends ActionBarActivity {
                 .commit();
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return true;
+    /** Provide information for share button */
+    private void updateShareIntent() {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_SUBJECT, "SETLISTER: " + artist + " on " + date);
+        StringBuilder text = new StringBuilder();
+        text.append("SETLISTER: ").append(artist).append(" on ").append(date).append(" at ").append(venue).append(":\n");
+        for(String s : songs) {
+            text.append("\n");
+            text.append(s);
+        }
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        intent.putExtra(Intent.EXTRA_TEXT, text.toString());
+        mShareActionProvider.setShareIntent(intent);
     }
 
+    /**
+     * Called on return from Spotify authentication
+     */
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         Uri uri = intent.getData();
 
+        // Spotify authorization failed
         if (uri == null) {
             Snackbar.with(getApplicationContext())
                     .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
@@ -157,10 +155,11 @@ public class SetlistActivity extends ActionBarActivity {
             return;
         }
 
+        // Create playlist in Spotify from setlist
         AuthenticationResponse response = SpotifyAuthentication.parseOauthResponse(uri);
         accessToken = response.getAccessToken();
         Snackbar.with(getApplicationContext()).text("Creating playlist...").show(SetlistActivity.this);
-        failedSpotifySongs = new ArrayList<String>();
+        failedSpotifySongs = new ArrayList<>();
         new PlaylistCreator().execute();
     }
 
@@ -174,37 +173,39 @@ public class SetlistActivity extends ActionBarActivity {
         outState.putString("VENUE", venue);
     }
 
-    public class PlaylistCreator extends AsyncTask<Void, Void, Void> {
+    /**
+     * Uses the Spotify API to create a playlist and add the songs
+     * from the setlist to the playlist
+     */
+    private class PlaylistCreator extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {
             try {
                 // Get username, which we need to create a playlist
-                JSONObject userJson = JSONRetriever.getRequest("https://api.spotify.com/v1/me",
+                JSONObject userJson = JSONRetriever.getRequest(
+                        "https://api.spotify.com/v1/me",
                         "Bearer", accessToken);
-
                 String username = userJson.getString("id");
-
-                System.out.println("THE USERNAME IS " + username);
 
                 // Create an empty playlist for the authenticated user
                 String createPlaylistUrl = "https://api.spotify.com/v1/users/" + username
                         + "/playlists";
-
                 JSONObject playlistInfo = new JSONObject();
                 playlistInfo.put("name", artist + ", " + date);
                 playlistInfo.put("public", "true");
-
-                JSONObject createPlaylistJson = JSONRetriever.postRequest(createPlaylistUrl,
+                JSONObject createPlaylistJson = JSONRetriever.postRequest(
+                        createPlaylistUrl,
                         "Bearer", accessToken, playlistInfo);
 
-                System.out.println("The playlist name is: " + createPlaylistJson.getString("name"));
-
+                // Get the newly created playlist so the fun can begin
                 String playlistId = createPlaylistJson.getString("id");
                 StringBuilder tracks = new StringBuilder();
-
                 int numSongsAdded = 0;
+
+                // Add songs one at a time
                 for (String s : songs) {
+                    // Only 100 songs can be added through the API
                     if (numSongsAdded > 100) {
                         failedSpotifySongs.add(s);
                     }
@@ -244,12 +245,9 @@ public class SetlistActivity extends ActionBarActivity {
 
                 String addSongsUrl = createPlaylistUrl + "/" + playlistId + "/tracks?uris=" + tracks
                         .toString();
-                System.out.println("The add songs URL is: " + addSongsUrl);
-
-                JSONRetriever.postRequest(addSongsUrl, "Bearer", accessToken, null);
-
+                JSONRetriever.postRequest(addSongsUrl, "Bearer",
+                        accessToken, null);
             } catch (JSONException e) {
-                Log.e("SetlistActivity", "JSONException");
                 e.printStackTrace();
             }
 
@@ -259,6 +257,8 @@ public class SetlistActivity extends ActionBarActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             Snackbar s = Snackbar.with(getApplicationContext()).text("Playlist created!");
+
+            // If there were missed songs, give the user the option to see what they were
             if (!failedSpotifySongs.isEmpty()) {
                 s.duration(Snackbar.SnackbarDuration.LENGTH_LONG);
                 s.actionLabel("Show " + failedSpotifySongs.size() + " missing songs");

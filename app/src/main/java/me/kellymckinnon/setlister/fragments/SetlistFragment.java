@@ -1,4 +1,4 @@
-package me.kellymckinnon.setlister;
+package me.kellymckinnon.setlister.fragments;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
@@ -10,8 +10,13 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import me.kellymckinnon.setlister.R;
+import me.kellymckinnon.setlister.network.SpotifyHandler;
+
 /**
- * Created by kelly on 12/22/14.
+ * Displays the setlist for the given show and uses a
+ * floating action button to give user the option to add
+ * all songs in the setlist to a Spotify playlist.
  */
 public class SetlistFragment extends Fragment {
 
@@ -33,7 +38,7 @@ public class SetlistFragment extends Fragment {
 
         ListView setlist = (ListView) rootView.findViewById(R.id.setlist);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_list_item_1, songs);
 
         setlist.setAdapter(adapter);

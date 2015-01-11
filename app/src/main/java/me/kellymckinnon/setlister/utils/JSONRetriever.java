@@ -1,4 +1,4 @@
-package me.kellymckinnon.setlister;
+package me.kellymckinnon.setlister.utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,7 +15,7 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 
 /**
- * Helper class that sends a GET request through the passed url and returns
+ * Helper class that sends a GET or POST request through the passed url and returns
  * the JSON object provided by the API
  */
 public class JSONRetriever {
@@ -45,10 +45,8 @@ public class JSONRetriever {
 
             return readHttpResponse(connection);
         } catch (IOException e) {
-            Log.e("JSONRetriever", "IOException");
             e.printStackTrace();
         } catch (JSONException e) {
-            Log.e("JSONRetriever", "JSONException");
             e.printStackTrace();
         }
 
@@ -79,10 +77,8 @@ public class JSONRetriever {
 
             return readHttpResponse(connection);
         } catch (IOException e) {
-            Log.e("JSONRetriever", "IOException");
             e.printStackTrace();
         } catch (JSONException e) {
-            Log.e("JSONRetriever", "JSONException");
             e.printStackTrace();
         }
 
@@ -92,7 +88,7 @@ public class JSONRetriever {
     /**
      * Helper method that converts a successful response to a JSONObject
      */
-    public static JSONObject readHttpResponse(HttpURLConnection connection)
+    private static JSONObject readHttpResponse(HttpURLConnection connection)
             throws IOException, JSONException {
         int responseCode = connection.getResponseCode();
         if (responseCode != HttpURLConnection.HTTP_OK
@@ -106,7 +102,7 @@ public class JSONRetriever {
 
         BufferedReader input = new BufferedReader(
                 new InputStreamReader(connection.getInputStream()), 8192);
-        String strLine = null;
+        String strLine;
         while ((strLine = input.readLine()) != null) {
             response.append(strLine);
         }

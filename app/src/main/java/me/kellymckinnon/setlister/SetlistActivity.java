@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -52,6 +53,7 @@ public class SetlistActivity extends ActionBarActivity {
                 text.append("\n");
                 text.append(s);
             }
+            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             intent.putExtra(Intent.EXTRA_TEXT, text.toString());
         }
         mShareActionProvider.setShareIntent(intent);
@@ -111,6 +113,7 @@ public class SetlistActivity extends ActionBarActivity {
                 text.append(s);
             }
             intent.putExtra(Intent.EXTRA_TEXT, text.toString());
+            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             mShareActionProvider.setShareIntent(intent);
         }
 

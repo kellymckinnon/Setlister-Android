@@ -34,7 +34,7 @@
         <activity
             android:name=".SetlistActivity"
             android:label="@string/title_activity_setlist"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:configChanges="orientation|screenSize"
             android:parentActivityName=".ListingActivity" >
             <meta-data

@@ -93,8 +93,6 @@ public class JSONRetriever {
         int responseCode = connection.getResponseCode();
         if (responseCode != HttpURLConnection.HTTP_OK
                 && responseCode != HttpsURLConnection.HTTP_CREATED) {
-            Log.e("JSONRetriever",
-                    "Request failed: response code was " + connection.getResponseCode() + ".");
             return null;
         }
 

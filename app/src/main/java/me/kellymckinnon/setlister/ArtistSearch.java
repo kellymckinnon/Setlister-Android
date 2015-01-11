@@ -17,8 +17,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.net.ssl.HttpsURLConnection;
-
 /**
  * Created by kelly on 1/6/15.
  */
@@ -39,9 +37,9 @@ public class ArtistSearch extends AsyncTask<Void, Void, Void> {
         artist.mbid = currentArtist.getString("@mbid");
 
         try {
-            artist.genre = currentArtist.getString("@disambiguation");
+            artist.disambiguation = currentArtist.getString("@disambiguation");
         } catch (JSONException e) {
-            artist.genre = "";
+            artist.disambiguation = "";
         }
 
         // If the artist has no setlists, don't add it to the list of choices

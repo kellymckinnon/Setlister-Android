@@ -65,6 +65,11 @@ public class SetlistActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_about) {
+            new MaterialDialog.Builder(this)
+                    .title("About Setlister")
+                    .customView(R.layout.about_dialog, true)
+                    .positiveText("OK")
+                    .show();
             return true;
         } else if (id == R.id.action_feedback) {
             Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
@@ -207,16 +212,25 @@ public class SetlistActivity extends ActionBarActivity {
                     String songQuery = s.replace(' ', '+');
                     String artistQuery = artist.replace(' ', '+');
                     try {
-                        //TODO: Make the limit 2, and compare the popularity so we don't actually
-                        // get
-                        //Digital Renegade (instrumental) instead of Digital Renegade
                         JSONObject trackJson = JSONRetriever.getRequest(
                                 "https://api.spotify.com/v1/search?q=track:" + songQuery
-                                        + "%20artist:" + artistQuery + "&type=track&limit=1");
+                                        + "%20artist:" + artistQuery + "&type=track&limit=5");
                         JSONObject tracking = trackJson.getJSONObject("tracks");
                         JSONArray items = tracking.getJSONArray("items");
+                        JSONObject firstChoice = (JSONObject) items.get(0);
 
-                        tracks.append(((JSONObject) items.get(0)).getString("uri"));
+                        // The first match isn't always the best one (e.g. X remix), so we check if
+                        // any of the top 5 are an exact match to X
+                        for(int i = 0; i < items.length(); i++) {
+                            JSONObject currentTrack = (JSONObject) items.get(i);
+                            if(currentTrack.getString("name").equals(s)) {
+                                firstChoice = currentTrack;
+                                break;
+                            }
+                        }
+
+                        tracks.append(firstChoice.getString("uri"));
+
                         tracks.append(",");
                         numSongsAdded++;
                     } catch (JSONException e) {

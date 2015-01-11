@@ -7,5 +7,5 @@ public class Artist {
 
     String name;
     String mbid;
-    String genre;
+    String disambiguation;
 }

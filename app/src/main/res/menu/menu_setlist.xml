@@ -6,4 +6,10 @@
         android:orderInCategory="100" app:showAsAction="never"/>
     <item android:id="@+id/action_feedback" android:title="@string/send_feedback"
         android:orderInCategory="200" app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_item_share"
+        app:showAsAction="ifRoom"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title="Share"
+        app:actionProviderClass="android.support.v7.widget.ShareActionProvider" />
 </menu>

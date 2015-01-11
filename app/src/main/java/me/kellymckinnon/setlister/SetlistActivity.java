@@ -14,11 +14,13 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ShareActionProvider;
 
 import java.util.ArrayList;
 
@@ -32,11 +34,27 @@ public class SetlistActivity extends ActionBarActivity {
     String tour;
     String accessToken;
     ArrayList<String> failedSpotifySongs = new ArrayList<String>();
+    private android.support.v7.widget.ShareActionProvider mShareActionProvider;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_setlist, menu);
+        MenuItem item = menu.findItem(R.id.menu_item_share);
+        mShareActionProvider = (android.support.v7.widget.ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        if(artist != null) {
+            intent.putExtra(Intent.EXTRA_SUBJECT, "SETLISTER: " + artist + " on " + date);
+            StringBuilder text = new StringBuilder();
+            text.append("SETLISTER: ").append(artist).append(" on ").append(date).append(" at ").append(venue).append(":\n");
+            for(String s : songs) {
+                text.append("\n");
+                text.append(s);
+            }
+            intent.putExtra(Intent.EXTRA_TEXT, text.toString());
+        }
+        mShareActionProvider.setShareIntent(intent);
         return true;
     }
 
@@ -80,6 +98,20 @@ public class SetlistActivity extends ActionBarActivity {
             String formattedDate = Utility.formatDate(date, "MM/dd/yyyy", "MMMM d, yyyy");
             ab.setTitle(formattedDate);
             ab.setSubtitle(artist);
+        }
+
+        if(mShareActionProvider != null) {
+            Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_SUBJECT, "SETLISTER: " + artist + " on " + date);
+            StringBuilder text = new StringBuilder();
+            text.append("SETLISTER: ").append(artist).append(" setlist on ").append(date).append(" at ").append(venue).append(":");
+            for(String s : songs) {
+                text.append("\n");
+                text.append(s);
+            }
+            intent.putExtra(Intent.EXTRA_TEXT, text.toString());
+            mShareActionProvider.setShareIntent(intent);
         }
 
         setContentView(R.layout.activity_setlist);

@@ -44,11 +44,13 @@ public class SetlistActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_setlist, menu);
         MenuItem item = menu.findItem(R.id.menu_item_share);
-        mShareActionProvider = (android.support.v7.widget.ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        mShareActionProvider
+                = (android.support.v7.widget.ShareActionProvider) MenuItemCompat.getActionProvider(
+                item);
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         mShareActionProvider.setShareIntent(intent); //dummy, in case
-        if(artist != null) {
+        if (artist != null) {
             updateShareIntent();
         }
         return true;
@@ -102,7 +104,7 @@ public class SetlistActivity extends ActionBarActivity {
             ab.setSubtitle(artist);
         }
 
-        if(mShareActionProvider != null) {
+        if (mShareActionProvider != null) {
             updateShareIntent();
         }
 
@@ -120,22 +122,6 @@ public class SetlistActivity extends ActionBarActivity {
         getFragmentManager().beginTransaction()
                 .add(R.id.activity_setlist, sf)
                 .commit();
-    }
-
-    /** Provide information for share button */
-    private void updateShareIntent() {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_SUBJECT, "SETLISTER: " + artist + " on " + date);
-        StringBuilder text = new StringBuilder();
-        text.append("SETLISTER: ").append(artist).append(" on ").append(date).append(" at ").append(venue).append(":\n");
-        for(String s : songs) {
-            text.append("\n");
-            text.append(s);
-        }
-        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-        intent.putExtra(Intent.EXTRA_TEXT, text.toString());
-        mShareActionProvider.setShareIntent(intent);
     }
 
     /**
@@ -158,7 +144,9 @@ public class SetlistActivity extends ActionBarActivity {
         // Create playlist in Spotify from setlist
         AuthenticationResponse response = SpotifyAuthentication.parseOauthResponse(uri);
         accessToken = response.getAccessToken();
-        Snackbar.with(getApplicationContext()).text("Creating playlist...").show(SetlistActivity.this);
+        Snackbar.with(getApplicationContext())
+                .text("Creating playlist...")
+                .show(SetlistActivity.this);
         failedSpotifySongs = new ArrayList<>();
         new PlaylistCreator().execute();
     }
@@ -171,6 +159,30 @@ public class SetlistActivity extends ActionBarActivity {
         outState.putString("DATE", date);
         outState.putString("TOUR", tour);
         outState.putString("VENUE", venue);
+    }
+
+    /**
+     * Provide information for share button
+     */
+    private void updateShareIntent() {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_SUBJECT, "SETLISTER: " + artist + " on " + date);
+        StringBuilder text = new StringBuilder();
+        text.append("SETLISTER: ")
+                .append(artist)
+                .append(" on ")
+                .append(date)
+                .append(" at ")
+                .append(venue)
+                .append(":\n");
+        for (String s : songs) {
+            text.append("\n");
+            text.append(s);
+        }
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        intent.putExtra(Intent.EXTRA_TEXT, text.toString());
+        mShareActionProvider.setShareIntent(intent);
     }
 
     /**
@@ -222,9 +234,9 @@ public class SetlistActivity extends ActionBarActivity {
 
                         // The first match isn't always the best one (e.g. X remix), so we check if
                         // any of the top 5 are an exact match to X
-                        for(int i = 0; i < items.length(); i++) {
+                        for (int i = 0; i < items.length(); i++) {
                             JSONObject currentTrack = (JSONObject) items.get(i);
-                            if(currentTrack.getString("name").equals(s)) {
+                            if (currentTrack.getString("name").equals(s)) {
                                 firstChoice = currentTrack;
                                 break;
                             }
@@ -268,7 +280,7 @@ public class SetlistActivity extends ActionBarActivity {
                     public void onActionClicked(Snackbar snackbar) {
                         StringBuilder content = new StringBuilder();
                         content.append("The following songs were not found on Spotify:\n");
-                        for(String s : failedSpotifySongs) {
+                        for (String s : failedSpotifySongs) {
                             content.append("\n");
                             content.append("• ");
                             content.append(s);

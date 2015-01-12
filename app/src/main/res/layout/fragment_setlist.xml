@@ -6,20 +6,20 @@
     <ListView
         android:id="@+id/setlist"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <com.getbase.floatingactionbutton.FloatingActionButton
+        android:id="@+id/spotify"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/spotify"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="80dp"
+        android:nestedScrollingEnabled="false"
+        android:src="@drawable/ic_spotify"
         fab:fab_colorNormal="@android:color/black"
         fab:fab_colorPressed="@color/my_accent"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:src="@drawable/ic_spotify"
-        fab:fab_title="Spotify"
-        android:layout_marginBottom="80dp"
-        android:nestedScrollingEnabled="false"/>
+        fab:fab_title="Spotify" />
 
 </RelativeLayout>

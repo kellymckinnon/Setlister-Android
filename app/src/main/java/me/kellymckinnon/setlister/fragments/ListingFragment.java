@@ -58,7 +58,8 @@ public class ListingFragment extends Fragment {
         noShows = (TextView) rootView.findViewById(R.id.no_shows);
         rv = (RecyclerView) rootView.findViewById(R.id.show_list);
         rv.addItemDecoration(
-                new me.kellymckinnon.setlister.views.RecyclerViewDivider(getActivity(), RecyclerViewDivider.VERTICAL_LIST));
+                new me.kellymckinnon.setlister.views.RecyclerViewDivider(getActivity(),
+                        RecyclerViewDivider.VERTICAL_LIST));
         llm = new LinearLayoutManager(getActivity());
 
         firstVisibleItem = 0;
@@ -137,7 +138,6 @@ public class ListingFragment extends Fragment {
                 }
 
                 url.append(parameter);
-
 
                 if (JSONRetriever.getRequest(url.toString()) == null) { // No results found
                     return null;

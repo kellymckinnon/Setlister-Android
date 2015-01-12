@@ -1,30 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:padding="-5dp"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="-5dp">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="8pt"
-        android:text="@string/about_info"
         android:autoLink="web"
-        android:textColor="@color/primary_text_default_material_light"/>
+        android:text="@string/about_info"
+        android:textColor="@color/primary_text_default_material_light"
+        android:textSize="8pt" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:textStyle="bold"
         android:text="@string/licenses_header"
-        android:textColor="@color/primary_text_default_material_light"/>
+        android:textColor="@color/primary_text_default_material_light"
+        android:textStyle="bold" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/library_floating_action_button_title"
-        android:textColor="@color/primary_text_default_material_light"/>
+        android:textColor="@color/primary_text_default_material_light" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -33,9 +34,9 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="vertical"
             android:layout_marginLeft="10dp"
-            android:text="@string/apache_license"/>
+            android:scrollbars="vertical"
+            android:text="@string/apache_license" />
 
     </ScrollView>
 
@@ -44,7 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:text="@string/library_spotify_title"
-        android:textColor="@color/primary_text_default_material_light"/>
+        android:textColor="@color/primary_text_default_material_light" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -53,9 +54,9 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="vertical"
             android:layout_marginLeft="10dp"
-            android:text="@string/apache_license"/>
+            android:scrollbars="vertical"
+            android:text="@string/apache_license" />
 
     </ScrollView>
 
@@ -65,7 +66,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:text="@string/library_materialedittext_title"
-        android:textColor="@color/primary_text_default_material_light"/>
+        android:textColor="@color/primary_text_default_material_light" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -74,9 +75,9 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="vertical"
             android:layout_marginLeft="10dp"
-            android:text="@string/apache_license"/>
+            android:scrollbars="vertical"
+            android:text="@string/apache_license" />
 
     </ScrollView>
 
@@ -85,7 +86,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:text="@string/library_materialdialogs_title"
-        android:textColor="@color/primary_text_default_material_light"/>
+        android:textColor="@color/primary_text_default_material_light" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -94,9 +95,9 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="vertical"
             android:layout_marginLeft="10dp"
-            android:text="@string/mit_license"/>
+            android:scrollbars="vertical"
+            android:text="@string/mit_license" />
 
     </ScrollView>
 
@@ -105,7 +106,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:text="@string/library_snackbar_title"
-        android:textColor="@color/primary_text_default_material_light"/>
+        android:textColor="@color/primary_text_default_material_light" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -114,9 +115,9 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="vertical"
             android:layout_marginLeft="10dp"
-            android:text="@string/mit_license"/>
+            android:scrollbars="vertical"
+            android:text="@string/mit_license" />
 
     </ScrollView>
 

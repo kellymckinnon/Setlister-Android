@@ -127,7 +127,8 @@ public class SearchFragment extends Fragment {
             }
         });
 
-        SharedPreferences recentFile = getActivity().getSharedPreferences(getString(R.string.prefs_name),
+        SharedPreferences recentFile = getActivity().getSharedPreferences(
+                getString(R.string.prefs_name),
                 Context.MODE_PRIVATE);
         recentSearches = new ArrayList<>();
         nameIdMap = new HashMap<>();
@@ -278,17 +279,19 @@ public class SearchFragment extends Fragment {
         super.onResume();
 
         // If previous search (still showing) was done before results finished, re-search
-        if(searchBar != null && searchBar.getText().toString().length() != 0 && loadingSpinner != null && loadingSpinner.getVisibility() == View.VISIBLE) {
+        if (searchBar != null && searchBar.getText().toString().length() != 0
+                && loadingSpinner != null && loadingSpinner.getVisibility() == View.VISIBLE) {
             startSearch();
         }
 
         // Reload shared preferences
-        SharedPreferences recentFile = getActivity().getSharedPreferences(getString(R.string.prefs_name),
+        SharedPreferences recentFile = getActivity().getSharedPreferences(
+                getString(R.string.prefs_name),
                 Context.MODE_PRIVATE);
 
         recentSearches = new ArrayList<>();
 
-        if(nameIdMap == null) {
+        if (nameIdMap == null) {
             nameIdMap = new HashMap<>();
         }
 
@@ -313,7 +316,9 @@ public class SearchFragment extends Fragment {
         super.onStop();
     }
 
-    /** Initiate a search of the selected type */
+    /**
+     * Initiate a search of the selected type
+     */
     public void startSearch() {
         if (searchType.equals(getString(R.string.artist))) {
             searchTask = new ArtistSearch(SearchFragment.this);
@@ -338,7 +343,8 @@ public class SearchFragment extends Fragment {
      * key and since no specific result was chosen, there is no associated id.
      */
     public void addRecentSearch(String query, String id) {
-        SharedPreferences recentFile = getActivity().getSharedPreferences(getString(R.string.prefs_name),
+        SharedPreferences recentFile = getActivity().getSharedPreferences(
+                getString(R.string.prefs_name),
                 Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = recentFile.edit();
 

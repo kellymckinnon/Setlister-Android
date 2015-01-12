@@ -24,7 +24,7 @@ import me.kellymckinnon.setlister.utils.Utility;
 /**
  * Uses the setlist.fm API to get all artists matching the
  * query, and returns any that actually have listed sets.
- *
+ * <p/>
  * Unfortunately, this is a minority of them (setlist.fm uses
  * MusicBrainz to get artists, and most have no sets), so artist
  * search is significantly slower than any other search. The
@@ -54,7 +54,8 @@ public class ArtistSearch extends AsyncTask<Void, Void, Void> {
 
         // If the artist has no setlists, don't add it to the list of choices
         try {
-            URL url = new URL("http://api.setlist.fm/rest/0.1/artist/" + artist.mbid + "/setlists.json");
+            URL url = new URL(
+                    "http://api.setlist.fm/rest/0.1/artist/" + artist.mbid + "/setlists.json");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             int responseCode = connection.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {

@@ -59,7 +59,7 @@ public class Utility {
      * Check if the network is connected.
      */
     public static boolean isNetworkConnected(Context context) {
-        if(context == null) {
+        if (context == null) {
             return true;
         }
 

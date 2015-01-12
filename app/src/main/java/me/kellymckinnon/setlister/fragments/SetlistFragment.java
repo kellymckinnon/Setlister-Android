@@ -50,7 +50,6 @@ public class SetlistFragment extends Fragment {
                 SpotifyHandler.authenticateUser(getActivity());
             }
         });
-
         return rootView;
     }
 }

@@ -17,10 +17,10 @@ import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import me.kellymckinnon.setlister.fragments.SetlistFragment;
@@ -247,8 +247,8 @@ public class SetlistActivity extends ActionBarActivity {
                         tracks.append(",");
                         numSongsAdded++;
                     } catch (JSONException e) {
-                        Log.e("SetlistActivity",
-                                "Track: " + s + " for artist: " + artist + " was not found.");
+                        failedSpotifySongs.add(s);
+                    } catch (IOException e) {
                         failedSpotifySongs.add(s);
                     }
                 }
@@ -260,6 +260,8 @@ public class SetlistActivity extends ActionBarActivity {
                 JSONRetriever.postRequest(addSongsUrl, "Bearer",
                         accessToken, null);
             } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
 

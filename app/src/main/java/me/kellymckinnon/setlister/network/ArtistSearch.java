@@ -100,6 +100,8 @@ public class ArtistSearch extends AsyncTask<Void, Void, Void> {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return null;

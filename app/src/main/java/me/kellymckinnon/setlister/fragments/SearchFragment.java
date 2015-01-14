@@ -1,5 +1,6 @@
 package me.kellymckinnon.setlister.fragments;
 
+import com.pnikosis.materialishprogress.ProgressWheel;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import android.app.Fragment;
@@ -44,13 +45,14 @@ public class SearchFragment extends Fragment {
     private static final int TRIGGER_SEARCH = 1;
     private static final long SEARCH_DELAY_IN_MS = 500;
     private static final int NUM_RECENT_SEARCHES = 5;
-    public ProgressBar loadingSpinner;
+    public ProgressWheel loadingSpinner;
     public MaterialEditText searchBar;
     public ListView suggestionList;
     public ArrayAdapter<String> listAdapter;
     public HashMap<String, String> nameIdMap;
     public TextView noResultsText;
     public TextView noConnectionText;
+    public TextView suggestionHeader;
     private AsyncTask<Void, Void, Void> searchTask;
     private String searchType;
     private ArrayList<String> recentSearches;
@@ -61,12 +63,12 @@ public class SearchFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_search, container, false);
 
         suggestionList = (ListView) rootView.findViewById(R.id.suggestion_list);
-        loadingSpinner = (ProgressBar) rootView.findViewById(R.id.loading_suggestions);
+        loadingSpinner = (ProgressWheel) rootView.findViewById(R.id.loading_suggestions);
         noResultsText = (TextView) rootView.findViewById(R.id.no_results_text);
         noConnectionText = (TextView) rootView.findViewById(R.id.no_connection_text);
         searchBar = (MaterialEditText) rootView.findViewById(R.id.search_bar);
+        suggestionHeader = (TextView) rootView.findViewById(R.id.suggestion_header);
 
-        final TextView suggestionHeader = (TextView) rootView.findViewById(R.id.suggestion_header);
         final TextView noRecentSearchesText = (TextView) rootView.findViewById(
                 R.id.no_searches_text);
         final TextView artistSelectionText = (TextView) rootView.findViewById(
@@ -239,7 +241,7 @@ public class SearchFragment extends Fragment {
 
         // Populate list with recent searches
         listAdapter = new ArrayAdapter<>(getActivity(),
-                android.R.layout.simple_list_item_1);
+                R.layout.single_line_list_row);
         suggestionList.setAdapter(listAdapter);
         listAdapter.addAll(recentSearches);
 
@@ -303,6 +305,11 @@ public class SearchFragment extends Fragment {
                 recentSearches.add(query);
                 nameIdMap.put(query, id);
             }
+        }
+
+        if (listAdapter != null && suggestionHeader != null && suggestionHeader.getText().equals(R.string.recent_searches_header)) {
+            listAdapter.clear();
+            listAdapter.addAll(recentSearches);
         }
     }
 

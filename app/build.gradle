@@ -1,9 +1,16 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file(RELEASE_STORE_FILE)
+            storePassword RELEASE_STORE_PASSWORD
+            keyAlias RELEASE_KEY_ALIAS
+            keyPassword RELEASE_KEY_PASSWORD
+        }
+    }
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
-
     defaultConfig {
         applicationId "me.kellymckinnon.setlister"
         minSdkVersion 15
@@ -15,6 +22,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
@@ -36,4 +44,5 @@ dependencies {
     compile 'com.rengwuxian.materialedittext:library:1.7.1'
     compile 'com.afollestad:material-dialogs:0.5.9'
     compile 'com.nispok:snackbar:2.7.3'
+    compile 'com.pnikosis:materialish-progress:1.2'
 }

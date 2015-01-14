@@ -39,7 +39,7 @@ public class SetlistFragment extends Fragment {
         ListView setlist = (ListView) rootView.findViewById(R.id.setlist);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
-                android.R.layout.simple_list_item_1, songs);
+                R.layout.single_line_list_row, songs);
 
         setlist.setAdapter(adapter);
 

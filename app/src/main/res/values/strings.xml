@@ -16,13 +16,14 @@
 
     <string name="about">About</string>
     <string name="send_feedback">Send Feedback</string>
-    <string name="about_info">Search through thousands of concert setlists on setlist.fm. Create a Spotify playlist from a setlist with one click!</string>
+    <string name="about_info">Browse through thousands of concert setlists from setlist.fm. Add them to a Spotify playlist with one click!</string>
 
     <string name="library_floating_action_button_title">Android-Floating-Action-Button\nCopyright © 2014 Jerzy Chalupski</string>
     <string name="library_spotify_title">Spotify Android SDK\nCopyright © 2014 Spotify</string>
     <string name="library_materialedittext_title">MaterialEditText\nCopyright © 2014 rengwuxian</string>
     <string name="library_materialdialogs_title">Material-Dialogs\nCopyright © 2014 Aidan Michael Follestad</string>
     <string name="library_snackbar_title">Snackbar\nCopyright © 2015 William Mora</string>
+    <string name="library_materialish_progress">Material-ish Progress\nCopyright © 2014 Nico Hormazábal</string>
 
     <string name="apache_license">
         Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,6 +54,7 @@
         LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         SOFTWARE.</string>
+
     <string name="email">setlisterapp@gmail.com</string>
     <string name="feedback_subject">Setlister Feedback</string>
     <string name="prefs_name">RecentSearchesFile</string>

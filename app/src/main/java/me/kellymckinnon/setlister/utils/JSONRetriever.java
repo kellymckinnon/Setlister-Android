@@ -18,7 +18,7 @@ import javax.net.ssl.HttpsURLConnection;
  */
 public class JSONRetriever {
 
-    public static JSONObject getRequest(String url) {
+    public static JSONObject getRequest(String url) throws IOException, JSONException {
         return getRequest(url, null, null);
     }
 
@@ -28,27 +28,19 @@ public class JSONRetriever {
 
     public static JSONObject getRequest(String stringURL,
             String authorizationType,
-            String authorization) {
-        try {
-            URL url = new URL(stringURL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            String authorization) throws IOException, JSONException {
+        URL url = new URL(stringURL);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-            if (authorization != null) {
-                connection.setRequestProperty("Authorization",
-                        authorizationType + " " + authorization);
-            }
-
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestMethod("GET");
-
-            return readHttpResponse(connection);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
+        if (authorization != null) {
+            connection.setRequestProperty("Authorization",
+                    authorizationType + " " + authorization);
         }
 
-        return null;
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestMethod("GET");
+
+        return readHttpResponse(connection);
     }
 
     public static JSONObject postRequest(String stringURL,

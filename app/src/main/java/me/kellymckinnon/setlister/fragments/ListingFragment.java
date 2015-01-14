@@ -1,5 +1,7 @@
 package me.kellymckinnon.setlister.fragments;
 
+import com.pnikosis.materialishprogress.ProgressWheel;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -39,6 +42,7 @@ public class ListingFragment extends Fragment {
     private RecyclerView rv;
     private String query;
     private TextView noShows;
+    private ProgressWheel loadingShows;
     private int pagesLoaded;
     private int firstVisibleItem, visibleItemCount, totalItemCount;
     private boolean loading = true;
@@ -56,6 +60,7 @@ public class ListingFragment extends Fragment {
         searchType = getArguments().getString("SEARCH_TYPE");
         id = getArguments().getString("ID");
         noShows = (TextView) rootView.findViewById(R.id.no_shows);
+        loadingShows = (ProgressWheel) rootView.findViewById(R.id.loading_shows);
         rv = (RecyclerView) rootView.findViewById(R.id.show_list);
         rv.addItemDecoration(
                 new me.kellymckinnon.setlister.views.RecyclerViewDivider(getActivity(),
@@ -182,6 +187,8 @@ public class ListingFragment extends Fragment {
                 e.printStackTrace();
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
             return null;
@@ -189,6 +196,7 @@ public class ListingFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            loadingShows.setVisibility(View.GONE);
             if (shows.size() == 0 && adapter.getItemCount() == 0) { // No results
                 if (!Utility.isNetworkConnected(getActivity())) {
                     noShows.setText(R.string.no_connection); // Because there's no signal
@@ -201,6 +209,8 @@ public class ListingFragment extends Fragment {
             for (Show s : shows) {
                 adapter.add(s);
             }
+
+            rv.setVisibility(View.VISIBLE);
         }
 
         /**
@@ -252,11 +262,14 @@ public class ListingFragment extends Fragment {
                 JSONArray songs = currentShow.getJSONObject("sets")
                         .getJSONObject("set")
                         .getJSONArray("song");
-                String[] setlist = new String[songs.length()];
+                ArrayList<String> setlist = new ArrayList<>();
                 for (int i = 0; i < songs.length(); i++) {
-                    setlist[i] = songs.getJSONObject(i).getString("@name");
+                    String song = songs.getJSONObject(i).getString("@name");
+                    if(!song.isEmpty()) {
+                        setlist.add(song);
+                    }
                 }
-                show.setlist = setlist;
+                show.setlist = setlist.toArray(new String[setlist.size()]);
                 numShowsAdded++;
                 shows.add(show);
                 return;
@@ -274,7 +287,10 @@ public class ListingFragment extends Fragment {
                 for (int i = 0; i < sets.length(); i++) {
                     JSONArray songs = sets.getJSONObject(i).getJSONArray("song");
                     for (int j = 0; j < songs.length(); j++) {
-                        setlist.add(songs.getJSONObject(j).getString("@name"));
+                        String song = songs.getJSONObject(j).getString("@name");
+                        if(!song.isEmpty()) {
+                            setlist.add(song);
+                        }
                     }
                 }
                 show.setlist = setlist.toArray(new String[setlist.size()]);

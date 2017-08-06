@@ -48,7 +48,6 @@ public class ListingFragment extends Fragment {
     private boolean loading = true;
     private ShowAdapter adapter;
     private int numPages; // Number of pages of setlists from API
-    private String searchType;
     private String id;
 
     @Override
@@ -57,7 +56,6 @@ public class ListingFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_listing, container, false);
         query = getArguments().getString("QUERY");
-        searchType = getArguments().getString("SEARCH_TYPE");
         id = getArguments().getString("ID");
         noShows = (TextView) rootView.findViewById(R.id.no_shows);
         loadingShows = (ProgressWheel) rootView.findViewById(R.id.loading_shows);
@@ -111,35 +109,15 @@ public class ListingFragment extends Fragment {
         protected Void doInBackground(Void... params) {
             loading = true;
             StringBuilder url = new StringBuilder();
-            url.append("http://api.setlist.fm/rest/0.1/search/setlists.json?");
+            url.append("https://api.setlist.fm/rest/0.1/search/setlists.json?");
             try {
                 /* If an ID was passed in, use that for the most accurate results.
-                Otherwise, just use the query as artist/venue/city name */
+                Otherwise, just use the query as artist name */
                 String parameter;
-                switch (searchType) {
-                    case "Artist":
-                        if (id != null) {
-                            parameter = "artistMbid=" + id;
-                        } else {
-                            parameter = "artistName=" + URLEncoder.encode(query, "UTF-8");
-                        }
-                        break;
-                    case "Venue":
-                        if (id != null) {
-                            parameter = "venueId=" + id;
-                        } else {
-                            parameter = "venueName=" + URLEncoder.encode(query, "UTF-8");
-                        }
-                        break;
-                    case "City":
-                        if (id != null) {
-                            parameter = "cityId=" + id;
-                        } else {
-                            parameter = "cityName=" + URLEncoder.encode(query, "UTF-8");
-                        }
-                        break;
-                    default:
-                        throw new RuntimeException("Invalid search type");
+                if (id != null) {
+                    parameter = "artistMbid=" + id;
+                } else {
+                    parameter = "artistName=" + URLEncoder.encode(query, "UTF-8");
                 }
 
                 url.append(parameter);

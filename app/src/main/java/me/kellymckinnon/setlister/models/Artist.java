@@ -1,11 +1,49 @@
+
 package me.kellymckinnon.setlister.models;
 
-/**
- * Model for an artist on setlist.fm
- */
+import com.squareup.moshi.Json;
+
 public class Artist {
 
-    public String name;
-    public String mbid;
-    public String disambiguation;
+    @Json(name = "mbid")
+    private String mbid;
+    @Json(name = "name")
+    private String name;
+    @Json(name = "disambiguation")
+    private String disambiguation;
+    @Json(name = "url")
+    private String url;
+
+    public String getMbid() {
+        return mbid;
+    }
+
+    public void setMbid(String mbid) {
+        this.mbid = mbid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDisambiguation() {
+        return disambiguation;
+    }
+
+    public void setDisambiguation(String disambiguation) {
+        this.disambiguation = disambiguation;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
 }

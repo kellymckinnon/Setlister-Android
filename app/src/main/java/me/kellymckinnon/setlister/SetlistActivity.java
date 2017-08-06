@@ -227,7 +227,9 @@ public class SetlistActivity extends ActionBarActivity {
                     try {
                         JSONObject trackJson = JSONRetriever.getRequest(
                                 "https://api.spotify.com/v1/search?q=track:" + songQuery
-                                        + "%20artist:" + artistQuery + "&type=track&limit=5");
+                                        + "%20artist:" + artistQuery + "&type=track&limit=5",
+                                "Bearer",
+                                accessToken);
                         JSONObject tracking = trackJson.getJSONObject("tracks");
                         JSONArray items = tracking.getJSONArray("items");
                         JSONObject firstChoice = (JSONObject) items.get(0);

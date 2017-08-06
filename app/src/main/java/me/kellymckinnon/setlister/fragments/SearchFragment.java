@@ -7,13 +7,13 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,18 +23,23 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import me.kellymckinnon.setlister.ListingActivity;
 import me.kellymckinnon.setlister.R;
-import me.kellymckinnon.setlister.network.ArtistSearch;
-import me.kellymckinnon.setlister.network.CitySearch;
-import me.kellymckinnon.setlister.network.VenueSearch;
+import me.kellymckinnon.setlister.models.Artist;
+import me.kellymckinnon.setlister.models.Artists;
+import me.kellymckinnon.setlister.models.Setlists;
+import me.kellymckinnon.setlister.network.ApiUtils;
+import me.kellymckinnon.setlister.network.SetlistFMService;
 import me.kellymckinnon.setlister.utils.Utility;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Fragment opened by SearchActivity that holds a search bar
@@ -54,13 +59,15 @@ public class SearchFragment extends Fragment {
     public TextView noConnectionText;
     public TextView suggestionHeader;
     private AsyncTask<Void, Void, Void> searchTask;
-    private String searchType;
     private ArrayList<String> recentSearches;
+    private SetlistFMService mService;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_search, container, false);
+
+        mService = ApiUtils.getSetlistFMService();
 
         suggestionList = (ListView) rootView.findViewById(R.id.suggestion_list);
         loadingSpinner = (ProgressWheel) rootView.findViewById(R.id.loading_suggestions);
@@ -71,10 +78,6 @@ public class SearchFragment extends Fragment {
 
         final TextView noRecentSearchesText = (TextView) rootView.findViewById(
                 R.id.no_searches_text);
-        final TextView artistSelectionText = (TextView) rootView.findViewById(
-                R.id.artist_selection);
-        final TextView venueSelectionText = (TextView) rootView.findViewById(R.id.venue_selection);
-        final TextView citySelectionText = (TextView) rootView.findViewById(R.id.city_selection);
 
         final ImageButton clearSearchButton = (ImageButton) rootView.findViewById(
                 R.id.clear_search);
@@ -82,50 +85,6 @@ public class SearchFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 searchBar.setText("");
-            }
-        });
-
-        final int accentColor = artistSelectionText.getCurrentTextColor();
-        final int normalColor = venueSelectionText.getCurrentTextColor();
-        searchType = getString(R.string.artist);
-
-        artistSelectionText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                artistSelectionText.setTextColor(accentColor);
-                venueSelectionText.setTextColor(normalColor);
-                citySelectionText.setTextColor(normalColor);
-
-                artistSelectionText.setTypeface(Typeface.DEFAULT_BOLD);
-                venueSelectionText.setTypeface(Typeface.DEFAULT);
-                citySelectionText.setTypeface(Typeface.DEFAULT);
-                searchType = getString(R.string.artist);
-            }
-        });
-
-        venueSelectionText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                artistSelectionText.setTextColor(normalColor);
-                venueSelectionText.setTextColor(accentColor);
-                citySelectionText.setTextColor(normalColor);
-                artistSelectionText.setTypeface(Typeface.DEFAULT);
-                venueSelectionText.setTypeface(Typeface.DEFAULT_BOLD);
-                citySelectionText.setTypeface(Typeface.DEFAULT);
-                searchType = getString(R.string.venue);
-            }
-        });
-
-        citySelectionText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                artistSelectionText.setTextColor(normalColor);
-                venueSelectionText.setTextColor(normalColor);
-                citySelectionText.setTextColor(accentColor);
-                artistSelectionText.setTypeface(Typeface.DEFAULT);
-                venueSelectionText.setTypeface(Typeface.DEFAULT);
-                citySelectionText.setTypeface(Typeface.DEFAULT_BOLD);
-                searchType = getString(R.string.city);
             }
         });
 
@@ -230,7 +189,6 @@ public class SearchFragment extends Fragment {
                     String formattedQuery = Utility.capitalizeFirstLetters(
                             text);
                     intent.putExtra("QUERY", formattedQuery);
-                    intent.putExtra("SEARCH_TYPE", searchType);
                     addRecentSearch(formattedQuery, "0");
                     startActivity(intent);
                     return true;
@@ -251,21 +209,10 @@ public class SearchFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String query = (String) suggestionList.getItemAtPosition(position);
                 String searchId = nameIdMap.get(query);
-
-                // Remove search type from recent searches before sending to search
-                if (query.contains("(Venue)")) {
-                    query = query.substring(0, query.length() - 8);
-                } else if (query.contains("(Artist)")) {
-                    query = query.substring(0, query.length() - 9);
-                } else if (query.contains("(Tour)")) {
-                    query = query.substring(0, query.length() - 7);
-                }
-
                 addRecentSearch(query, searchId);
 
                 Intent intent = new Intent(getActivity(), ListingActivity.class);
                 intent.putExtra("QUERY", query);
-                intent.putExtra("SEARCH_TYPE", searchType);
                 if (!searchId.equals("0")) {
                     intent.putExtra("ID", searchId);
                 }
@@ -327,18 +274,78 @@ public class SearchFragment extends Fragment {
      * Initiate a search of the selected type
      */
     public void startSearch() {
-        if (searchType.equals(getString(R.string.artist))) {
-            searchTask = new ArtistSearch(SearchFragment.this);
-        } else if (searchType.equals(getString(R.string.venue))) {
-            searchTask = new VenueSearch(SearchFragment.this);
-        } else if (searchType.equals(getString(R.string.city))) {
-            searchTask = new CitySearch(SearchFragment.this);
-        } else {
-            // This should never happen
-            throw new IllegalArgumentException("Search type not specified.");
+        mService.getArtists(searchBar.getText().toString()).enqueue(new Callback<Artists>() {
+            @Override
+            public void onResponse(Call<Artists> call, Response<Artists> response) {
+                if (!response.isSuccessful()) {
+                   Log.e(this.getClass().getSimpleName(), "Artists search failed. Response code was: " + response.code() + ". Message was: " + response.errorBody());
+                   return;
+                }
+
+                if (response.body().getTotal() == 0) { // No results
+                    suggestionList.setVisibility(View.GONE);
+                    loadingSpinner.setVisibility(View.GONE);
+                    if (getActivity() != null && Utility.isNetworkConnected(getActivity())) {
+                        noResultsText.setVisibility(View.VISIBLE);
+                    } else {
+                        noConnectionText.setVisibility(View.VISIBLE);
+                    }
+                    return;
+                }
+
+                listAdapter.clear();
+                addArtistsWithSetlists(response.body().getArtist());
+            }
+
+            @Override
+            public void onFailure(Call<Artists> call, Throwable t) {
+                Log.e(getClass().getSimpleName(), t.toString());
+            }
+        });
+    }
+
+    private void addArtistsWithSetlists(final List<Artist> artists) {
+        for (int i = 0; i < artists.size(); i++) {
+            final Artist artist = artists.get(i);
+            final int finalI = i;
+            mService.getSetlists(artist.getMbid()).enqueue(new Callback<Setlists>() {
+                @Override
+                public void onResponse(Call<Setlists> call, Response<Setlists> response) {
+                    // If artist has no setlists, request will return 404
+                    if (response.isSuccessful()) {
+                        nameIdMap.put(artist.getName(), artist.getMbid());
+                        listAdapter.add(artist.getName());
+                    }
+
+                    // TODO: Handle case where artist only has empty setlists (EX: "77 Jefferson")
+
+                    /* If none of the artists had setlists, treat it the same as if no artists were returns */
+                    if (finalI == artists.size() - 1) {
+                        loadingSpinner.setVisibility(View.GONE);
+
+                        if (listAdapter.getCount() == 0) {
+                            suggestionList.setVisibility(View.GONE);
+                            loadingSpinner.setVisibility(View.GONE);
+                            if (getActivity() != null && Utility.isNetworkConnected(getActivity())) {
+                                noResultsText.setVisibility(View.VISIBLE);
+                            } else {
+                                noConnectionText.setVisibility(View.VISIBLE);
+                            }
+                            return;
+                        } else {
+                            suggestionList.setVisibility(View.VISIBLE);
+                            listAdapter.notifyDataSetChanged();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Setlists> call, Throwable t) {
+                    Log.e(getClass().getSimpleName(), t.toString());
+                }
+            });
         }
 
-        searchTask.execute();
     }
 
     /**
@@ -355,10 +362,8 @@ public class SearchFragment extends Fragment {
                 Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = recentFile.edit();
 
-        String formattedRecentSearch = query + " (" + searchType + ")";
-
         for (String s : recentSearches) {
-            if (s.equalsIgnoreCase(formattedRecentSearch)) {
+            if (s.equalsIgnoreCase(query)) {
                 //TODO: Instead of doing nothing, move the search to the top
                 //And replace the ID if necessary
                 return;
@@ -372,7 +377,7 @@ public class SearchFragment extends Fragment {
             }
         }
 
-        editor.putString("search" + 0, formattedRecentSearch);
+        editor.putString("search" + 0, query);
         editor.putString("id" + 0, id);
         editor.apply();
     }

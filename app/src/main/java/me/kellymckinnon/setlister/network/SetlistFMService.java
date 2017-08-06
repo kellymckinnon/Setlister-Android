@@ -1,8 +1,31 @@
 package me.kellymckinnon.setlister.network;
 
-/**
- * Created by kellymckinnon on 7/30/17.
- */
+import me.kellymckinnon.setlister.models.Artists;
+import me.kellymckinnon.setlister.models.Setlists;
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Headers;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
-public class SetlistFMService {
+/**
+ * Interface that contains methods needed to execute requests to setlist.fm.
+ */
+public interface SetlistFMService {
+
+    @Headers({
+        "x-api-key: bc296136-5d85-4737-8a5e-83b84bc223f9",
+        "Accept: application/json",
+        "Content-Type: application/json"
+    })
+    @GET("search/artists/")
+    Call<Artists> getArtists(@Query("artistName") String artistName);
+
+    @Headers({
+        "x-api-key: bc296136-5d85-4737-8a5e-83b84bc223f9",
+        "Accept: application/json",
+        "Content-Type: application/json"
+    })
+    @GET("artist/{mbid}/setlists")
+    Call<Setlists> getSetlists(@Path("mbid") String mbid);
 }

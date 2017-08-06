@@ -53,13 +53,11 @@ public class ListingActivity extends ActionBarActivity {
         setContentView(R.layout.activity_list);
 
         String query = getIntent().getStringExtra("QUERY");
-        String searchType = getIntent().getStringExtra("SEARCH_TYPE");
         getSupportActionBar().setTitle(query);
 
         ListingFragment lf = new ListingFragment();
         Bundle bundle = new Bundle();
         bundle.putString("QUERY", query);
-        bundle.putString("SEARCH_TYPE", searchType);
 
         // If search is not through suggestion, this will be null
         bundle.putString("ID", getIntent().getStringExtra("ID"));

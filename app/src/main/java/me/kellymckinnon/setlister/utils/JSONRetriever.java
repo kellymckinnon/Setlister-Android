@@ -37,6 +37,8 @@ public class JSONRetriever {
                     authorizationType + " " + authorization);
         }
 
+        connection.setRequestProperty("x-api-key", "bc296136-5d85-4737-8a5e-83b84bc223f9");
+        connection.setRequestProperty("Accept", "application/json");
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setRequestMethod("GET");
 

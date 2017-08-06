@@ -1,5 +1,5 @@
 
-package com.example;
+package me.kellymckinnon.setlister.models;
 
 import com.squareup.moshi.Json;
 

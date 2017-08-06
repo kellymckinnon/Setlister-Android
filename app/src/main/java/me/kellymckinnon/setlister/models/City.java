@@ -1,5 +1,5 @@
 
-package com.example;
+package me.kellymckinnon.setlister.models;
 
 import com.squareup.moshi.Json;
 
@@ -13,8 +13,6 @@ public class City {
     private String state;
     @Json(name = "stateCode")
     private String stateCode;
-    @Json(name = "coords")
-    private Coords coords;
     @Json(name = "country")
     private Country country;
 
@@ -48,14 +46,6 @@ public class City {
 
     public void setStateCode(String stateCode) {
         this.stateCode = stateCode;
-    }
-
-    public Coords getCoords() {
-        return coords;
-    }
-
-    public void setCoords(Coords coords) {
-        this.coords = coords;
     }
 
     public Country getCountry() {

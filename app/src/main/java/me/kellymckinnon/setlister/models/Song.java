@@ -1,5 +1,5 @@
 
-package com.example;
+package me.kellymckinnon.setlister.models;
 
 import com.squareup.moshi.Json;
 
@@ -10,9 +10,9 @@ public class Song {
     @Json(name = "info")
     private String info;
     @Json(name = "cover")
-    private Cover cover;
+    private Artist originalArtist;
     @Json(name = "with")
-    private With with;
+    private Artist with;
 
     public String getName() {
         return name;
@@ -30,19 +30,19 @@ public class Song {
         this.info = info;
     }
 
-    public Cover getCover() {
-        return cover;
+    public Artist getCover() {
+        return originalArtist;
     }
 
-    public void setCover(Cover cover) {
-        this.cover = cover;
+    public void setCover(Artist originalArtist) {
+        this.originalArtist = originalArtist;
     }
 
-    public With getWith() {
+    public Artist getWith() {
         return with;
     }
 
-    public void setWith(With with) {
+    public void setWith(Artist with) {
         this.with = with;
     }
 

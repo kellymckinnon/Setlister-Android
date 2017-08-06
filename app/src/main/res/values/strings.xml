@@ -5,7 +5,7 @@
     <string name="title_activity_setlist">SetlistActivity</string>
 
 
-    <string name="search_header">SEARCH BY:</string>
+    <string name="search_header">SEARCH FOR AN ARTIST</string>
     <string name="search_bar_hint">Results powered by setlist.fm</string>
     <string name="recent_searches_header">RECENT SEARCHES</string>
     <string name="best_matches_header">BEST MATCHES</string>
@@ -58,9 +58,7 @@
     <string name="email">setlisterapp@gmail.com</string>
     <string name="feedback_subject">Setlister Feedback</string>
     <string name="prefs_name">RecentSearchesFile</string>
-    <string name="artist">Artist</string>
     <string name="venue">Venue</string>
-    <string name="city">City</string>
     <string name="share">Share</string>
     <string name="default_date">12/31/1969</string>
     <string name="default_num_songs">0 songs</string>

@@ -6,7 +6,7 @@
     android:padding="8dp">
 
     <!-- Top card that holds the search bar/search type -->
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -55,11 +55,11 @@
                 android:contentDescription="@string/clear_search" />
 
         </RelativeLayout>
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
     <!-- Suggestions card that displays recent searches if no query is entered,
      or search suggestions if a query is entered.-->
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp">
@@ -131,6 +131,6 @@
                 app:progressIndeterminate="true" />
         </RelativeLayout>
 
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
 </LinearLayout>

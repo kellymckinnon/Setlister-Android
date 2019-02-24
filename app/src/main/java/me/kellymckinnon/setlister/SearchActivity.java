@@ -5,7 +5,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -15,7 +15,7 @@ import me.kellymckinnon.setlister.fragments.SearchFragment;
  * The launcher activity, which uses a SearchFragment to guide the user
  * to search for an artist, venue, or city.
  */
-public class SearchActivity extends ActionBarActivity {
+public class SearchActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -14,9 +14,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import androidx.core.view.MenuItemCompat;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -32,20 +32,20 @@ import me.kellymckinnon.setlister.utils.Utility;
  * setlist for the selected show, and gives the option to
  * create a Spotify playlist out of this setlist.
  */
-public class SetlistActivity extends ActionBarActivity {
+public class SetlistActivity extends AppCompatActivity {
 
     private String[] songs;
     private String artist, date, venue, tour;
     private String accessToken;
     private ArrayList<String> failedSpotifySongs = new ArrayList<>();
-    private android.support.v7.widget.ShareActionProvider mShareActionProvider;
+    private androidx.appcompat.widget.ShareActionProvider mShareActionProvider;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_setlist, menu);
         MenuItem item = menu.findItem(R.id.menu_item_share);
         mShareActionProvider
-                = (android.support.v7.widget.ShareActionProvider) MenuItemCompat.getActionProvider(
+                = (androidx.appcompat.widget.ShareActionProvider) MenuItemCompat.getActionProvider(
                 item);
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
@@ -204,7 +204,7 @@ public class SetlistActivity extends ActionBarActivity {
                 String createPlaylistUrl = "https://api.spotify.com/v1/users/" + username
                         + "/playlists";
                 JSONObject playlistInfo = new JSONObject();
-                playlistInfo.put("name", artist + ", " + date);
+                playlistInfo.put("name", artist + ", " + venue + ", " + date);
                 playlistInfo.put("public", "true");
                 JSONObject createPlaylistJson = JSONRetriever.postRequest(
                         createPlaylistUrl,

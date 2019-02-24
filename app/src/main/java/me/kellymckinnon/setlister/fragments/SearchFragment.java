@@ -308,7 +308,7 @@ public class SearchFragment extends Fragment {
         for (int i = 0; i < artists.size(); i++) {
             final Artist artist = artists.get(i);
             final int finalI = i;
-            mService.getSetlists(artist.getMbid()).enqueue(new Callback<Setlists>() {
+            mService.getSetlistsByArtistMbid(artist.getMbid(), 1).enqueue(new Callback<Setlists>() {
                 @Override
                 public void onResponse(Call<Setlists> call, Response<Setlists> response) {
                     // If artist has no setlists, request will return 404

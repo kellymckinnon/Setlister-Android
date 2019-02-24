@@ -2,7 +2,9 @@ package me.kellymckinnon.setlister.views;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +17,9 @@ import me.kellymckinnon.setlister.R;
 import me.kellymckinnon.setlister.SetlistActivity;
 import me.kellymckinnon.setlister.models.Show;
 
-import static android.support.v7.widget.RecyclerView.Adapter;
-import static android.support.v7.widget.RecyclerView.OnClickListener;
-import static android.support.v7.widget.RecyclerView.ViewHolder;
+import static androidx.recyclerview.widget.RecyclerView.Adapter;
+import static androidx.recyclerview.widget.RecyclerView.OnClickListener;
+import static androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 /**
  * Adapter for ListingFragment to display show information in RecyclerView
@@ -49,6 +51,14 @@ public class ShowAdapter extends Adapter {
         ((ShowHolder) viewHolder).date.setText(data.get(i).date);
         ((ShowHolder) viewHolder).numSongs.setText(data.get(i).setlist.length + " songs");
         ((ShowHolder) viewHolder).show = data.get(i);
+
+        if (data.get(i).setlist.length == 0) {
+            ((ShowHolder) viewHolder).itemView.setOnClickListener(null);
+            ((ShowHolder) viewHolder).itemView.setBackgroundColor(Color.LTGRAY);
+        } else {
+            ((ShowHolder) viewHolder).itemView.setOnClickListener(((ShowHolder) viewHolder));
+            ((ShowHolder) viewHolder).itemView.setBackgroundColor(Color.WHITE);
+        }
     }
 
     @Override
@@ -67,17 +77,18 @@ public class ShowAdapter extends Adapter {
         public TextView venue;
         public TextView tour;
         public TextView date;
-        public TextView numSongs;
+        View itemView;
+        TextView numSongs;
         public Show show;
 
-        public ShowHolder(View itemView) {
+        ShowHolder(View itemView) {
             super(itemView);
-            itemView.setOnClickListener(this);
-            band = (TextView) itemView.findViewById(R.id.band);
-            venue = (TextView) itemView.findViewById(R.id.venue);
-            tour = (TextView) itemView.findViewById(R.id.tour);
-            date = (TextView) itemView.findViewById(R.id.date);
-            numSongs = (TextView) itemView.findViewById(R.id.num_songs);
+            this.itemView = itemView;
+            band = itemView.findViewById(R.id.band);
+            venue = itemView.findViewById(R.id.venue);
+            tour = itemView.findViewById(R.id.tour);
+            date = itemView.findViewById(R.id.date);
+            numSongs = itemView.findViewById(R.id.num_songs);
         }
 
         @Override

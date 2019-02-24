@@ -9,9 +9,11 @@ import org.json.JSONObject;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,13 +23,22 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.List;
 
 import me.kellymckinnon.setlister.R;
+import me.kellymckinnon.setlister.models.Set;
+import me.kellymckinnon.setlister.models.Setlist;
+import me.kellymckinnon.setlister.models.Setlists;
 import me.kellymckinnon.setlister.models.Show;
-import me.kellymckinnon.setlister.utils.JSONRetriever;
+import me.kellymckinnon.setlister.models.Song;
+import me.kellymckinnon.setlister.network.ApiUtils;
+import me.kellymckinnon.setlister.network.SetlistFMService;
 import me.kellymckinnon.setlister.utils.Utility;
 import me.kellymckinnon.setlister.views.RecyclerViewDivider;
 import me.kellymckinnon.setlister.views.ShowAdapter;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 /**
@@ -45,14 +56,16 @@ public class ListingFragment extends Fragment {
     private ProgressWheel loadingShows;
     private int pagesLoaded;
     private int firstVisibleItem, visibleItemCount, totalItemCount;
-    private boolean loading = true;
+    private boolean loading = false;
     private ShowAdapter adapter;
     private int numPages; // Number of pages of setlists from API
     private String id;
+    private SetlistFMService mService;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
+        mService = ApiUtils.getSetlistFMService();
 
         View rootView = inflater.inflate(R.layout.fragment_listing, container, false);
         query = getArguments().getString("QUERY");
@@ -76,7 +89,7 @@ public class ListingFragment extends Fragment {
         rv.setItemAnimator(new DefaultItemAnimator());
 
         /* Load new page(s) if the user scrolls to the end */
-        rv.setOnScrollListener(new RecyclerView.OnScrollListener() {
+        rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
 
@@ -84,205 +97,134 @@ public class ListingFragment extends Fragment {
                 totalItemCount = llm.getItemCount();
                 firstVisibleItem = llm.findFirstVisibleItemPosition();
 
-                if (loading && pagesLoaded < numPages) {
+                if (!loading && pagesLoaded < numPages) {
                     if ((visibleItemCount + firstVisibleItem) >= totalItemCount - 10) {
-                        loading = false;
-                        new ShowSearch().execute();
+                        getSetlists();
                     }
                 }
             }
         });
 
-        // Start the initial search
-        new ShowSearch().execute();
+        getSetlists();
 
         return rootView;
     }
 
-    /* Gets shows from the setlist.fm API */
-    private class ShowSearch extends AsyncTask<Void, Void, Void> {
-
-        int numShowsAdded = 0; // Shows added on this search only
-        ArrayList<Show> shows = new ArrayList<>();
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            loading = true;
-            StringBuilder url = new StringBuilder();
-            url.append("https://api.setlist.fm/rest/0.1/search/setlists.json?");
-            try {
-                /* If an ID was passed in, use that for the most accurate results.
-                Otherwise, just use the query as artist name */
-                String parameter;
-                if (id != null) {
-                    parameter = "artistMbid=" + id;
-                } else {
-                    parameter = "artistName=" + URLEncoder.encode(query, "UTF-8");
+    private void getSetlists() {
+        loading = true;
+        Callback<Setlists> callback = new Callback<Setlists>() {
+            @Override
+            public void onResponse(Call<Setlists> call, Response<Setlists> response) {
+                // If artist has no setlists, request will return 404
+                if (!response.isSuccessful() || response.body() == null) {
+                    showNullState();
+                    return;
                 }
-
-                url.append(parameter);
-
-                if (JSONRetriever.getRequest(url.toString()) == null) { // No results found
-                    return null;
-                }
-
-                JSONObject json;
 
                 // On first run, calculate total number of pages
                 if (pagesLoaded == 0) {
-                    json = JSONRetriever.getRequest(url.toString()).getJSONObject("setlists");
-                    int numShows = Integer.parseInt(json.getString("@total"));
+                    int numShows = response.body().getTotal();
 
                     // One 20-item array per page
                     numPages = numShows / 20;
                     if (numShows % 20 != 0) {
                         numPages++;
                     }
-
-                    // If only one show, it's a JSONObject instead of an array
-                    if (numShows == 1) {
-                        JSONObject currentSetlist = json.getJSONObject("setlist");
-                        populateShow(currentSetlist);
-                        pagesLoaded++;
-                        return null;
-                    }
                 }
 
-                // Add at least 12 shows (or one page, whichever is bigger) on each scroll
-                while (numShowsAdded < 12 && pagesLoaded < numPages) {
-                    String currentPageQuery = url.toString() + "&p=" + (pagesLoaded + 1);
-                    json = JSONRetriever.getRequest(currentPageQuery).getJSONObject("setlists");
-                    JSONArray items = json.getJSONArray("setlist");
-
-                    for (int i = 0; i < items.length(); i++) {
-                        JSONObject currentSetlist = items.getJSONObject(i);
-                        populateShow(currentSetlist);
+                List<Setlist> setlists = response.body().getSetlist();
+                for (Setlist setlist : setlists) {
+                    Show show = getShowModel(setlist);
+                    if (show == null) { // No setlists available for this show
+                        continue;
                     }
 
-                    pagesLoaded++;
+                    adapter.add(show);
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
+
+                pagesLoaded++;
+
+                if (adapter.getItemCount() > 0) {
+                    loadingShows.setVisibility(View.GONE);
+                    rv.setVisibility(View.VISIBLE);
+                } else {
+                    showNullState();
+                }
+                loading = false;
+            }
+
+            @Override
+            public void onFailure(Call<Setlists> call, Throwable t) {
+                Log.e(getClass().getSimpleName(), t.toString());
+                showNullState();
+            }
+        };
+
+        if (id != null) { // We have an MBID, use that
+            mService.getSetlistsByArtistMbid(id, pagesLoaded + 1).enqueue(callback);
+        } else { // We have a plaintext name, use that
+            try {
+                mService.getSetlistsByArtistName(URLEncoder.encode(query, "UTF-8"), pagesLoaded + 1).enqueue(callback);
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+                showNullState();
+            }
+        }
+    }
+
+    /**
+     * Move data from JSON response into Show objects
+     */
+    private Show getShowModel(Setlist setlist) {
+        Show show = new Show();
+
+        show.band = setlist.getArtist().getName();
+        show.tour = setlist.getTour() == null || setlist.getTour().getName().equals("No Tour Assigned") ? "" : setlist.getTour().getName();
+
+        String year = setlist.getEventDate().substring(6);
+        String day = setlist.getEventDate().substring(0, 2);
+        String month = setlist.getEventDate().substring(3, 5);
+        show.date = month + "/" + day + "/" + year;
+
+        try {
+            show.venue = setlist.getVenue().getName() + ", "
+                    + setlist.getVenue().getCity().getName() + ", "
+                    + setlist.getVenue().getCity().getStateCode() + ", "
+                    + setlist.getVenue().getCity().getCountry().getCode();
+        } catch (Exception e) {
+            show.venue = "Unknown venue";
+        }
+
+        try {
+            List<Set> sets = setlist.getSets().getSet();
+            ArrayList<String> songList = new ArrayList<>();
+
+            // Combine all of the sets into one for viewing
+            for (Set set : sets) {
+                for (Song song : set.getSong()) {
+                    if (!song.getName().isEmpty()) {
+                        songList.add(song.getName());
+                    }
+                }
             }
 
+            show.setlist = songList.toArray(new String[0]);
+        } catch (Exception e) {
+            // Usually, this just means there are no songs in the setlist, and "sets"
+            // is an empty string instead of an object.
+
+            e.printStackTrace();
             return null;
         }
+        return show;
+    }
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            loadingShows.setVisibility(View.GONE);
-            if (shows.size() == 0 && adapter.getItemCount() == 0) { // No results
-                if (!Utility.isNetworkConnected(getActivity())) {
-                    noShows.setText(R.string.no_connection); // Because there's no signal
-                } // Or because there are no shows for that query
-                noShows.setVisibility(View.VISIBLE);
-                rv.setVisibility(View.GONE);
-                return;
-            }
-
-            for (Show s : shows) {
-                adapter.add(s);
-            }
-
-            rv.setVisibility(View.VISIBLE);
-        }
-
-        /**
-         * Move data from JSON response into Show objects
-         */
-        private void populateShow(JSONObject currentShow) {
-            Show show = new Show();
-
-            try {
-                show.band = currentShow.getJSONObject("artist").getString("@name");
-            } catch (JSONException e) {
-                show.band = "Unknown band";
-            }
-            try {
-                show.tour = currentShow.getString("@tour");
-            } catch (JSONException e) {
-                show.tour = "";
-            }
-
-            try {
-                String year = currentShow.getString("@eventDate").substring(6);
-                String day = currentShow.getString("@eventDate").substring(0, 2);
-                String month = currentShow.getString("@eventDate").substring(3, 5);
-                show.date = month + "/" + day + "/" + year;
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return;
-            }
-
-            try {
-                show.venue = currentShow.getJSONObject("venue").getString("@name") + ", "
-                        + currentShow.getJSONObject("venue")
-                        .getJSONObject("city")
-                        .getString("@name") + ", "
-                        + currentShow.getJSONObject("venue")
-                        .getJSONObject("city")
-                        .getString("@stateCode") + ", "
-                        + currentShow.getJSONObject("venue")
-                        .getJSONObject("city")
-                        .getJSONObject("country")
-                        .getString("@code");
-            } catch (JSONException e) {
-                show.venue = "Unknown venue";
-            }
-
-            /* First, assume there is exactly ONE set. "sets" will
-            be an object that contains another object, "set".*/
-            try {
-                JSONArray songs = currentShow.getJSONObject("sets")
-                        .getJSONObject("set")
-                        .getJSONArray("song");
-                ArrayList<String> setlist = new ArrayList<>();
-                for (int i = 0; i < songs.length(); i++) {
-                    String song = songs.getJSONObject(i).getString("@name");
-                    if(!song.isEmpty()) {
-                        setlist.add(song);
-                    }
-                }
-                show.setlist = setlist.toArray(new String[setlist.size()]);
-                numShowsAdded++;
-                shows.add(show);
-                return;
-            } catch (JSONException e) {
-                // If this fails, there are multiple sets for the show.
-            }
-
-            /* There are multiple sets, so "set" is an array. */
-            try {
-                JSONArray sets = currentShow.getJSONObject("sets")
-                        .getJSONArray("set");
-                ArrayList<String> setlist = new ArrayList<>();
-
-                // Combine all of the sets into one for viewing
-                for (int i = 0; i < sets.length(); i++) {
-                    JSONArray songs = sets.getJSONObject(i).getJSONArray("song");
-                    for (int j = 0; j < songs.length(); j++) {
-                        String song = songs.getJSONObject(j).getString("@name");
-                        if(!song.isEmpty()) {
-                            setlist.add(song);
-                        }
-                    }
-                }
-                show.setlist = setlist.toArray(new String[setlist.size()]);
-                numShowsAdded++;
-                shows.add(show);
-            } catch (JSONException e) {
-                // Usually, this just means there are no songs in the setlist, and "sets"
-                // is an empty string instead of an object.
-                try {
-                    currentShow.getString("sets");
-                } catch (JSONException f) {
-                    e.printStackTrace(); // There was an actual problem
-                }
-            }
-        }
+    private void showNullState() {
+        loadingShows.setVisibility(View.GONE);
+        if (!Utility.isNetworkConnected(getActivity())) {
+            noShows.setText(R.string.no_connection); // Because there's no signal
+        } // Or because there are no shows for that query
+        noShows.setVisibility(View.VISIBLE);
+        rv.setVisibility(View.GONE);
     }
 }

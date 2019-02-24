@@ -5,7 +5,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -14,7 +14,7 @@ import me.kellymckinnon.setlister.fragments.ListingFragment;
 /**
  * Uses a ListingFragment to display list of shows for searched item.
  */
-public class ListingActivity extends ActionBarActivity {
+public class ListingActivity extends AppCompatActivity {
 
     public boolean listClicked = false;
 

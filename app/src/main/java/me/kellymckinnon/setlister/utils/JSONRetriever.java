@@ -18,14 +18,6 @@ import javax.net.ssl.HttpsURLConnection;
  */
 public class JSONRetriever {
 
-    public static JSONObject getRequest(String url) throws IOException, JSONException {
-        return getRequest(url, null, null);
-    }
-
-    public static JSONObject postRequest(String url) {
-        return postRequest(url, null, null, null);
-    }
-
     public static JSONObject getRequest(String stringURL,
             String authorizationType,
             String authorization) throws IOException, JSONException {

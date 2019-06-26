@@ -22,7 +22,6 @@
     <string name="library_spotify_title">Spotify Android SDK\nCopyright © 2014 Spotify</string>
     <string name="library_materialedittext_title">MaterialEditText\nCopyright © 2014 rengwuxian</string>
     <string name="library_materialdialogs_title">Material-Dialogs\nCopyright © 2014 Aidan Michael Follestad</string>
-    <string name="library_snackbar_title">Snackbar\nCopyright © 2015 William Mora</string>
     <string name="library_materialish_progress">Material-ish Progress\nCopyright © 2014 Nico Hormazábal</string>
 
     <string name="apache_license">

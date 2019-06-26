@@ -16,14 +16,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.*;
 
 import com.pnikosis.materialishprogress.ProgressWheel;
-import com.rengwuxian.materialedittext.MaterialEditText;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +46,7 @@ public class SearchFragment extends Fragment {
   private static final long SEARCH_DELAY_IN_MS = 500;
   private static final int NUM_RECENT_SEARCHES = 5;
   public ProgressWheel loadingSpinner;
-  public MaterialEditText searchBar;
+  public EditText searchBar;
   public ListView suggestionList;
   public ArrayAdapter<String> listAdapter;
   public HashMap<String, String> nameIdMap;

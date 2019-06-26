@@ -65,5 +65,12 @@
     <string name="tour">Tour</string>
     <string name="licenses_header">Licenses:</string>
     <string name="clear_search">Clear Search</string>
+    <string name="snackbar_spotify_connection_failed">Connecting to Spotify failed. Try again.</string>
+    <string name="snackbar_spotify_creating_playlist">Creating playlist…</string>
+    <string name="snackbar_spotify_playlist_created">Playlist created!</string>
+    <plurals name="snackbar_spotify_missing_songs">
+        <item quantity="one">Show %d missing song</item>
+        <item quantity="other">Show %d missing songs</item>
+    </plurals>
 
 </resources>

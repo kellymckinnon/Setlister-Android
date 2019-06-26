@@ -1,49 +1,50 @@
-
 package me.kellymckinnon.setlister.models;
 
 import com.squareup.moshi.Json;
 
 public class Venue {
 
-    @Json(name = "id")
-    private String id;
-    @Json(name = "name")
-    private String name;
-    @Json(name = "city")
-    private City city;
-    @Json(name = "url")
-    private String url;
+  @Json(name = "id")
+  private String id;
 
-    public String getId() {
-        return id;
-    }
+  @Json(name = "name")
+  private String name;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+  @Json(name = "city")
+  private City city;
 
-    public String getName() {
-        return name;
-    }
+  @Json(name = "url")
+  private String url;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public City getCity() {
-        return city;
-    }
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    public void setCity(City city) {
-        this.city = city;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public String getUrl() {
-        return url;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+  public City getCity() {
+    return city;
+  }
 
+  public void setCity(City city) {
+    this.city = city;
+  }
+
+  public String getUrl() {
+    return url;
+  }
+
+  public void setUrl(String url) {
+    this.url = url;
+  }
 }

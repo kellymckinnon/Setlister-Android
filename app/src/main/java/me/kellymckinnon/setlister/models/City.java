@@ -1,59 +1,61 @@
-
 package me.kellymckinnon.setlister.models;
 
 import com.squareup.moshi.Json;
 
 public class City {
 
-    @Json(name = "id")
-    private String id;
-    @Json(name = "name")
-    private String name;
-    @Json(name = "state")
-    private String state;
-    @Json(name = "stateCode")
-    private String stateCode;
-    @Json(name = "country")
-    private Country country;
+  @Json(name = "id")
+  private String id;
 
-    public String getId() {
-        return id;
-    }
+  @Json(name = "name")
+  private String name;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+  @Json(name = "state")
+  private String state;
 
-    public String getName() {
-        return name;
-    }
+  @Json(name = "stateCode")
+  private String stateCode;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  @Json(name = "country")
+  private Country country;
 
-    public String getState() {
-        return state;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public void setState(String state) {
-        this.state = state;
-    }
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    public String getStateCode() {
-        return stateCode;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public void setStateCode(String stateCode) {
-        this.stateCode = stateCode;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public Country getCountry() {
-        return country;
-    }
+  public String getState() {
+    return state;
+  }
 
-    public void setCountry(Country country) {
-        this.country = country;
-    }
+  public void setState(String state) {
+    this.state = state;
+  }
 
+  public String getStateCode() {
+    return stateCode;
+  }
+
+  public void setStateCode(String stateCode) {
+    this.stateCode = stateCode;
+  }
+
+  public Country getCountry() {
+    return country;
+  }
+
+  public void setCountry(Country country) {
+    this.country = country;
+  }
 }

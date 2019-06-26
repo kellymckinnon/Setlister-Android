@@ -1,109 +1,116 @@
-
 package me.kellymckinnon.setlister.models;
 
 import com.squareup.moshi.Json;
 
 public class Setlist {
 
-    @Json(name = "id")
-    private String id;
-    @Json(name = "versionId")
-    private String versionId;
-    @Json(name = "eventDate")
-    private String eventDate;
-    @Json(name = "lastUpdated")
-    private String lastUpdated;
-    @Json(name = "artist")
-    private Artist artist;
-    @Json(name = "venue")
-    private Venue venue;
-    @Json(name = "tour")
-    private Tour tour;
-    @Json(name = "sets")
-    private Sets sets;
-    @Json(name = "url")
-    private String url;
-    @Json(name = "info")
-    private String info;
+  @Json(name = "id")
+  private String id;
 
-    public String getId() {
-        return id;
-    }
+  @Json(name = "versionId")
+  private String versionId;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+  @Json(name = "eventDate")
+  private String eventDate;
 
-    public String getVersionId() {
-        return versionId;
-    }
+  @Json(name = "lastUpdated")
+  private String lastUpdated;
 
-    public void setVersionId(String versionId) {
-        this.versionId = versionId;
-    }
+  @Json(name = "artist")
+  private Artist artist;
 
-    public String getEventDate() {
-        return eventDate;
-    }
+  @Json(name = "venue")
+  private Venue venue;
 
-    public void setEventDate(String eventDate) {
-        this.eventDate = eventDate;
-    }
+  @Json(name = "tour")
+  private Tour tour;
 
-    public String getLastUpdated() {
-        return lastUpdated;
-    }
+  @Json(name = "sets")
+  private Sets sets;
 
-    public void setLastUpdated(String lastUpdated) {
-        this.lastUpdated = lastUpdated;
-    }
+  @Json(name = "url")
+  private String url;
 
-    public Artist getArtist() {
-        return artist;
-    }
+  @Json(name = "info")
+  private String info;
 
-    public void setArtist(Artist artist) {
-        this.artist = artist;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public Venue getVenue() {
-        return venue;
-    }
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    public void setVenue(Venue venue) {
-        this.venue = venue;
-    }
+  public String getVersionId() {
+    return versionId;
+  }
 
-    public Tour getTour() {
-        return tour;
-    }
+  public void setVersionId(String versionId) {
+    this.versionId = versionId;
+  }
 
-    public void setTour(Tour tour) {
-        this.tour = tour;
-    }
+  public String getEventDate() {
+    return eventDate;
+  }
 
-    public Sets getSets() {
-        return sets;
-    }
+  public void setEventDate(String eventDate) {
+    this.eventDate = eventDate;
+  }
 
-    public void setSets(Sets sets) {
-        this.sets = sets;
-    }
+  public String getLastUpdated() {
+    return lastUpdated;
+  }
 
-    public String getUrl() {
-        return url;
-    }
+  public void setLastUpdated(String lastUpdated) {
+    this.lastUpdated = lastUpdated;
+  }
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+  public Artist getArtist() {
+    return artist;
+  }
 
-    public String getInfo() {
-        return info;
-    }
+  public void setArtist(Artist artist) {
+    this.artist = artist;
+  }
 
-    public void setInfo(String info) {
-        this.info = info;
-    }
+  public Venue getVenue() {
+    return venue;
+  }
 
+  public void setVenue(Venue venue) {
+    this.venue = venue;
+  }
+
+  public Tour getTour() {
+    return tour;
+  }
+
+  public void setTour(Tour tour) {
+    this.tour = tour;
+  }
+
+  public Sets getSets() {
+    return sets;
+  }
+
+  public void setSets(Sets sets) {
+    this.sets = sets;
+  }
+
+  public String getUrl() {
+    return url;
+  }
+
+  public void setUrl(String url) {
+    this.url = url;
+  }
+
+  public String getInfo() {
+    return info;
+  }
+
+  public void setInfo(String info) {
+    this.info = info;
+  }
 }

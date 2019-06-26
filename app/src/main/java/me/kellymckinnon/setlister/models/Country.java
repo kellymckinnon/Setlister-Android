@@ -1,29 +1,28 @@
-
 package me.kellymckinnon.setlister.models;
 
 import com.squareup.moshi.Json;
 
 public class Country {
 
-    @Json(name = "code")
-    private String code;
-    @Json(name = "name")
-    private String name;
+  @Json(name = "code")
+  private String code;
 
-    public String getCode() {
-        return code;
-    }
+  @Json(name = "name")
+  private String name;
 
-    public void setCode(String code) {
-        this.code = code;
-    }
+  public String getCode() {
+    return code;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public void setCode(String code) {
+    this.code = code;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public String getName() {
+    return name;
+  }
 
+  public void setName(String name) {
+    this.name = name;
+  }
 }

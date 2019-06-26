@@ -9,8 +9,8 @@
         android:id="@+id/show_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        android:scrollbars="vertical" />
+        android:scrollbars="vertical"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/no_shows"
@@ -26,8 +26,8 @@
         android:id="@+id/loading_shows"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_margin="20dp"
         android:layout_gravity="center"
+        android:layout_margin="20dp"
         app:barColor="@color/my_accent"
         app:progressIndeterminate="true" />
 

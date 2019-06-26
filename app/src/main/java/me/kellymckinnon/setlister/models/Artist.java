@@ -1,49 +1,50 @@
-
 package me.kellymckinnon.setlister.models;
 
 import com.squareup.moshi.Json;
 
 public class Artist {
 
-    @Json(name = "mbid")
-    private String mbid;
-    @Json(name = "name")
-    private String name;
-    @Json(name = "disambiguation")
-    private String disambiguation;
-    @Json(name = "url")
-    private String url;
+  @Json(name = "mbid")
+  private String mbid;
 
-    public String getMbid() {
-        return mbid;
-    }
+  @Json(name = "name")
+  private String name;
 
-    public void setMbid(String mbid) {
-        this.mbid = mbid;
-    }
+  @Json(name = "disambiguation")
+  private String disambiguation;
 
-    public String getName() {
-        return name;
-    }
+  @Json(name = "url")
+  private String url;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public String getMbid() {
+    return mbid;
+  }
 
-    public String getDisambiguation() {
-        return disambiguation;
-    }
+  public void setMbid(String mbid) {
+    this.mbid = mbid;
+  }
 
-    public void setDisambiguation(String disambiguation) {
-        this.disambiguation = disambiguation;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public String getUrl() {
-        return url;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+  public String getDisambiguation() {
+    return disambiguation;
+  }
 
+  public void setDisambiguation(String disambiguation) {
+    this.disambiguation = disambiguation;
+  }
+
+  public String getUrl() {
+    return url;
+  }
+
+  public void setUrl(String url) {
+    this.url = url;
+  }
 }

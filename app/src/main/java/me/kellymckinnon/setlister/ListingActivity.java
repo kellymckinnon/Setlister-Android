@@ -1,75 +1,73 @@
 package me.kellymckinnon.setlister;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.afollestad.materialdialogs.MaterialDialog;
+
 import me.kellymckinnon.setlister.fragments.ListingFragment;
 
-/**
- * Uses a ListingFragment to display list of shows for searched item.
- */
+/** Uses a ListingFragment to display list of shows for searched item. */
 public class ListingActivity extends AppCompatActivity {
 
-    public boolean listClicked = false;
+  public boolean listClicked = false;
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_list, menu);
-        return true;
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.menu_list, menu);
+    return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    int id = item.getItemId();
+
+    if (id == R.id.action_about) {
+      new MaterialDialog.Builder(this)
+          .title("About Setlister")
+          .customView(R.layout.about_dialog, true)
+          .positiveText("OK")
+          .show();
+      return true;
+    } else if (id == R.id.action_feedback) {
+      Intent emailIntent =
+          new Intent(
+              Intent.ACTION_SENDTO, Uri.fromParts("mailto", getString(R.string.email), null));
+      emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_subject));
+      startActivity(Intent.createChooser(emailIntent, "Send email..."));
+      return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+    return super.onOptionsItemSelected(item);
+  }
 
-        if (id == R.id.action_about) {
-            new MaterialDialog.Builder(this)
-                    .title("About Setlister")
-                    .customView(R.layout.about_dialog, true)
-                    .positiveText("OK")
-                    .show();
-            return true;
-        } else if (id == R.id.action_feedback) {
-            Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                    "mailto", getString(R.string.email), null));
-            emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_subject));
-            startActivity(Intent.createChooser(emailIntent, "Send email..."));
-            return true;
-        }
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-        return super.onOptionsItemSelected(item);
-    }
+    setContentView(R.layout.activity_list);
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    String query = getIntent().getStringExtra("QUERY");
+    getSupportActionBar().setTitle(query);
 
-        setContentView(R.layout.activity_list);
+    ListingFragment lf = new ListingFragment();
+    Bundle bundle = new Bundle();
+    bundle.putString("QUERY", query);
 
-        String query = getIntent().getStringExtra("QUERY");
-        getSupportActionBar().setTitle(query);
+    // If search is not through suggestion, this will be null
+    bundle.putString("ID", getIntent().getStringExtra("ID"));
+    lf.setArguments(bundle);
+    getFragmentManager().beginTransaction().add(R.id.activity_list, lf).commit();
+  }
 
-        ListingFragment lf = new ListingFragment();
-        Bundle bundle = new Bundle();
-        bundle.putString("QUERY", query);
-
-        // If search is not through suggestion, this will be null
-        bundle.putString("ID", getIntent().getStringExtra("ID"));
-        lf.setArguments(bundle);
-        getFragmentManager().beginTransaction()
-                .add(R.id.activity_list, lf)
-                .commit();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        listClicked = false;
-    }
+  @Override
+  protected void onResume() {
+    super.onResume();
+    listClicked = false;
+  }
 }

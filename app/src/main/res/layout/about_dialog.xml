@@ -26,13 +26,14 @@
         android:layout_height="wrap_content"
         android:text="@string/library_floating_action_button_title"
         android:textColor="@color/primary_text_default_material_light" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
-        android:textSize="4pt"
         android:scrollbars="vertical"
-        android:text="@string/apache_license" />
+        android:text="@string/apache_license"
+        android:textSize="4pt" />
 
 
     <TextView
@@ -41,13 +42,14 @@
         android:layout_marginTop="5dp"
         android:text="@string/library_spotify_title"
         android:textColor="@color/primary_text_default_material_light" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
-        android:textSize="4pt"
         android:scrollbars="vertical"
-        android:text="@string/apache_license" />
+        android:text="@string/apache_license"
+        android:textSize="4pt" />
 
     <TextView
         android:layout_width="match_parent"
@@ -55,13 +57,14 @@
         android:layout_marginTop="5dp"
         android:text="@string/library_materialedittext_title"
         android:textColor="@color/primary_text_default_material_light" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
-        android:textSize="4pt"
         android:scrollbars="vertical"
-        android:text="@string/apache_license" />
+        android:text="@string/apache_license"
+        android:textSize="4pt" />
 
     <TextView
         android:layout_width="match_parent"
@@ -69,13 +72,14 @@
         android:layout_marginTop="5dp"
         android:text="@string/library_materialdialogs_title"
         android:textColor="@color/primary_text_default_material_light" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
-        android:textSize="4pt"
         android:scrollbars="vertical"
-        android:text="@string/mit_license" />
+        android:text="@string/mit_license"
+        android:textSize="4pt" />
 
     <TextView
         android:layout_width="match_parent"
@@ -83,13 +87,14 @@
         android:layout_marginTop="5dp"
         android:text="@string/library_snackbar_title"
         android:textColor="@color/primary_text_default_material_light" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
-        android:textSize="4pt"
         android:scrollbars="vertical"
-        android:text="@string/mit_license" />
+        android:text="@string/mit_license"
+        android:textSize="4pt" />
 
     <TextView
         android:layout_width="match_parent"
@@ -97,12 +102,13 @@
         android:layout_marginTop="5dp"
         android:text="@string/library_materialish_progress"
         android:textColor="@color/primary_text_default_material_light" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
-        android:textSize="4pt"
         android:scrollbars="vertical"
-        android:text="@string/apache_license" />
+        android:text="@string/apache_license"
+        android:textSize="4pt" />
 
 </LinearLayout>

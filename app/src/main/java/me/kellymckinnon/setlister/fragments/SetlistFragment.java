@@ -1,7 +1,5 @@
 package me.kellymckinnon.setlister.fragments;
 
-import com.getbase.floatingactionbutton.FloatingActionButton;
-
 import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,46 +8,47 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
+
 import me.kellymckinnon.setlister.R;
 import me.kellymckinnon.setlister.network.SpotifyHandler;
 
 /**
- * Displays the setlist for the given show and uses a
- * floating action button to give user the option to add
- * all songs in the setlist to a Spotify playlist.
+ * Displays the setlist for the given show and uses a floating action button to give user the option
+ * to add all songs in the setlist to a Spotify playlist.
  */
 public class SetlistFragment extends Fragment {
 
-    @Override
-    public View onCreateView(LayoutInflater inflater,
-            ViewGroup container,
-            Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_setlist, container, false);
+  @Override
+  public View onCreateView(
+      LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    View rootView = inflater.inflate(R.layout.fragment_setlist, container, false);
 
-        Bundle arguments = getArguments();
+    Bundle arguments = getArguments();
 
-        String[] songs = arguments.getStringArray("SONGS");
+    String[] songs = arguments.getStringArray("SONGS");
 
-        // Not used currently, but may be later on
-        String artist = arguments.getString("ARTIST");
-        String tour = arguments.getString("TOUR");
-        String venue = arguments.getString("VENUE");
-        String date = arguments.getString("DATE");
+    // Not used currently, but may be later on
+    String artist = arguments.getString("ARTIST");
+    String tour = arguments.getString("TOUR");
+    String venue = arguments.getString("VENUE");
+    String date = arguments.getString("DATE");
 
-        ListView setlist = (ListView) rootView.findViewById(R.id.setlist);
+    ListView setlist = rootView.findViewById(R.id.setlist);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
-                R.layout.single_line_list_row, songs);
+    ArrayAdapter<String> adapter =
+        new ArrayAdapter<>(getActivity(), R.layout.single_line_list_row, songs);
 
-        setlist.setAdapter(adapter);
+    setlist.setAdapter(adapter);
 
-        FloatingActionButton spotify = (FloatingActionButton) rootView.findViewById(R.id.spotify);
-        spotify.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SpotifyHandler.authenticateUser(getActivity());
-            }
+    FloatingActionButton spotify = rootView.findViewById(R.id.spotify);
+    spotify.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            SpotifyHandler.authenticateUser(getActivity());
+          }
         });
-        return rootView;
-    }
+    return rootView;
+  }
 }

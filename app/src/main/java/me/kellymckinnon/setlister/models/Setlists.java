@@ -1,60 +1,63 @@
-
 package me.kellymckinnon.setlister.models;
 
-import java.util.List;
 import com.squareup.moshi.Json;
+
+import java.util.List;
 
 public class Setlists {
 
-    @Json(name = "type")
-    private String type;
-    @Json(name = "itemsPerPage")
-    private Integer itemsPerPage;
-    @Json(name = "page")
-    private Integer page;
-    @Json(name = "total")
-    private Integer total;
-    @Json(name = "setlist")
-    private List<Setlist> setlist = null;
+  @Json(name = "type")
+  private String type;
 
-    public String getType() {
-        return type;
-    }
+  @Json(name = "itemsPerPage")
+  private Integer itemsPerPage;
 
-    public void setType(String type) {
-        this.type = type;
-    }
+  @Json(name = "page")
+  private Integer page;
 
-    public Integer getItemsPerPage() {
-        return itemsPerPage;
-    }
+  @Json(name = "total")
+  private Integer total;
 
-    public void setItemsPerPage(Integer itemsPerPage) {
-        this.itemsPerPage = itemsPerPage;
-    }
+  @Json(name = "setlist")
+  private List<Setlist> setlist = null;
 
-    public Integer getPage() {
-        return page;
-    }
+  public String getType() {
+    return type;
+  }
 
-    public void setPage(Integer page) {
-        this.page = page;
-    }
+  public void setType(String type) {
+    this.type = type;
+  }
 
-    public Integer getTotal() {
-        return total;
-    }
+  public Integer getItemsPerPage() {
+    return itemsPerPage;
+  }
 
-    public void setTotal(Integer total) {
-        this.total = total;
-    }
+  public void setItemsPerPage(Integer itemsPerPage) {
+    this.itemsPerPage = itemsPerPage;
+  }
 
-    public List<Setlist> getSetlist() {
-        return setlist;
-    }
+  public Integer getPage() {
+    return page;
+  }
 
-    public void setSetlist(List<Setlist> setlist) {
-        this.setlist = setlist;
-    }
+  public void setPage(Integer page) {
+    this.page = page;
+  }
 
+  public Integer getTotal() {
+    return total;
+  }
+
+  public void setTotal(Integer total) {
+    this.total = total;
+  }
+
+  public List<Setlist> getSetlist() {
+    return setlist;
+  }
+
+  public void setSetlist(List<Setlist> setlist) {
+    this.setlist = setlist;
+  }
 }

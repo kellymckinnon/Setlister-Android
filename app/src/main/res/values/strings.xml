@@ -65,10 +65,17 @@
     <string name="tour">Tour</string>
     <string name="licenses_header">Licenses:</string>
     <string name="clear_search">Clear Search</string>
-    <string name="snackbar_spotify_connection_failed">Connecting to Spotify failed. Try again.</string>
-    <string name="snackbar_spotify_creating_playlist">Creating playlist…</string>
-    <string name="snackbar_spotify_playlist_created">Playlist created!</string>
-    <plurals name="snackbar_spotify_missing_songs">
+    <string name="about_setlister">About Setlister</string>
+    <string name="send_email">Send email…</string>
+    <string name="setlist_share_title">SETLISTER: %1$s on %2$s at %3$s</string>
+
+    <!-- Saving songs to Spotify -->
+    <string name="spotify_connection_failed_snackbar">Connecting to Spotify failed. Try again.</string>
+    <string name="spotify_creating_playlist_snackbar">Creating playlist…</string>
+    <string name="spotify_playlist_created_snackbar">Playlist created!</string>
+    <string name="spotify_missing_songs_dialog_body">The following songs were not found on Spotify:</string>
+    <string name="spotify_missing_songs_dialog_title">Missing songs</string>
+    <plurals name="spotify_missing_songs_snackbar">
         <item quantity="one">Show %d missing song</item>
         <item quantity="other">Show %d missing songs</item>
     </plurals>

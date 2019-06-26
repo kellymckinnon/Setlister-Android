@@ -8,8 +8,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.ShareActionProvider;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.MenuItemCompat;
 
@@ -35,22 +37,22 @@ import me.kellymckinnon.setlister.utils.Utility;
  */
 public class SetlistActivity extends AppCompatActivity {
 
-  private String[] songs;
-  private String artist, date, venue, tour;
-  private String accessToken;
-  private ArrayList<String> failedSpotifySongs = new ArrayList<>();
-  private androidx.appcompat.widget.ShareActionProvider mShareActionProvider;
+  private String[] mSongs;
+  private String mArtist, mDate, mVenue, mTour;
+  private String mAccessToken;
+  private ArrayList<String> mFailedSpotifySongs = new ArrayList<>();
+  private ShareActionProvider mShareActionProvider;
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.menu_setlist, menu);
     MenuItem item = menu.findItem(R.id.menu_item_share);
     mShareActionProvider =
-        (androidx.appcompat.widget.ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        (ShareActionProvider) MenuItemCompat.getActionProvider(item);
     Intent intent = new Intent(Intent.ACTION_SEND);
     intent.setType("text/plain");
     mShareActionProvider.setShareIntent(intent); // dummy, in case
-    if (artist != null) {
+    if (mArtist != null) {
       updateShareIntent();
     }
     return true;
@@ -62,7 +64,7 @@ public class SetlistActivity extends AppCompatActivity {
 
     if (id == R.id.action_about) {
       new MaterialDialog.Builder(this)
-          .title("About Setlister")
+          .title(getString(R.string.about_setlister))
           .customView(R.layout.about_dialog, true)
           .positiveText("OK")
           .show();
@@ -72,7 +74,7 @@ public class SetlistActivity extends AppCompatActivity {
           new Intent(
               Intent.ACTION_SENDTO, Uri.fromParts("mailto", getString(R.string.email), null));
       emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_subject));
-      startActivity(Intent.createChooser(emailIntent, "Send email..."));
+      startActivity(Intent.createChooser(emailIntent, getString(R.string.send_email)));
       return true;
     }
 
@@ -91,17 +93,17 @@ public class SetlistActivity extends AppCompatActivity {
       arguments = savedInstanceState;
     }
 
-    songs = arguments.getStringArray("SONGS");
-    artist = arguments.getString("ARTIST");
-    date = arguments.getString("DATE");
-    venue = arguments.getString("VENUE");
-    tour = arguments.getString("TOUR");
+    mSongs = arguments.getStringArray("SONGS");
+    mArtist = arguments.getString("ARTIST");
+    mDate = arguments.getString("DATE");
+    mVenue = arguments.getString("VENUE");
+    mTour = arguments.getString("TOUR");
 
     ActionBar ab = getSupportActionBar();
     if (ab != null) {
-      String formattedDate = Utility.formatDate(date, "MM/dd/yyyy", "MMMM d, yyyy");
+      String formattedDate = Utility.formatDate(mDate, "MM/dd/yyyy", "MMMM d, yyyy");
       ab.setTitle(formattedDate);
-      ab.setSubtitle(artist);
+      ab.setSubtitle(mArtist);
     }
 
     if (mShareActionProvider != null) {
@@ -112,11 +114,11 @@ public class SetlistActivity extends AppCompatActivity {
 
     SetlistFragment sf = new SetlistFragment();
     Bundle bundle = new Bundle();
-    bundle.putStringArray("SONGS", songs);
-    bundle.putString("ARTIST", artist);
-    bundle.putString("DATE", date);
-    bundle.putString("TOUR", tour);
-    bundle.putString("VENUE", venue);
+    bundle.putStringArray("SONGS", mSongs);
+    bundle.putString("ARTIST", mArtist);
+    bundle.putString("DATE", mDate);
+    bundle.putString("TOUR", mTour);
+    bundle.putString("VENUE", mVenue);
 
     sf.setArguments(bundle);
     getFragmentManager().beginTransaction().add(R.id.activity_setlist, sf).commit();
@@ -132,7 +134,7 @@ public class SetlistActivity extends AppCompatActivity {
     if (uri == null) {
       Snackbar.make(
               findViewById(android.R.id.content),
-              getString(R.string.snackbar_spotify_connection_failed),
+              getString(R.string.spotify_connection_failed_snackbar),
               Snackbar.LENGTH_SHORT)
           .show();
       return;
@@ -140,42 +142,39 @@ public class SetlistActivity extends AppCompatActivity {
 
     // Create playlist in Spotify from setlist
     AuthenticationResponse response = SpotifyAuthentication.parseOauthResponse(uri);
-    accessToken = response.getAccessToken();
+    mAccessToken = response.getAccessToken();
 
     Snackbar.make(
             findViewById(android.R.id.content),
-            getString(R.string.snackbar_spotify_creating_playlist),
+            getString(R.string.spotify_creating_playlist_snackbar),
             Snackbar.LENGTH_SHORT)
         .show();
 
-    failedSpotifySongs = new ArrayList<>();
+    mFailedSpotifySongs = new ArrayList<>();
     new PlaylistCreator().execute();
   }
 
   @Override
-  protected void onSaveInstanceState(Bundle outState) {
+  protected void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
-    outState.putStringArray("SONGS", songs);
-    outState.putString("ARTIST", artist);
-    outState.putString("DATE", date);
-    outState.putString("TOUR", tour);
-    outState.putString("VENUE", venue);
+    outState.putStringArray("SONGS", mSongs);
+    outState.putString("ARTIST", mArtist);
+    outState.putString("DATE", mDate);
+    outState.putString("TOUR", mTour);
+    outState.putString("VENUE", mVenue);
   }
 
   /** Provide information for share button */
   private void updateShareIntent() {
+    String shareTitle = getString(R.string.setlist_share_title, mArtist, mDate, mVenue);
+
     Intent intent = new Intent(Intent.ACTION_SEND);
     intent.setType("text/plain");
-    intent.putExtra(Intent.EXTRA_SUBJECT, "SETLISTER: " + artist + " on " + date);
+    intent.putExtra(Intent.EXTRA_SUBJECT, shareTitle);
     StringBuilder text = new StringBuilder();
-    text.append("SETLISTER: ")
-        .append(artist)
-        .append(" on ")
-        .append(date)
-        .append(" at ")
-        .append(venue)
+    text.append(shareTitle)
         .append(":\n");
-    for (String s : songs) {
+    for (String s : mSongs) {
       text.append("\n");
       text.append(s);
     }
@@ -194,16 +193,16 @@ public class SetlistActivity extends AppCompatActivity {
       try {
         // Get username, which we need to create a playlist
         JSONObject userJson =
-            JSONRetriever.getRequest("https://api.spotify.com/v1/me", "Bearer", accessToken);
+            JSONRetriever.getRequest("https://api.spotify.com/v1/me", "Bearer", mAccessToken);
         String username = userJson.getString("id");
 
         // Create an empty playlist for the authenticated user
         String createPlaylistUrl = "https://api.spotify.com/v1/users/" + username + "/playlists";
         JSONObject playlistInfo = new JSONObject();
-        playlistInfo.put("name", artist + ", " + venue + ", " + date);
+        playlistInfo.put("name", mArtist + ", " + mVenue + ", " + mDate);
         playlistInfo.put("public", "true");
         JSONObject createPlaylistJson =
-            JSONRetriever.postRequest(createPlaylistUrl, "Bearer", accessToken, playlistInfo);
+            JSONRetriever.postRequest(createPlaylistUrl, "Bearer", mAccessToken, playlistInfo);
 
         // Get the newly created playlist so the fun can begin
         String playlistId = createPlaylistJson.getString("id");
@@ -211,14 +210,14 @@ public class SetlistActivity extends AppCompatActivity {
         int numSongsAdded = 0;
 
         // Add songs one at a time
-        for (String s : songs) {
+        for (String s : mSongs) {
           // Only 100 songs can be added through the API
           if (numSongsAdded > 100) {
-            failedSpotifySongs.add(s);
+            mFailedSpotifySongs.add(s);
           }
 
           String songQuery = s.replace(' ', '+');
-          String artistQuery = artist.replace(' ', '+');
+          String artistQuery = mArtist.replace(' ', '+');
           try {
             JSONObject trackJson =
                 JSONRetriever.getRequest(
@@ -228,7 +227,7 @@ public class SetlistActivity extends AppCompatActivity {
                         + artistQuery
                         + "&type=track&limit=5",
                     "Bearer",
-                    accessToken);
+                        mAccessToken);
             JSONObject tracking = trackJson.getJSONObject("tracks");
             JSONArray items = tracking.getJSONArray("items");
             JSONObject firstChoice = (JSONObject) items.get(0);
@@ -248,9 +247,9 @@ public class SetlistActivity extends AppCompatActivity {
             tracks.append(",");
             numSongsAdded++;
           } catch (JSONException e) {
-            failedSpotifySongs.add(s);
+            mFailedSpotifySongs.add(s);
           } catch (IOException e) {
-            failedSpotifySongs.add(s);
+            mFailedSpotifySongs.add(s);
           }
         }
 
@@ -258,7 +257,7 @@ public class SetlistActivity extends AppCompatActivity {
 
         String addSongsUrl =
             createPlaylistUrl + "/" + playlistId + "/tracks?uris=" + tracks.toString();
-        JSONRetriever.postRequest(addSongsUrl, "Bearer", accessToken, null);
+        JSONRetriever.postRequest(addSongsUrl, "Bearer", mAccessToken, null);
       } catch (JSONException e) {
         e.printStackTrace();
       } catch (IOException e) {
@@ -273,34 +272,35 @@ public class SetlistActivity extends AppCompatActivity {
       Snackbar snackbar =
           Snackbar.make(
               findViewById(android.R.id.content),
-              getString(R.string.snackbar_spotify_playlist_created),
+              getString(R.string.spotify_playlist_created_snackbar),
               Snackbar.LENGTH_SHORT);
 
       // If there were missed songs, give the user the option to see what they were
-      if (!failedSpotifySongs.isEmpty()) {
+      if (!mFailedSpotifySongs.isEmpty()) {
         snackbar
             .setDuration(Snackbar.LENGTH_LONG)
             .setAction(
                 getResources()
                     .getQuantityString(
-                        R.plurals.snackbar_spotify_missing_songs,
-                        failedSpotifySongs.size(),
-                        failedSpotifySongs.size()),
+                        R.plurals.spotify_missing_songs_snackbar,
+                        mFailedSpotifySongs.size(),
+                        mFailedSpotifySongs.size()),
                 new View.OnClickListener() {
                   @Override
                   public void onClick(View view) {
                     StringBuilder content = new StringBuilder();
-                    content.append("The following songs were not found on Spotify:\n");
-                    for (String s : failedSpotifySongs) {
+                    content.append(R.string.spotify_missing_songs_dialog_body);
+                    content.append("\n");
+                    for (String s : mFailedSpotifySongs) {
                       content.append("\n");
                       content.append("• ");
                       content.append(s);
                     }
 
                     new MaterialDialog.Builder(SetlistActivity.this)
-                        .title("Missing songs")
+                        .title(getString(R.string.spotify_missing_songs_dialog_title))
                         .content(content)
-                        .positiveText("OK")
+                        .positiveText(android.R.string.ok)
                         .show();
                   }
                 })

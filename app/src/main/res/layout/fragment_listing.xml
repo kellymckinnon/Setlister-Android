@@ -22,13 +22,11 @@
         android:textSize="20sp"
         android:visibility="gone" />
 
-    <com.pnikosis.materialishprogress.ProgressWheel
+    <ProgressBar
         android:id="@+id/loading_shows"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_gravity="center"
-        android:layout_margin="20dp"
-        app:barColor="@color/my_accent"
-        app:progressIndeterminate="true" />
+        android:layout_margin="20dp" />
 
 </LinearLayout>

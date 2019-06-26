@@ -17,13 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.*;
-
-import com.pnikosis.materialishprogress.ProgressWheel;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import me.kellymckinnon.setlister.ListingActivity;
 import me.kellymckinnon.setlister.R;
 import me.kellymckinnon.setlister.models.Artist;
@@ -36,6 +29,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * Fragment opened by SearchActivity that holds a search bar and displays recent results as well as
  * suggestions as the user types
@@ -45,7 +42,7 @@ public class SearchFragment extends Fragment {
   private static final int TRIGGER_SEARCH = 1;
   private static final long SEARCH_DELAY_IN_MS = 500;
   private static final int NUM_RECENT_SEARCHES = 5;
-  public ProgressWheel loadingSpinner;
+  public ProgressBar loadingSpinner;
   public EditText searchBar;
   public ListView suggestionList;
   public ArrayAdapter<String> listAdapter;

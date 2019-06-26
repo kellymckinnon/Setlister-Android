@@ -6,25 +6,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.pnikosis.materialishprogress.ProgressWheel;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-
 import me.kellymckinnon.setlister.R;
-import me.kellymckinnon.setlister.models.Set;
-import me.kellymckinnon.setlister.models.Setlist;
-import me.kellymckinnon.setlister.models.Setlists;
-import me.kellymckinnon.setlister.models.Show;
-import me.kellymckinnon.setlister.models.Song;
+import me.kellymckinnon.setlister.models.*;
 import me.kellymckinnon.setlister.network.ApiUtils;
 import me.kellymckinnon.setlister.network.SetlistFMService;
 import me.kellymckinnon.setlister.utils.Utility;
@@ -33,6 +21,11 @@ import me.kellymckinnon.setlister.views.ShowAdapter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Uses the passed in query (either an artist, venue, or city) to search the setlist.fm database for
@@ -45,7 +38,7 @@ public class ListingFragment extends Fragment {
   private RecyclerView rv;
   private String query;
   private TextView noShows;
-  private ProgressWheel loadingShows;
+  private ProgressBar loadingShows;
   private int pagesLoaded;
   private int firstVisibleItem, visibleItemCount, totalItemCount;
   private boolean loading = false;

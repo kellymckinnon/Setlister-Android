@@ -85,13 +85,6 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:text="@string/library_materialish_progress"
-        android:textColor="@color/primary_text_default_material_light" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:scrollbars="vertical"
         android:text="@string/apache_license"

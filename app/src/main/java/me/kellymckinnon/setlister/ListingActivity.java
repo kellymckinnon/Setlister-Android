@@ -8,7 +8,7 @@ import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import me.kellymckinnon.setlister.fragments.ListingFragment;
 
@@ -28,11 +28,10 @@ public class ListingActivity extends AppCompatActivity {
     int id = item.getItemId();
 
     if (id == R.id.action_about) {
-      new MaterialDialog.Builder(this)
-          .title("About Setlister")
-          .customView(R.layout.about_dialog, true)
-          .positiveText("OK")
-          .show();
+      new MaterialAlertDialogBuilder(this)
+              .setTitle(R.string.about_setlister)
+              .setView(R.layout.about_dialog)
+              .show();
       return true;
     } else if (id == R.id.action_feedback) {
       Intent emailIntent =

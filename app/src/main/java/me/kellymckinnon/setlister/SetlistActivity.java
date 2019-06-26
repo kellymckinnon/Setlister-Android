@@ -15,7 +15,7 @@ import androidx.appcompat.widget.ShareActionProvider;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.MenuItemCompat;
 
-import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.authentication.SpotifyAuthentication;
@@ -63,11 +63,10 @@ public class SetlistActivity extends AppCompatActivity {
     int id = item.getItemId();
 
     if (id == R.id.action_about) {
-      new MaterialDialog.Builder(this)
-          .title(getString(R.string.about_setlister))
-          .customView(R.layout.about_dialog, true)
-          .positiveText("OK")
-          .show();
+      new MaterialAlertDialogBuilder(this)
+              .setTitle(R.string.about_setlister)
+              .setView(R.layout.about_dialog)
+              .show();
       return true;
     } else if (id == R.id.action_feedback) {
       Intent emailIntent =
@@ -289,7 +288,7 @@ public class SetlistActivity extends AppCompatActivity {
                   @Override
                   public void onClick(View view) {
                     StringBuilder content = new StringBuilder();
-                    content.append(R.string.spotify_missing_songs_dialog_body);
+                    content.append(getString(R.string.spotify_missing_songs_dialog_body));
                     content.append("\n");
                     for (String s : mFailedSpotifySongs) {
                       content.append("\n");
@@ -297,11 +296,11 @@ public class SetlistActivity extends AppCompatActivity {
                       content.append(s);
                     }
 
-                    new MaterialDialog.Builder(SetlistActivity.this)
-                        .title(getString(R.string.spotify_missing_songs_dialog_title))
-                        .content(content)
-                        .positiveText(android.R.string.ok)
-                        .show();
+                    new MaterialAlertDialogBuilder(SetlistActivity.this)
+                            .setTitle(R.string.spotify_missing_songs_dialog_title)
+                            .setMessage(content)
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show();
                   }
                 })
             .setActionTextColor(ContextCompat.getColor(SetlistActivity.this, R.color.my_accent));

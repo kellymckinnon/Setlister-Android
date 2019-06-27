@@ -35,7 +35,9 @@
                 android:hint="@string/search_bar_hint"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
-                android:singleLine="true" />
+                android:singleLine="true">
+                <requestFocus />
+             </EditText>
 
             <ImageButton
                 android:id="@+id/clear_search"

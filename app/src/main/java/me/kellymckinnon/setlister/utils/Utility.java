@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /** General utility class */
 public class Utility {
@@ -20,7 +21,7 @@ public class Utility {
    * @return reformatted date as a String
    */
   public static String formatDate(String date, String originalFormat, String newFormat) {
-    SimpleDateFormat oldDate = new SimpleDateFormat(originalFormat);
+    SimpleDateFormat oldDate = new SimpleDateFormat(originalFormat, Locale.getDefault());
     Date myDate = null;
     try {
       myDate = oldDate.parse(date);
@@ -28,7 +29,11 @@ public class Utility {
       e.printStackTrace();
     }
 
-    SimpleDateFormat newDate = new SimpleDateFormat(newFormat);
+    if (myDate == null) {
+      return "";
+    }
+
+    SimpleDateFormat newDate = new SimpleDateFormat(newFormat, Locale.getDefault());
     return newDate.format(myDate);
   }
 
@@ -60,7 +65,7 @@ public class Utility {
     ConnectivityManager cm =
         (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+    NetworkInfo activeNetwork = cm != null ? cm.getActiveNetworkInfo() : null;
     return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
   }
 }

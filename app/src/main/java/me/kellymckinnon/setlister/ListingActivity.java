@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -24,7 +25,7 @@ public class ListingActivity extends AppCompatActivity {
   }
 
   @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
+  public boolean onOptionsItemSelected(@NonNull MenuItem item) {
     int id = item.getItemId();
 
     if (id == R.id.action_about) {
@@ -61,7 +62,7 @@ public class ListingActivity extends AppCompatActivity {
     // If search is not through suggestion, this will be null
     bundle.putString("ID", getIntent().getStringExtra("ID"));
     lf.setArguments(bundle);
-    getFragmentManager().beginTransaction().add(R.id.activity_list, lf).commit();
+    getSupportFragmentManager().beginTransaction().add(R.id.activity_list, lf).commit();
   }
 
   @Override

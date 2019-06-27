@@ -1,6 +1,7 @@
 package me.kellymckinnon.setlister.fragments;
 
-import android.app.Fragment;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import me.kellymckinnon.setlister.R;
 import me.kellymckinnon.setlister.models.*;
-import me.kellymckinnon.setlister.network.ApiUtils;
+import me.kellymckinnon.setlister.network.RetrofitClient;
 import me.kellymckinnon.setlister.network.SetlistFMService;
 import me.kellymckinnon.setlister.utils.Utility;
 import me.kellymckinnon.setlister.views.RecyclerViewDivider;
@@ -49,8 +50,8 @@ public class ListingFragment extends Fragment {
 
   @Override
   public View onCreateView(
-      LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    mService = ApiUtils.getSetlistFMService();
+          @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    mService = RetrofitClient.getSetlistFMService();
 
     View rootView = inflater.inflate(R.layout.fragment_listing, container, false);
     query = getArguments().getString("QUERY");
@@ -77,7 +78,7 @@ public class ListingFragment extends Fragment {
     rv.addOnScrollListener(
         new RecyclerView.OnScrollListener() {
           @Override
-          public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+          public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
 
             visibleItemCount = llm.getChildCount();
             totalItemCount = llm.getItemCount();

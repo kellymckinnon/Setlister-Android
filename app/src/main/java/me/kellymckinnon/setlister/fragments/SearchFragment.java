@@ -1,10 +1,10 @@
 package me.kellymckinnon.setlister.fragments;
 
-import android.app.Fragment;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -22,7 +22,7 @@ import me.kellymckinnon.setlister.R;
 import me.kellymckinnon.setlister.models.Artist;
 import me.kellymckinnon.setlister.models.Artists;
 import me.kellymckinnon.setlister.models.Setlists;
-import me.kellymckinnon.setlister.network.ApiUtils;
+import me.kellymckinnon.setlister.network.RetrofitClient;
 import me.kellymckinnon.setlister.network.SetlistFMService;
 import me.kellymckinnon.setlister.utils.Utility;
 import retrofit2.Call;
@@ -42,31 +42,31 @@ public class SearchFragment extends Fragment {
   private static final int TRIGGER_SEARCH = 1;
   private static final long SEARCH_DELAY_IN_MS = 500;
   private static final int NUM_RECENT_SEARCHES = 5;
-  public ProgressBar loadingSpinner;
-  public EditText searchBar;
-  public ListView suggestionList;
-  public ArrayAdapter<String> listAdapter;
-  public HashMap<String, String> nameIdMap;
-  public TextView noResultsText;
-  public TextView noConnectionText;
-  public TextView suggestionHeader;
-  private AsyncTask<Void, Void, Void> searchTask;
-  private ArrayList<String> recentSearches;
-  private SetlistFMService mService;
+
+  private ProgressBar mLoadingSpinner;
+  private EditText mSearchEditText;
+  private ListView mSuggestionListView;
+  private ArrayAdapter<String> mSuggestionListAdapter;
+  private HashMap<String, String> mNameToIdMap;
+  private TextView mNoResultsTextView;
+  private TextView mNoConnectionTextView;
+  private TextView mSuggestionsHeader;
+  private ArrayList<String> mRecentSearchesList;
+  private SetlistFMService mSetlistFMService;
 
   @Override
   public View onCreateView(
-      LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+          @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View rootView = inflater.inflate(R.layout.fragment_search, container, false);
 
-    mService = ApiUtils.getSetlistFMService();
+    mSetlistFMService = RetrofitClient.getSetlistFMService();
 
-    suggestionList = rootView.findViewById(R.id.suggestion_list);
-    loadingSpinner = rootView.findViewById(R.id.loading_suggestions);
-    noResultsText = rootView.findViewById(R.id.no_results_text);
-    noConnectionText = rootView.findViewById(R.id.no_connection_text);
-    searchBar = rootView.findViewById(R.id.search_bar);
-    suggestionHeader = rootView.findViewById(R.id.suggestion_header);
+    mSuggestionListView = rootView.findViewById(R.id.suggestion_list);
+    mLoadingSpinner = rootView.findViewById(R.id.loading_suggestions);
+    mNoResultsTextView = rootView.findViewById(R.id.no_results_text);
+    mNoConnectionTextView = rootView.findViewById(R.id.no_connection_text);
+    mSearchEditText = rootView.findViewById(R.id.search_bar);
+    mSuggestionsHeader = rootView.findViewById(R.id.suggestion_header);
 
     final TextView noRecentSearchesText = rootView.findViewById(R.id.no_searches_text);
 
@@ -75,28 +75,28 @@ public class SearchFragment extends Fragment {
         new ImageButton.OnClickListener() {
           @Override
           public void onClick(View v) {
-            searchBar.setText("");
+            mSearchEditText.setText("");
           }
         });
 
     SharedPreferences recentFile =
         getActivity().getSharedPreferences(getString(R.string.prefs_name), Context.MODE_PRIVATE);
-    recentSearches = new ArrayList<>();
-    nameIdMap = new HashMap<>();
+    mRecentSearchesList = new ArrayList<>();
+    mNameToIdMap = new HashMap<>();
 
     // Recent searches are stored as search0, search1, search2, etc up to search4 (5 maximum)
     for (int i = 0; i < NUM_RECENT_SEARCHES; i++) {
       if (recentFile.contains("search" + i)) {
         String query = recentFile.getString("search" + i, "");
         String id = recentFile.getString("id" + i, "0");
-        recentSearches.add(query);
-        nameIdMap.put(query, id);
+        mRecentSearchesList.add(query);
+        mNameToIdMap.put(query, id);
       }
     }
 
-    if (recentSearches.isEmpty()) {
+    if (mRecentSearchesList.isEmpty()) {
       noRecentSearchesText.setVisibility(View.VISIBLE);
-      suggestionList.setVisibility(View.GONE);
+      mSuggestionListView.setVisibility(View.GONE);
     }
 
     // Don't search until user has stopped typing
@@ -104,18 +104,18 @@ public class SearchFragment extends Fragment {
         new Handler() {
           @Override
           public void handleMessage(Message msg) {
-            if (msg.what == TRIGGER_SEARCH && searchBar.getText().toString().length() != 0) {
-              noResultsText.setVisibility(View.GONE);
-              noConnectionText.setVisibility(View.GONE);
-              loadingSpinner.setVisibility(View.VISIBLE);
-              suggestionList.setVisibility(View.GONE);
+            if (msg.what == TRIGGER_SEARCH && mSearchEditText.getText().toString().length() != 0) {
+              mNoResultsTextView.setVisibility(View.GONE);
+              mNoConnectionTextView.setVisibility(View.GONE);
+              mLoadingSpinner.setVisibility(View.VISIBLE);
+              mSuggestionListView.setVisibility(View.GONE);
 
               startSearch();
             }
           }
         };
 
-    searchBar.addTextChangedListener(
+    mSearchEditText.addTextChangedListener(
         new TextWatcher() {
           @Override
           public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -126,35 +126,32 @@ public class SearchFragment extends Fragment {
           @Override
           public void afterTextChanged(Editable s) {
             if (s.length() == 0) { // Empty search, show recent searches
-              suggestionHeader.setText(getString(R.string.recent_searches_header));
-              loadingSpinner.setVisibility(View.GONE);
-              noResultsText.setVisibility(View.GONE);
-              noConnectionText.setVisibility(View.GONE);
+              mSuggestionsHeader.setText(getString(R.string.recent_searches_header));
+              mLoadingSpinner.setVisibility(View.GONE);
+              mNoResultsTextView.setVisibility(View.GONE);
+              mNoConnectionTextView.setVisibility(View.GONE);
 
-              if (recentSearches.isEmpty()) {
-                suggestionList.setVisibility(View.GONE);
+              if (mRecentSearchesList.isEmpty()) {
+                mSuggestionListView.setVisibility(View.GONE);
                 noRecentSearchesText.setVisibility(View.VISIBLE);
               } else {
-                suggestionList.setVisibility(View.VISIBLE);
+                mSuggestionListView.setVisibility(View.VISIBLE);
               }
 
               // Stop any current searches
               handler.removeMessages(TRIGGER_SEARCH);
-              if (searchTask != null && searchTask.getStatus() == AsyncTask.Status.RUNNING) {
-                searchTask.cancel(true);
-              }
 
-              if (listAdapter != null) {
-                listAdapter.clear();
-                listAdapter.addAll(recentSearches);
+              if (mSuggestionListAdapter != null) {
+                mSuggestionListAdapter.clear();
+                mSuggestionListAdapter.addAll(mRecentSearchesList);
               }
             } else { // There is a query, get suggestions
               noRecentSearchesText.setVisibility(View.GONE);
-              noResultsText.setVisibility(View.GONE);
-              noConnectionText.setVisibility(View.GONE);
-              loadingSpinner.setVisibility(View.VISIBLE);
-              suggestionList.setVisibility(View.GONE);
-              suggestionHeader.setText(getString(R.string.best_matches_header));
+              mNoResultsTextView.setVisibility(View.GONE);
+              mNoConnectionTextView.setVisibility(View.GONE);
+              mLoadingSpinner.setVisibility(View.VISIBLE);
+              mSuggestionListView.setVisibility(View.GONE);
+              mSuggestionsHeader.setText(getString(R.string.best_matches_header));
               handler.removeMessages(TRIGGER_SEARCH);
               handler.sendEmptyMessageDelayed(TRIGGER_SEARCH, SEARCH_DELAY_IN_MS);
             }
@@ -162,11 +159,11 @@ public class SearchFragment extends Fragment {
         });
 
     // Search when enter is pressed
-    searchBar.setOnKeyListener(
+    mSearchEditText.setOnKeyListener(
         new View.OnKeyListener() {
           @Override
           public boolean onKey(View v, int keyCode, KeyEvent event) {
-            String text = searchBar.getText().toString();
+            String text = mSearchEditText.getText().toString();
 
             // We only want to do this once
             if (event.getAction() != KeyEvent.ACTION_UP) {
@@ -187,17 +184,17 @@ public class SearchFragment extends Fragment {
         });
 
     // Populate list with recent searches
-    listAdapter = new ArrayAdapter<>(getActivity(), R.layout.single_line_list_row);
-    suggestionList.setAdapter(listAdapter);
-    listAdapter.addAll(recentSearches);
+    mSuggestionListAdapter = new ArrayAdapter<>(getActivity(), R.layout.single_line_list_row);
+    mSuggestionListView.setAdapter(mSuggestionListAdapter);
+    mSuggestionListAdapter.addAll(mRecentSearchesList);
 
     // Search for the clicked suggestion/recent search
-    suggestionList.setOnItemClickListener(
+    mSuggestionListView.setOnItemClickListener(
         new AdapterView.OnItemClickListener() {
           @Override
           public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            String query = (String) suggestionList.getItemAtPosition(position);
-            String searchId = nameIdMap.get(query);
+            String query = (String) mSuggestionListView.getItemAtPosition(position);
+            String searchId = mNameToIdMap.get(query);
             addRecentSearch(query, searchId);
 
             Intent intent = new Intent(getActivity(), ListingActivity.class);
@@ -217,10 +214,10 @@ public class SearchFragment extends Fragment {
     super.onResume();
 
     // If previous search (still showing) was done before results finished, re-search
-    if (searchBar != null
-        && searchBar.getText().toString().length() != 0
-        && loadingSpinner != null
-        && loadingSpinner.getVisibility() == View.VISIBLE) {
+    if (mSearchEditText != null
+        && mSearchEditText.getText().toString().length() != 0
+        && mLoadingSpinner != null
+        && mLoadingSpinner.getVisibility() == View.VISIBLE) {
       startSearch();
     }
 
@@ -228,10 +225,10 @@ public class SearchFragment extends Fragment {
     SharedPreferences recentFile =
         getActivity().getSharedPreferences(getString(R.string.prefs_name), Context.MODE_PRIVATE);
 
-    recentSearches = new ArrayList<>();
+    mRecentSearchesList = new ArrayList<>();
 
-    if (nameIdMap == null) {
-      nameIdMap = new HashMap<>();
+    if (mNameToIdMap == null) {
+      mNameToIdMap = new HashMap<>();
     }
 
     // Recent searches are stored as search0, search1, search2, etc up to search4 (5 maximum)
@@ -239,33 +236,23 @@ public class SearchFragment extends Fragment {
       if (recentFile.contains("search" + i)) {
         String query = recentFile.getString("search" + i, "");
         String id = recentFile.getString("id" + i, "0");
-        recentSearches.add(query);
-        nameIdMap.put(query, id);
+        mRecentSearchesList.add(query);
+        mNameToIdMap.put(query, id);
       }
     }
 
-    if (listAdapter != null
-        && suggestionHeader != null
-        && suggestionHeader.getText().equals(R.string.recent_searches_header)) {
-      listAdapter.clear();
-      listAdapter.addAll(recentSearches);
+    if (mSuggestionListAdapter != null
+        && mSuggestionsHeader != null
+        && mSuggestionsHeader.getText().equals(getString(R.string.recent_searches_header))) {
+      mSuggestionListAdapter.clear();
+      mSuggestionListAdapter.addAll(mRecentSearchesList);
     }
-  }
-
-  @Override
-  public void onStop() {
-    // Check the state of the task
-    if (searchTask != null && searchTask.getStatus() == AsyncTask.Status.RUNNING) {
-      searchTask.cancel(true);
-    }
-
-    super.onStop();
   }
 
   /** Initiate a search of the selected type */
-  public void startSearch() {
-    mService
-        .getArtists(searchBar.getText().toString())
+  private void startSearch() {
+    mSetlistFMService
+        .getArtists(mSearchEditText.getText().toString())
         .enqueue(
             new Callback<Artists>() {
               @Override
@@ -281,17 +268,17 @@ public class SearchFragment extends Fragment {
                 }
 
                 if (response.body().getTotal() == 0) { // No results
-                  suggestionList.setVisibility(View.GONE);
-                  loadingSpinner.setVisibility(View.GONE);
+                  mSuggestionListView.setVisibility(View.GONE);
+                  mLoadingSpinner.setVisibility(View.GONE);
                   if (getActivity() != null && Utility.isNetworkConnected(getActivity())) {
-                    noResultsText.setVisibility(View.VISIBLE);
+                    mNoResultsTextView.setVisibility(View.VISIBLE);
                   } else {
-                    noConnectionText.setVisibility(View.VISIBLE);
+                    mNoConnectionTextView.setVisibility(View.VISIBLE);
                   }
                   return;
                 }
 
-                listAdapter.clear();
+                mSuggestionListAdapter.clear();
                 addArtistsWithSetlists(response.body().getArtist());
               }
 
@@ -306,7 +293,7 @@ public class SearchFragment extends Fragment {
     for (int i = 0; i < artists.size(); i++) {
       final Artist artist = artists.get(i);
       final int finalI = i;
-      mService
+      mSetlistFMService
           .getSetlistsByArtistMbid(artist.getMbid(), 1)
           .enqueue(
               new Callback<Setlists>() {
@@ -314,28 +301,27 @@ public class SearchFragment extends Fragment {
                 public void onResponse(Call<Setlists> call, Response<Setlists> response) {
                   // If artist has no setlists, request will return 404
                   if (response.isSuccessful()) {
-                    nameIdMap.put(artist.getName(), artist.getMbid());
-                    listAdapter.add(artist.getName());
+                    mNameToIdMap.put(artist.getName(), artist.getMbid());
+                    mSuggestionListAdapter.add(artist.getName());
                   }
 
                   // TODO: Handle case where artist only has empty setlists (EX: "77 Jefferson")
 
                   /* If none of the artists had setlists, treat it the same as if no artists were returns */
                   if (finalI == artists.size() - 1) {
-                    loadingSpinner.setVisibility(View.GONE);
+                    mLoadingSpinner.setVisibility(View.GONE);
 
-                    if (listAdapter.getCount() == 0) {
-                      suggestionList.setVisibility(View.GONE);
-                      loadingSpinner.setVisibility(View.GONE);
+                    if (mSuggestionListAdapter.getCount() == 0) {
+                      mSuggestionListView.setVisibility(View.GONE);
+                      mLoadingSpinner.setVisibility(View.GONE);
                       if (getActivity() != null && Utility.isNetworkConnected(getActivity())) {
-                        noResultsText.setVisibility(View.VISIBLE);
+                        mNoResultsTextView.setVisibility(View.VISIBLE);
                       } else {
-                        noConnectionText.setVisibility(View.VISIBLE);
+                        mNoConnectionTextView.setVisibility(View.VISIBLE);
                       }
-                      return;
                     } else {
-                      suggestionList.setVisibility(View.VISIBLE);
-                      listAdapter.notifyDataSetChanged();
+                      mSuggestionListView.setVisibility(View.VISIBLE);
+                      mSuggestionListAdapter.notifyDataSetChanged();
                     }
                   }
                 }
@@ -356,12 +342,12 @@ public class SearchFragment extends Fragment {
    * <p>If the id for a recent search is 0, this indicates that the search was done via the enter
    * key and since no specific result was chosen, there is no associated id.
    */
-  public void addRecentSearch(String query, String id) {
+  private void addRecentSearch(String query, String id) {
     SharedPreferences recentFile =
         getActivity().getSharedPreferences(getString(R.string.prefs_name), Context.MODE_PRIVATE);
     SharedPreferences.Editor editor = recentFile.edit();
 
-    for (String s : recentSearches) {
+    for (String s : mRecentSearchesList) {
       if (s.equalsIgnoreCase(query)) {
         // TODO: Instead of doing nothing, move the search to the top
         // And replace the ID if necessary

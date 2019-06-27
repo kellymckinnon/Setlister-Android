@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -24,16 +26,17 @@ import static androidx.recyclerview.widget.RecyclerView.ViewHolder;
 /** Adapter for ListingFragment to display show information in RecyclerView */
 public class ShowAdapter extends Adapter {
 
-  private ArrayList<Show> data;
-  private Context context;
+  private final ArrayList<Show> mShowList;
+  private final Context mContext;
 
   public ShowAdapter(Context context) {
-    data = new ArrayList<>();
-    this.context = context;
+    mShowList = new ArrayList<>();
+    this.mContext = context;
   }
 
+  @NonNull
   @Override
-  public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+  public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
     View v =
         LayoutInflater.from(viewGroup.getContext())
             .inflate(R.layout.show_list_row, viewGroup, false);
@@ -41,44 +44,29 @@ public class ShowAdapter extends Adapter {
   }
 
   @Override
-  public void onBindViewHolder(ViewHolder viewHolder, int i) {
-    /* Get element from data set at this position and
-    replace the contents of the view with that element */
-    ((ShowHolder) viewHolder).band.setText(data.get(i).band);
-    ((ShowHolder) viewHolder).venue.setText(data.get(i).venue);
-    ((ShowHolder) viewHolder).tour.setText(data.get(i).tour);
-    ((ShowHolder) viewHolder).date.setText(data.get(i).date);
-    ((ShowHolder) viewHolder).numSongs.setText(data.get(i).setlist.length + " songs");
-    ((ShowHolder) viewHolder).show = data.get(i);
-
-    if (data.get(i).setlist.length == 0) {
-      ((ShowHolder) viewHolder).itemView.setOnClickListener(null);
-      ((ShowHolder) viewHolder).itemView.setBackgroundColor(Color.LTGRAY);
-    } else {
-      ((ShowHolder) viewHolder).itemView.setOnClickListener(((ShowHolder) viewHolder));
-      ((ShowHolder) viewHolder).itemView.setBackgroundColor(Color.WHITE);
-    }
+  public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+    ((ShowHolder) viewHolder).bindShow(mShowList.get(i));
   }
 
   @Override
   public int getItemCount() {
-    return data.size();
+    return mShowList.size();
   }
 
   public void add(Show show) {
-    data.add(show);
+    mShowList.add(show);
     notifyItemInserted(getItemCount());
   }
 
-  public class ShowHolder extends RecyclerView.ViewHolder implements OnClickListener {
+  class ShowHolder extends RecyclerView.ViewHolder implements OnClickListener {
 
-    public TextView band;
-    public TextView venue;
-    public TextView tour;
-    public TextView date;
-    public Show show;
-    View itemView;
-    TextView numSongs;
+    final TextView band;
+    final TextView venue;
+    final TextView tour;
+    final TextView date;
+    Show show;
+    final View itemView;
+    final TextView numSongs;
 
     ShowHolder(View itemView) {
       super(itemView);
@@ -90,20 +78,52 @@ public class ShowAdapter extends Adapter {
       numSongs = itemView.findViewById(R.id.num_songs);
     }
 
+    void bindShow(Show show) {
+      this.show = show;
+      band.setText(show.band);
+      venue.setText(show.venue);
+      tour.setText(show.tour);
+      date.setText(show.date);
+      numSongs.setText(
+          numSongs
+              .getContext()
+              .getResources()
+              .getQuantityString(
+                  R.plurals.setlist_row_num_songs, show.setlist.length, show.setlist.length));
+
+      if (show.setlist.length == 0) {
+        itemView.setOnClickListener(null);
+        itemView.setBackgroundColor(Color.LTGRAY);
+        band.setTextColor(Color.DKGRAY);
+        venue.setTextColor(Color.DKGRAY);
+        tour.setTextColor(Color.DKGRAY);
+        date.setTextColor(Color.DKGRAY);
+        numSongs.setTextColor(Color.DKGRAY);
+      } else {
+        itemView.setOnClickListener(this);
+        itemView.setBackgroundColor(Color.WHITE);
+        band.setTextColor(ContextCompat.getColor(itemView.getContext(), android.R.color.primary_text_light));
+        venue.setTextColor(ContextCompat.getColor(itemView.getContext(), android.R.color.primary_text_light));
+        tour.setTextColor(ContextCompat.getColor(itemView.getContext(), android.R.color.primary_text_light));
+        date.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.my_accent));
+        numSongs.setTextColor(ContextCompat.getColor(itemView.getContext(), android.R.color.secondary_text_light));
+      }
+    }
+
     @Override
     public void onClick(View view) {
-      if (((ListingActivity) context).listClicked) {
+      if (((ListingActivity) mContext).listClicked) {
         return;
       }
 
-      ((ListingActivity) context).listClicked = true;
-      Intent intent = new Intent(context, SetlistActivity.class);
+      ((ListingActivity) mContext).listClicked = true;
+      Intent intent = new Intent(mContext, SetlistActivity.class);
       intent.putExtra("SONGS", show.setlist);
       intent.putExtra("ARTIST", show.band);
       intent.putExtra("DATE", show.date);
       intent.putExtra("VENUE", show.venue);
       intent.putExtra("TOUR", show.tour);
-      context.startActivity(intent);
+      mContext.startActivity(intent);
     }
   }
 }

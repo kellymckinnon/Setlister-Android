@@ -25,10 +25,10 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginRight="10dp"
-        android:layout_toLeftOf="@id/date"
+        android:layout_marginEnd="10dp"
+        android:layout_toStartOf="@id/date"
         android:singleLine="true"
-        android:textColor="@color/primary_text_default_material_light"
+        android:textColor="@android:color/black"
         android:textSize="16sp"
         android:textStyle="bold" />
 
@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/band"
         android:text="@string/venue"
-        android:textColor="@color/primary_text_default_material_light" />
+        android:textColor="@android:color/primary_text_light" />
 
     <TextView
         android:id="@+id/num_songs"
@@ -46,9 +46,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/venue"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
         android:text="@string/default_num_songs"
-        android:textColor="@color/secondary_text_default_material_light"
+        android:textColor="@android:color/secondary_text_light"
         android:textSize="12sp" />
 
     <TextView
@@ -56,8 +55,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/venue"
-        android:layout_marginRight="10dp"
-        android:layout_toLeftOf="@id/num_songs"
+        android:layout_marginEnd="10dp"
+        android:layout_toStartOf="@id/num_songs"
         android:singleLine="true"
         android:text="@string/tour"
         android:textColor="@color/secondary_text_default_material_light" />

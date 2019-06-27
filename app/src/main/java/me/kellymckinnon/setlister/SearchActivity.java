@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -24,7 +25,7 @@ public class SearchActivity extends AppCompatActivity {
   }
 
   @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
+  public boolean onOptionsItemSelected(@NonNull MenuItem item) {
     int id = item.getItemId();
     if (id == R.id.action_about) {
       new MaterialAlertDialogBuilder(this)
@@ -49,7 +50,7 @@ public class SearchActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_search);
     if (savedInstanceState == null) {
-      getFragmentManager()
+      getSupportFragmentManager()
           .beginTransaction()
           .add(R.id.activity_search, new SearchFragment())
           .commit();

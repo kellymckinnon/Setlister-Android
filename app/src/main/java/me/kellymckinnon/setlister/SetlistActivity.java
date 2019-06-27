@@ -1,5 +1,6 @@
 package me.kellymckinnon.setlister;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -59,7 +60,7 @@ public class SetlistActivity extends AppCompatActivity {
   }
 
   @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
+  public boolean onOptionsItemSelected(@NonNull MenuItem item) {
     int id = item.getItemId();
 
     if (id == R.id.action_about) {
@@ -120,7 +121,7 @@ public class SetlistActivity extends AppCompatActivity {
     bundle.putString("VENUE", mVenue);
 
     sf.setArguments(bundle);
-    getFragmentManager().beginTransaction().add(R.id.activity_setlist, sf).commit();
+    getSupportFragmentManager().beginTransaction().add(R.id.activity_setlist, sf).commit();
   }
 
   /** Called on return from Spotify authentication */
@@ -266,6 +267,7 @@ public class SetlistActivity extends AppCompatActivity {
       return null;
     }
 
+    @SuppressLint("WrongConstant")
     @Override
     protected void onPostExecute(Void aVoid) {
       Snackbar snackbar =

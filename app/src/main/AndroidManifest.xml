@@ -22,24 +22,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ListingActivity"
-            android:configChanges="orientation|screenSize"
-            android:label="@string/title_activity_list"
-            android:launchMode="singleTop"
-            android:parentActivityName=".SearchActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".SearchActivity" />
-        </activity>
-        <activity
             android:name=".SetlistActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_setlist"
             android:launchMode="singleTask"
-            android:parentActivityName=".ListingActivity">
+            android:parentActivityName=".SearchActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="me.kellymckinnon.setlister.ListingActivity" />
+                android:value="me.kellymckinnon.setlister.SearchActivity" />
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 

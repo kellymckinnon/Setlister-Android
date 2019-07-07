@@ -1,7 +1,6 @@
 package me.kellymckinnon.setlister.fragments;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,11 +8,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import me.kellymckinnon.setlister.R;
-import me.kellymckinnon.setlister.models.*;
+import me.kellymckinnon.setlister.models.Set;
+import me.kellymckinnon.setlister.models.Setlist;
+import me.kellymckinnon.setlister.models.Setlists;
+import me.kellymckinnon.setlister.models.Show;
+import me.kellymckinnon.setlister.models.Song;
 import me.kellymckinnon.setlister.network.RetrofitClient;
 import me.kellymckinnon.setlister.network.SetlistFMService;
 import me.kellymckinnon.setlister.utils.Utility;
@@ -22,11 +31,6 @@ import me.kellymckinnon.setlister.views.ShowAdapter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Uses the passed in query (either an artist, venue, or city) to search the setlist.fm database for
@@ -47,10 +51,24 @@ public class ListingFragment extends Fragment {
   private int numPages; // Number of pages of setlists from API
   private String id;
   private SetlistFMService mService;
+  private OnSetlistSelectedListener mOnSetlistSelectedListener;
+
+  /**
+   * Callback to inform the activity that the user has selected a setlist and we should display
+   * relevant details for that setlist.
+   */
+  public interface OnSetlistSelectedListener {
+
+    /** Notifies listener that setlist has been selected */
+    // TODO: Refactor to just take a POJO object instead of all these strings
+    void onSetlistSelected(String band, String venue, String date, String tour, String[] setlist);
+  }
 
   @Override
   public View onCreateView(
-          @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+      @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    // TODO: Handle title change
+
     mService = RetrofitClient.getSetlistFMService();
 
     View rootView = inflater.inflate(R.layout.fragment_listing, container, false);
@@ -68,7 +86,7 @@ public class ListingFragment extends Fragment {
     visibleItemCount = 0;
     totalItemCount = 0;
 
-    adapter = new ShowAdapter(getActivity());
+    adapter = new ShowAdapter(mOnSetlistSelectedListener);
     rv.setAdapter(adapter);
     rv.setHasFixedSize(true);
     rv.setLayoutManager(llm);
@@ -95,6 +113,18 @@ public class ListingFragment extends Fragment {
     getSetlists();
 
     return rootView;
+  }
+
+  @Override
+  public void onAttach(@NonNull Context context) {
+    super.onAttach(context);
+
+    try {
+      mOnSetlistSelectedListener = (OnSetlistSelectedListener) context;
+    } catch (ClassCastException e) {
+      throw new ClassCastException(
+          context.toString() + " must implement OnSetlistSelectedListener");
+    }
   }
 
   private void getSetlists() {

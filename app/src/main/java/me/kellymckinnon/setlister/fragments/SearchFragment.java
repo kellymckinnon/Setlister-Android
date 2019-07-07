@@ -2,8 +2,8 @@ package me.kellymckinnon.setlister.fragments;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,7 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.*;
-import me.kellymckinnon.setlister.ListingActivity;
+
 import me.kellymckinnon.setlister.R;
 import me.kellymckinnon.setlister.models.Artist;
 import me.kellymckinnon.setlister.models.Artists;
@@ -53,6 +53,22 @@ public class SearchFragment extends Fragment {
   private TextView mSuggestionsHeader;
   private ArrayList<String> mRecentSearchesList;
   private SetlistFMService mSetlistFMService;
+  private OnArtistSelectedListener mOnArtistSelectedListener;
+
+  /** Callback to inform the activity that the user has selected an artist and we should
+   * display relevant setlists for that artist.
+   */
+  public interface OnArtistSelectedListener {
+    // TODO: Change artistId to be @Nullable, instead of passing "0" everywhere
+
+    /**
+     * Notifies listener that artist has been selected
+     * @param artistName query, like "The Killers"
+     * @param artistId ID for the artist, if available. Due to the way setlist.fm works, sometimes
+     *                 we do not have the ID, only the name.
+     */
+    void onArtistSelected(String artistName, String artistId);
+  }
 
   @Override
   public View onCreateView(
@@ -172,11 +188,9 @@ public class SearchFragment extends Fragment {
 
             if ((keyCode == KeyEvent.KEYCODE_ENTER || keyCode == EditorInfo.IME_ACTION_SEARCH)
                 && text.length() != 0) {
-              Intent intent = new Intent(getActivity(), ListingActivity.class);
               String formattedQuery = Utility.capitalizeFirstLetters(text);
-              intent.putExtra("QUERY", formattedQuery);
               addRecentSearch(formattedQuery, "0");
-              startActivity(intent);
+              mOnArtistSelectedListener.onArtistSelected(formattedQuery, "0" /* artistId */);
               return true;
             }
             return false;
@@ -196,17 +210,23 @@ public class SearchFragment extends Fragment {
             String query = (String) mSuggestionListView.getItemAtPosition(position);
             String searchId = mNameToIdMap.get(query);
             addRecentSearch(query, searchId);
-
-            Intent intent = new Intent(getActivity(), ListingActivity.class);
-            intent.putExtra("QUERY", query);
-            if (!searchId.equals("0")) {
-              intent.putExtra("ID", searchId);
-            }
-            startActivity(intent);
+            mOnArtistSelectedListener.onArtistSelected(query, "0" /* artistId */);
           }
         });
 
     return rootView;
+  }
+
+  @Override
+  public void onAttach(Context context) {
+    super.onAttach(context);
+
+    try {
+      mOnArtistSelectedListener = (OnArtistSelectedListener) context;
+    } catch (ClassCastException e) {
+      throw new ClassCastException(context.toString()
+              + " must implement OnArtistSelectedListener");
+    }
   }
 
   @Override

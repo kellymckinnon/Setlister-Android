@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-import me.kellymckinnon.setlister.ListingActivity;
 import me.kellymckinnon.setlister.R;
 import me.kellymckinnon.setlister.SetlistActivity;
+import me.kellymckinnon.setlister.fragments.ListingFragment.OnSetlistSelectedListener;
 import me.kellymckinnon.setlister.models.Show;
 
 import static androidx.recyclerview.widget.RecyclerView.Adapter;
@@ -27,11 +27,11 @@ import static androidx.recyclerview.widget.RecyclerView.ViewHolder;
 public class ShowAdapter extends Adapter {
 
   private final ArrayList<Show> mShowList;
-  private final Context mContext;
+  private final OnSetlistSelectedListener mOnSetlistSelectedListener;
 
-  public ShowAdapter(Context context) {
+  public ShowAdapter(OnSetlistSelectedListener onSetlistSelectedListener) {
     mShowList = new ArrayList<>();
-    this.mContext = context;
+    mOnSetlistSelectedListener = onSetlistSelectedListener;
   }
 
   @NonNull
@@ -113,18 +113,8 @@ public class ShowAdapter extends Adapter {
 
     @Override
     public void onClick(View view) {
-      if (((ListingActivity) mContext).listClicked) {
-        return;
-      }
-
-      ((ListingActivity) mContext).listClicked = true;
-      Intent intent = new Intent(mContext, SetlistActivity.class);
-      intent.putExtra("SONGS", show.setlist);
-      intent.putExtra("ARTIST", show.band);
-      intent.putExtra("DATE", show.date);
-      intent.putExtra("VENUE", show.venue);
-      intent.putExtra("TOUR", show.tour);
-      mContext.startActivity(intent);
+      // TODO: Prevent the list from being clicked multiple times
+      mOnSetlistSelectedListener.onSetlistSelected(show.band, show.venue, show.date, show.tour, show.setlist);
     }
   }
 }

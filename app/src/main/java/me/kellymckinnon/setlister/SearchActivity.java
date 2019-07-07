@@ -8,19 +8,22 @@ import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import me.kellymckinnon.setlister.fragments.ListingFragment;
 import me.kellymckinnon.setlister.fragments.SearchFragment;
 
 /**
  * The launcher activity, which uses a SearchFragment to guide the user to search for an artist,
  * venue, or city.
  */
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity implements SearchFragment.OnArtistSelectedListener, ListingFragment.OnSetlistSelectedListener {
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_search, menu);
+    getMenuInflater().inflate(R.menu.menu_setlister, menu);
     return true;
   }
 
@@ -52,8 +55,41 @@ public class SearchActivity extends AppCompatActivity {
     if (savedInstanceState == null) {
       getSupportFragmentManager()
           .beginTransaction()
-          .add(R.id.activity_search, new SearchFragment())
+          .add(R.id.fragment_container, new SearchFragment())
           .commit();
     }
+  }
+
+  @Override
+  public void onArtistSelected(String artistName, String artistId) {
+    ListingFragment listingFragment = new ListingFragment();
+    Bundle args = new Bundle();
+    args.putString("QUERY", artistName);
+
+    // TODO: Change artistId to be @Nullable, instead of passing "0" everywhere
+    if (!artistId.equals("0")) {
+      args.putString("ID", artistId);
+    }
+
+    listingFragment.setArguments(args);
+    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+    getSupportFragmentManager()
+        .beginTransaction()
+        .replace(R.id.fragment_container, listingFragment)
+        .addToBackStack(null)
+        .commit();
+  }
+
+  @Override
+  public void onSetlistSelected(String band, String venue, String date, String tour,
+      String[] setlist) {
+    Intent intent = new Intent(this, SetlistActivity.class);
+    intent.putExtra("SONGS", setlist);
+    intent.putExtra("ARTIST", band);
+    intent.putExtra("DATE", date);
+    intent.putExtra("VENUE", venue);
+    intent.putExtra("TOUR", tour);
+    startActivity(intent);
   }
 }

@@ -46,8 +46,8 @@ public class SetlistActivity extends AppCompatActivity {
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_setlist, menu);
-    MenuItem item = menu.findItem(R.id.menu_item_share);
+    getMenuInflater().inflate(R.menu.menu_setlister, menu);
+    MenuItem item = menu.findItem(R.id.action_share);
     mShareActionProvider =
         (ShareActionProvider) MenuItemCompat.getActionProvider(item);
     Intent intent = new Intent(Intent.ACTION_SEND);

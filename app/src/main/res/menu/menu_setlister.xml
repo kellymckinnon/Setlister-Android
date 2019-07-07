@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="me.kellymckinnon.setlister.ListingActivity">
+    tools:context="me.kellymckinnon.setlister.SetlistActivity">
     <item
         android:id="@+id/action_about"
         android:orderInCategory="100"
@@ -12,4 +12,11 @@
         android:orderInCategory="200"
         android:title="@string/send_feedback"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_share"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title="@string/share"
+        android:visible="false"
+        app:actionProviderClass="androidx.appcompat.widget.ShareActionProvider"
+        app:showAsAction="ifRoom" />
 </menu>

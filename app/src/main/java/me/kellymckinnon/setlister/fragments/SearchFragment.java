@@ -1,9 +1,5 @@
 package me.kellymckinnon.setlister.fragments;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -17,22 +13,28 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.*;
-
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import me.kellymckinnon.setlister.R;
 import me.kellymckinnon.setlister.models.Artist;
 import me.kellymckinnon.setlister.models.Artists;
-import me.kellymckinnon.setlister.models.Setlists;
 import me.kellymckinnon.setlister.network.RetrofitClient;
 import me.kellymckinnon.setlister.network.SetlistFMService;
 import me.kellymckinnon.setlister.utils.Utility;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Fragment opened by SearchActivity that holds a search bar and displays recent results as well as
@@ -59,17 +61,19 @@ public class SearchFragment extends Fragment {
   private OnArtistSelectedListener mOnArtistSelectedListener;
   private String mCurrentSearch;
 
-  /** Callback to inform the activity that the user has selected an artist and we should
-   * display relevant setlists for that artist.
+  /**
+   * Callback to inform the activity that the user has selected an artist and we should display
+   * relevant setlists for that artist.
    */
   public interface OnArtistSelectedListener {
     // TODO: Change artistId to be @Nullable, instead of passing "0" everywhere
 
     /**
      * Notifies listener that artist has been selected
+     *
      * @param artistName query, like "The Killers"
      * @param artistId ID for the artist, if available. Due to the way setlist.fm works, sometimes
-     *                 we do not have the ID, only the name.
+     *     we do not have the ID, only the name.
      */
     void onArtistSelected(String artistName, String artistId);
   }
@@ -107,11 +111,7 @@ public class SearchFragment extends Fragment {
         });
 
     updateRecentSearchesList();
-
-    if (mRecentSearchesList.isEmpty()) {
-      mNoRecentSearchesText.setVisibility(View.VISIBLE);
-      mSuggestionListView.setVisibility(View.GONE);
-    }
+    showRecentSearchesView();
 
     // Search when enter is pressed
     mSearchEditText.setOnKeyListener(
@@ -163,8 +163,7 @@ public class SearchFragment extends Fragment {
     try {
       mOnArtistSelectedListener = (OnArtistSelectedListener) context;
     } catch (ClassCastException e) {
-      throw new ClassCastException(context.toString()
-              + " must implement OnArtistSelectedListener");
+      throw new ClassCastException(context.toString() + " must implement OnArtistSelectedListener");
     }
   }
 
@@ -178,11 +177,7 @@ public class SearchFragment extends Fragment {
           @Override
           public void handleMessage(Message msg) {
             if (msg.what == TRIGGER_SEARCH && mSearchEditText.getText().toString().length() != 0) {
-              mNoResultsTextView.setVisibility(View.GONE);
-              mNoConnectionTextView.setVisibility(View.GONE);
-              mLoadingSpinner.setVisibility(View.VISIBLE);
-              mSuggestionListView.setVisibility(View.GONE);
-
+              showLoadingView();
               startSearch();
             }
           }
@@ -199,17 +194,7 @@ public class SearchFragment extends Fragment {
           @Override
           public void afterTextChanged(Editable s) {
             if (s.length() == 0) { // Empty search, show recent searches
-              mSuggestionsHeader.setText(getString(R.string.recent_searches_header));
-              mLoadingSpinner.setVisibility(View.GONE);
-              mNoResultsTextView.setVisibility(View.GONE);
-              mNoConnectionTextView.setVisibility(View.GONE);
-
-              if (mRecentSearchesList.isEmpty()) {
-                mSuggestionListView.setVisibility(View.GONE);
-                mNoRecentSearchesText.setVisibility(View.VISIBLE);
-              } else {
-                mSuggestionListView.setVisibility(View.VISIBLE);
-              }
+              showRecentSearchesView();
 
               // Stop any current searches
               handler.removeMessages(TRIGGER_SEARCH);
@@ -219,12 +204,7 @@ public class SearchFragment extends Fragment {
                 mSuggestionListAdapter.addAll(mRecentSearchesList);
               }
             } else { // There is a query, get suggestions
-              mNoRecentSearchesText.setVisibility(View.GONE);
-              mNoResultsTextView.setVisibility(View.GONE);
-              mNoConnectionTextView.setVisibility(View.GONE);
-              mLoadingSpinner.setVisibility(View.VISIBLE);
-              mSuggestionListView.setVisibility(View.GONE);
-              mSuggestionsHeader.setText(getString(R.string.best_matches_header));
+              showLoadingView();
               handler.removeMessages(TRIGGER_SEARCH);
               handler.sendEmptyMessageDelayed(TRIGGER_SEARCH, SEARCH_DELAY_IN_MS);
             }
@@ -313,6 +293,29 @@ public class SearchFragment extends Fragment {
                 showNullState();
               }
             });
+  }
+
+  private void showLoadingView() {
+    mSuggestionsHeader.setText(getString(R.string.best_matches_header));
+    mNoResultsTextView.setVisibility(View.GONE);
+    mNoConnectionTextView.setVisibility(View.GONE);
+    mLoadingSpinner.setVisibility(View.VISIBLE);
+    mSuggestionListView.setVisibility(View.GONE);
+    mNoRecentSearchesText.setVisibility(View.GONE);
+  }
+
+  private void showRecentSearchesView() {
+    mSuggestionsHeader.setText(getString(R.string.recent_searches_header));
+    mLoadingSpinner.setVisibility(View.GONE);
+    mNoResultsTextView.setVisibility(View.GONE);
+    mNoConnectionTextView.setVisibility(View.GONE);
+
+    if (mRecentSearchesList.isEmpty()) {
+      mSuggestionListView.setVisibility(View.GONE);
+      mNoRecentSearchesText.setVisibility(View.VISIBLE);
+    } else {
+      mSuggestionListView.setVisibility(View.VISIBLE);
+    }
   }
 
   private void showNullState() {

@@ -1,5 +1,6 @@
 package me.kellymckinnon.setlister.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -22,11 +23,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import me.kellymckinnon.setlister.R;
+import me.kellymckinnon.setlister.SetlisterExtras;
 import me.kellymckinnon.setlister.models.Artist;
 import me.kellymckinnon.setlister.models.Artists;
 import me.kellymckinnon.setlister.network.RetrofitClient;
@@ -170,6 +174,10 @@ public class SearchFragment extends Fragment {
   @Override
   public void onResume() {
     super.onResume();
+
+    ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+    actionBar.setDisplayHomeAsUpEnabled(false);
+    actionBar.setTitle(R.string.app_name);
 
     // Don't search until user has stopped typing
     final Handler handler =

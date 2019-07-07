@@ -86,22 +86,8 @@ public class SetlistActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    Bundle arguments;
-
-    if (savedInstanceState == null) {
-      arguments = getIntent().getExtras();
-    } else {
-      arguments = savedInstanceState;
-    }
-
+    Bundle arguments = getIntent().getExtras();
     Show show = arguments.getParcelable(SetlisterExtras.EXTRA_SHOW);
-
-    ActionBar ab = getSupportActionBar();
-    if (ab != null) {
-      String formattedDate = Utility.formatDate(show.getDate(), "MM/dd/yyyy", "MMMM d, yyyy");
-      ab.setTitle(formattedDate);
-      ab.setSubtitle(mArtist);
-    }
 
     if (mShareActionProvider != null) {
       updateShareIntent();
@@ -110,10 +96,7 @@ public class SetlistActivity extends AppCompatActivity {
     setContentView(R.layout.activity_setlist);
 
     SetlistFragment sf = new SetlistFragment();
-    Bundle bundle = new Bundle();
-    bundle.putParcelable(SetlisterExtras.EXTRA_SHOW, show);
-
-    sf.setArguments(bundle);
+    sf.setArguments(arguments);
     getSupportFragmentManager().beginTransaction().add(R.id.activity_setlist, sf).commit();
   }
 

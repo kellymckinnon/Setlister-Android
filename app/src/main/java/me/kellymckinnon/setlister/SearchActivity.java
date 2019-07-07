@@ -30,22 +30,24 @@ public class SearchActivity extends AppCompatActivity implements SearchFragment.
 
   @Override
   public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-    int id = item.getItemId();
-    if (id == R.id.action_about) {
-      new MaterialAlertDialogBuilder(this)
-              .setTitle(R.string.about_setlister)
-              .setView(R.layout.about_dialog)
-              .show();
-      return true;
-    } else if (id == R.id.action_feedback) {
-      Intent emailIntent =
-          new Intent(
-              Intent.ACTION_SENDTO, Uri.fromParts("mailto", getString(R.string.email), null));
-      emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_subject));
-      startActivity(Intent.createChooser(emailIntent, "Send email..."));
-      return true;
+    switch(item.getItemId()) {
+      case R.id.action_about:
+        new MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.about_setlister)
+            .setView(R.layout.about_dialog)
+            .show();
+        break;
+      case R.id.action_feedback:
+        Intent emailIntent =
+            new Intent(
+                Intent.ACTION_SENDTO, Uri.fromParts("mailto", getString(R.string.email), null));
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_subject));
+        startActivity(Intent.createChooser(emailIntent, "Send email..."));
+        break;
+      case android.R.id.home:
+        onBackPressed();
+        break;
     }
-
     return super.onOptionsItemSelected(item);
   }
 

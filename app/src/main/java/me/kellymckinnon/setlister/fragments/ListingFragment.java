@@ -1,5 +1,6 @@
 package me.kellymckinnon.setlister.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,6 +10,9 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -67,8 +71,6 @@ public class ListingFragment extends Fragment {
   @Override
   public View onCreateView(
       @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    // TODO: Handle title change
-
     mService = RetrofitClient.getSetlistFMService();
 
     View rootView = inflater.inflate(R.layout.fragment_listing, container, false);
@@ -125,6 +127,15 @@ public class ListingFragment extends Fragment {
       throw new ClassCastException(
           context.toString() + " must implement OnSetlistSelectedListener");
     }
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+
+    ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+    actionBar.setDisplayHomeAsUpEnabled(true);
+    actionBar.setTitle(getArguments().getString(SetlisterExtras.EXTRA_ARTIST_NAME));
   }
 
   private void getSetlists() {

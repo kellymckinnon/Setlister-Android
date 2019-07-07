@@ -18,5 +18,5 @@
         android:title="@string/share"
         android:visible="false"
         app:actionProviderClass="androidx.appcompat.widget.ShareActionProvider"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 </menu>

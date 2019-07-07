@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,22 +40,21 @@ import me.kellymckinnon.setlister.utils.Utility;
  */
 public class SetlistActivity extends AppCompatActivity {
 
-  private String[] mSongs;
-  private String mArtist, mDate, mVenue, mTour;
   private String mAccessToken;
   private ArrayList<String> mFailedSpotifySongs = new ArrayList<>();
   private ShareActionProvider mShareActionProvider;
+  private Show mShow;
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.menu_setlister, menu);
     MenuItem item = menu.findItem(R.id.action_share);
+    item.setVisible(true);
     mShareActionProvider =
         (ShareActionProvider) MenuItemCompat.getActionProvider(item);
     Intent intent = new Intent(Intent.ACTION_SEND);
     intent.setType("text/plain");
-    mShareActionProvider.setShareIntent(intent); // dummy, in case
-    if (mArtist != null) {
+    if (mShow != null) {
       updateShareIntent();
     }
     return true;
@@ -87,7 +87,7 @@ public class SetlistActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
 
     Bundle arguments = getIntent().getExtras();
-    Show show = arguments.getParcelable(SetlisterExtras.EXTRA_SHOW);
+    mShow = arguments.getParcelable(SetlisterExtras.EXTRA_SHOW);
 
     if (mShareActionProvider != null) {
       updateShareIntent();
@@ -132,7 +132,7 @@ public class SetlistActivity extends AppCompatActivity {
 
   /** Provide information for share button */
   private void updateShareIntent() {
-    String shareTitle = getString(R.string.setlist_share_title, mArtist, mDate, mVenue);
+    String shareTitle = getString(R.string.setlist_share_title, mShow.getBand(), mShow.getDate(), mShow.getVenue());
 
     Intent intent = new Intent(Intent.ACTION_SEND);
     intent.setType("text/plain");
@@ -140,7 +140,7 @@ public class SetlistActivity extends AppCompatActivity {
     StringBuilder text = new StringBuilder();
     text.append(shareTitle)
         .append(":\n");
-    for (String s : mSongs) {
+    for (String s : mShow.getSongs()) {
       text.append("\n");
       text.append(s);
     }
@@ -165,7 +165,7 @@ public class SetlistActivity extends AppCompatActivity {
         // Create an empty playlist for the authenticated user
         String createPlaylistUrl = "https://api.spotify.com/v1/users/" + username + "/playlists";
         JSONObject playlistInfo = new JSONObject();
-        playlistInfo.put("name", mArtist + ", " + mVenue + ", " + mDate);
+        playlistInfo.put("name", mShow.getBand() + ", " + mShow.getVenue() + ", " + mShow.getDate());
         playlistInfo.put("public", "true");
         JSONObject createPlaylistJson =
             JSONRetriever.postRequest(createPlaylistUrl, "Bearer", mAccessToken, playlistInfo);
@@ -176,14 +176,14 @@ public class SetlistActivity extends AppCompatActivity {
         int numSongsAdded = 0;
 
         // Add songs one at a time
-        for (String s : mSongs) {
+        for (String s : mShow.getSongs()) {
           // Only 100 songs can be added through the API
           if (numSongsAdded > 100) {
             mFailedSpotifySongs.add(s);
           }
 
           String songQuery = s.replace(' ', '+');
-          String artistQuery = mArtist.replace(' ', '+');
+          String artistQuery = mShow.getBand().replace(' ', '+');
           try {
             JSONObject trackJson =
                 JSONRetriever.getRequest(

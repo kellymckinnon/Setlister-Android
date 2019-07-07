@@ -18,6 +18,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import me.kellymckinnon.setlister.R;
+import me.kellymckinnon.setlister.SetlisterExtras;
 import me.kellymckinnon.setlister.models.Set;
 import me.kellymckinnon.setlister.models.Setlist;
 import me.kellymckinnon.setlister.models.Setlists;
@@ -60,8 +61,7 @@ public class ListingFragment extends Fragment {
   public interface OnSetlistSelectedListener {
 
     /** Notifies listener that setlist has been selected */
-    // TODO: Refactor to just take a POJO object instead of all these strings
-    void onSetlistSelected(String band, String venue, String date, String tour, String[] setlist);
+    void onSetlistSelected(Show show);
   }
 
   @Override
@@ -72,8 +72,8 @@ public class ListingFragment extends Fragment {
     mService = RetrofitClient.getSetlistFMService();
 
     View rootView = inflater.inflate(R.layout.fragment_listing, container, false);
-    query = getArguments().getString("QUERY");
-    id = getArguments().getString("ID");
+    query = getArguments().getString(SetlisterExtras.EXTRA_ARTIST_NAME);
+    id = getArguments().getString(SetlisterExtras.EXTRA_ARTIST_ID);
     noShows = rootView.findViewById(R.id.no_shows);
     loadingShows = rootView.findViewById(R.id.loading_shows);
     rv = rootView.findViewById(R.id.show_list);
@@ -194,10 +194,7 @@ public class ListingFragment extends Fragment {
 
   /** Move data from JSON response into Show objects */
   private Show getShowModel(Setlist setlist) {
-    Show show = new Show();
-
-    show.band = setlist.getArtist().getName();
-    show.tour =
+    String tour =
         setlist.getTour() == null || setlist.getTour().getName().equals("No Tour Assigned")
             ? ""
             : setlist.getTour().getName();
@@ -205,10 +202,11 @@ public class ListingFragment extends Fragment {
     String year = setlist.getEventDate().substring(6);
     String day = setlist.getEventDate().substring(0, 2);
     String month = setlist.getEventDate().substring(3, 5);
-    show.date = month + "/" + day + "/" + year;
+    String date = month + "/" + day + "/" + year;
 
+    String venue;
     try {
-      show.venue =
+      venue =
           setlist.getVenue().getName()
               + ", "
               + setlist.getVenue().getCity().getName()
@@ -217,9 +215,10 @@ public class ListingFragment extends Fragment {
               + ", "
               + setlist.getVenue().getCity().getCountry().getCode();
     } catch (Exception e) {
-      show.venue = "Unknown venue";
+      venue = "Unknown venue";
     }
 
+    String[] songs;
     try {
       List<Set> sets = setlist.getSets().getSet();
       ArrayList<String> songList = new ArrayList<>();
@@ -233,7 +232,7 @@ public class ListingFragment extends Fragment {
         }
       }
 
-      show.setlist = songList.toArray(new String[0]);
+      songs = songList.toArray(new String[0]);
     } catch (Exception e) {
       // Usually, this just means there are no songs in the setlist, and "sets"
       // is an empty string instead of an object.
@@ -241,6 +240,16 @@ public class ListingFragment extends Fragment {
       e.printStackTrace();
       return null;
     }
+
+    Show show =
+        new Show.Builder()
+            .setBand(setlist.getArtist().getName())
+            .setTour(tour)
+            .setDate(date)
+            .setVenue(venue)
+            .setSongs(songs)
+            .createShow();
+
     return show;
   }
 

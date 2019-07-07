@@ -1,27 +1,22 @@
 package me.kellymckinnon.setlister.views;
 
+import static androidx.recyclerview.widget.RecyclerView.Adapter;
+import static androidx.recyclerview.widget.RecyclerView.OnClickListener;
+import static androidx.recyclerview.widget.RecyclerView.ViewHolder;
+
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.ArrayList;
-
 import me.kellymckinnon.setlister.R;
-import me.kellymckinnon.setlister.SetlistActivity;
 import me.kellymckinnon.setlister.fragments.ListingFragment.OnSetlistSelectedListener;
 import me.kellymckinnon.setlister.models.Show;
-
-import static androidx.recyclerview.widget.RecyclerView.Adapter;
-import static androidx.recyclerview.widget.RecyclerView.OnClickListener;
-import static androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 /** Adapter for ListingFragment to display show information in RecyclerView */
 public class ShowAdapter extends Adapter {
@@ -80,18 +75,18 @@ public class ShowAdapter extends Adapter {
 
     void bindShow(Show show) {
       this.show = show;
-      band.setText(show.band);
-      venue.setText(show.venue);
-      tour.setText(show.tour);
-      date.setText(show.date);
+      band.setText(show.getBand());
+      venue.setText(show.getVenue());
+      tour.setText(show.getTour());
+      date.setText(show.getDate());
       numSongs.setText(
           numSongs
               .getContext()
               .getResources()
               .getQuantityString(
-                  R.plurals.setlist_row_num_songs, show.setlist.length, show.setlist.length));
+                  R.plurals.setlist_row_num_songs, show.getSongs().length, show.getSongs().length));
 
-      if (show.setlist.length == 0) {
+      if (show.getSongs().length == 0) {
         itemView.setOnClickListener(null);
         itemView.setBackgroundColor(Color.LTGRAY);
         band.setTextColor(Color.GRAY);
@@ -104,8 +99,8 @@ public class ShowAdapter extends Adapter {
         itemView.setOnClickListener(this);
         itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.appBackground));
         band.setTextColor(ContextCompat.getColor(context, R.color.primaryText));
-        venue.setTextColor(ContextCompat.getColor(context,  R.color.primaryText));
-        tour.setTextColor(ContextCompat.getColor(context,  R.color.secondaryText));
+        venue.setTextColor(ContextCompat.getColor(context, R.color.primaryText));
+        tour.setTextColor(ContextCompat.getColor(context, R.color.secondaryText));
         date.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
         numSongs.setTextColor(ContextCompat.getColor(context, R.color.secondaryText));
       }
@@ -114,7 +109,7 @@ public class ShowAdapter extends Adapter {
     @Override
     public void onClick(View view) {
       // TODO: Prevent the list from being clicked multiple times
-      mOnSetlistSelectedListener.onSetlistSelected(show.band, show.venue, show.date, show.tour, show.setlist);
+      mOnSetlistSelectedListener.onSetlistSelected(show);
     }
   }
 }

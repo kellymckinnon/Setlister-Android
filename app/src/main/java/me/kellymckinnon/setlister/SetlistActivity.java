@@ -21,6 +21,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.authentication.SpotifyAuthentication;
 
+import me.kellymckinnon.setlister.models.Show;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -93,15 +94,11 @@ public class SetlistActivity extends AppCompatActivity {
       arguments = savedInstanceState;
     }
 
-    mSongs = arguments.getStringArray("SONGS");
-    mArtist = arguments.getString("ARTIST");
-    mDate = arguments.getString("DATE");
-    mVenue = arguments.getString("VENUE");
-    mTour = arguments.getString("TOUR");
+    Show show = arguments.getParcelable(SetlisterExtras.EXTRA_SHOW);
 
     ActionBar ab = getSupportActionBar();
     if (ab != null) {
-      String formattedDate = Utility.formatDate(mDate, "MM/dd/yyyy", "MMMM d, yyyy");
+      String formattedDate = Utility.formatDate(show.getDate(), "MM/dd/yyyy", "MMMM d, yyyy");
       ab.setTitle(formattedDate);
       ab.setSubtitle(mArtist);
     }
@@ -114,11 +111,7 @@ public class SetlistActivity extends AppCompatActivity {
 
     SetlistFragment sf = new SetlistFragment();
     Bundle bundle = new Bundle();
-    bundle.putStringArray("SONGS", mSongs);
-    bundle.putString("ARTIST", mArtist);
-    bundle.putString("DATE", mDate);
-    bundle.putString("TOUR", mTour);
-    bundle.putString("VENUE", mVenue);
+    bundle.putParcelable(SetlisterExtras.EXTRA_SHOW, show);
 
     sf.setArguments(bundle);
     getSupportFragmentManager().beginTransaction().add(R.id.activity_setlist, sf).commit();
@@ -152,16 +145,6 @@ public class SetlistActivity extends AppCompatActivity {
 
     mFailedSpotifySongs = new ArrayList<>();
     new PlaylistCreator().execute();
-  }
-
-  @Override
-  protected void onSaveInstanceState(@NonNull Bundle outState) {
-    super.onSaveInstanceState(outState);
-    outState.putStringArray("SONGS", mSongs);
-    outState.putString("ARTIST", mArtist);
-    outState.putString("DATE", mDate);
-    outState.putString("TOUR", mTour);
-    outState.putString("VENUE", mVenue);
   }
 
   /** Provide information for share button */

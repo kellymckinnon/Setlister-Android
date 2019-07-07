@@ -14,6 +14,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import me.kellymckinnon.setlister.fragments.ListingFragment;
 import me.kellymckinnon.setlister.fragments.SearchFragment;
+import me.kellymckinnon.setlister.models.Show;
 
 /**
  * The launcher activity, which uses a SearchFragment to guide the user to search for an artist,
@@ -64,11 +65,11 @@ public class SearchActivity extends AppCompatActivity implements SearchFragment.
   public void onArtistSelected(String artistName, String artistId) {
     ListingFragment listingFragment = new ListingFragment();
     Bundle args = new Bundle();
-    args.putString("QUERY", artistName);
+    args.putString(SetlisterExtras.EXTRA_ARTIST_NAME, artistName);
 
     // TODO: Change artistId to be @Nullable, instead of passing "0" everywhere
     if (!artistId.equals("0")) {
-      args.putString("ID", artistId);
+      args.putString(SetlisterExtras.EXTRA_ARTIST_ID, artistId);
     }
 
     listingFragment.setArguments(args);
@@ -82,14 +83,9 @@ public class SearchActivity extends AppCompatActivity implements SearchFragment.
   }
 
   @Override
-  public void onSetlistSelected(String band, String venue, String date, String tour,
-      String[] setlist) {
+  public void onSetlistSelected(Show show) {
     Intent intent = new Intent(this, SetlistActivity.class);
-    intent.putExtra("SONGS", setlist);
-    intent.putExtra("ARTIST", band);
-    intent.putExtra("DATE", date);
-    intent.putExtra("VENUE", venue);
-    intent.putExtra("TOUR", tour);
+    intent.putExtra(SetlisterExtras.EXTRA_SHOW, show);
     startActivity(intent);
   }
 }

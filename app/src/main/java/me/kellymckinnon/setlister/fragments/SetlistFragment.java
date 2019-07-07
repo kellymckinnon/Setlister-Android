@@ -13,6 +13,8 @@ import android.widget.ListView;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import me.kellymckinnon.setlister.R;
+import me.kellymckinnon.setlister.SetlisterExtras;
+import me.kellymckinnon.setlister.models.Show;
 import me.kellymckinnon.setlister.network.SpotifyHandler;
 
 /**
@@ -28,18 +30,12 @@ public class SetlistFragment extends Fragment {
 
     Bundle arguments = getArguments();
 
-    String[] songs = arguments.getStringArray("SONGS");
-
-    // Not used currently, but may be later on
-    String artist = arguments.getString("ARTIST");
-    String tour = arguments.getString("TOUR");
-    String venue = arguments.getString("VENUE");
-    String date = arguments.getString("DATE");
+    Show show = arguments.getParcelable(SetlisterExtras.EXTRA_SHOW);
 
     ListView setlist = rootView.findViewById(R.id.setlist);
 
     ArrayAdapter<String> adapter =
-        new ArrayAdapter<>(getActivity(), R.layout.single_line_list_row, songs);
+        new ArrayAdapter<>(getActivity(), R.layout.single_line_list_row, show.getSongs());
 
     setlist.setAdapter(adapter);
 

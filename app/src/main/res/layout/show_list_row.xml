@@ -3,6 +3,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="?android:attr/selectableItemBackground"
     android:gravity="center_vertical"
     android:paddingLeft="12dp"
@@ -15,10 +16,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:text="@string/default_date"
-        android:textColor="@color/my_accent"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        tools:text="@string/default_date" />
 
     <TextView
         android:id="@+id/band"
@@ -28,7 +27,6 @@
         android:layout_marginEnd="10dp"
         android:layout_toStartOf="@id/date"
         android:singleLine="true"
-        android:textColor="@android:color/black"
         android:textSize="16sp"
         android:textStyle="bold" />
 
@@ -37,8 +35,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/band"
-        android:text="@string/venue"
-        android:textColor="@android:color/primary_text_light" />
+        tools:text="@string/venue" />
 
     <TextView
         android:id="@+id/num_songs"
@@ -46,9 +43,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/venue"
         android:layout_alignParentEnd="true"
-        android:text="@string/default_num_songs"
-        android:textColor="@android:color/secondary_text_light"
-        android:textSize="12sp" />
+        android:textColor="@color/secondaryText"
+        android:textSize="12sp"
+        tools:text="@string/default_num_songs" />
 
     <TextView
         android:id="@+id/tour"
@@ -58,7 +55,6 @@
         android:layout_marginEnd="10dp"
         android:layout_toStartOf="@id/num_songs"
         android:singleLine="true"
-        android:text="@string/tour"
-        android:textColor="@color/secondary_text_default_material_light" />
+        tools:text="@string/tour" />
 
 </RelativeLayout>

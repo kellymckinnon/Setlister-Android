@@ -17,7 +17,7 @@
         android:layout_marginBottom="80dp"
         android:src="@drawable/ic_spotify"
         fab:fab_colorNormal="@android:color/black"
-        fab:fab_colorPressed="@color/my_accent"
+        fab:fab_colorPressed="@color/colorAccent"
         fab:fab_title="Spotify" />
 
 </RelativeLayout>

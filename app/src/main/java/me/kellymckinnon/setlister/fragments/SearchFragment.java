@@ -264,17 +264,12 @@ public class SearchFragment extends Fragment {
                           + response.code()
                           + ". Message was: "
                           + response.errorBody());
+                  showNullState();
                   return;
                 }
 
                 if (response.body().getTotal() == 0) { // No results
-                  mSuggestionListView.setVisibility(View.GONE);
-                  mLoadingSpinner.setVisibility(View.GONE);
-                  if (getActivity() != null && Utility.isNetworkConnected(getActivity())) {
-                    mNoResultsTextView.setVisibility(View.VISIBLE);
-                  } else {
-                    mNoConnectionTextView.setVisibility(View.VISIBLE);
-                  }
+                  showNullState();
                   return;
                 }
 
@@ -285,8 +280,19 @@ public class SearchFragment extends Fragment {
               @Override
               public void onFailure(Call<Artists> call, Throwable t) {
                 Log.e(getClass().getSimpleName(), t.toString());
+                showNullState();
               }
             });
+  }
+
+  private void showNullState() {
+    mLoadingSpinner.setVisibility(View.GONE);
+    mSuggestionListView.setVisibility(View.GONE);
+    if (getActivity() != null && Utility.isNetworkConnected(getActivity())) {
+      mNoResultsTextView.setVisibility(View.VISIBLE);
+    } else {
+      mNoConnectionTextView.setVisibility(View.VISIBLE);
+    }
   }
 
   private void addArtistsWithSetlists(final List<Artist> artists) {

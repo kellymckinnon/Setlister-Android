@@ -305,7 +305,7 @@ public class SetlistActivity extends AppCompatActivity {
                             .show();
                   }
                 })
-            .setActionTextColor(ContextCompat.getColor(SetlistActivity.this, R.color.my_accent));
+            .setActionTextColor(ContextCompat.getColor(SetlistActivity.this, R.color.colorAccent));
       }
       snackbar.show();
       super.onPostExecute(aVoid);

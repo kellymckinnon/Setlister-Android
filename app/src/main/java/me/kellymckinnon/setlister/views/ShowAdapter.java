@@ -94,19 +94,20 @@ public class ShowAdapter extends Adapter {
       if (show.setlist.length == 0) {
         itemView.setOnClickListener(null);
         itemView.setBackgroundColor(Color.LTGRAY);
-        band.setTextColor(Color.DKGRAY);
-        venue.setTextColor(Color.DKGRAY);
-        tour.setTextColor(Color.DKGRAY);
-        date.setTextColor(Color.DKGRAY);
-        numSongs.setTextColor(Color.DKGRAY);
+        band.setTextColor(Color.GRAY);
+        venue.setTextColor(Color.GRAY);
+        tour.setTextColor(Color.GRAY);
+        date.setTextColor(Color.GRAY);
+        numSongs.setTextColor(Color.GRAY);
       } else {
+        Context context = itemView.getContext();
         itemView.setOnClickListener(this);
-        itemView.setBackgroundColor(Color.WHITE);
-        band.setTextColor(ContextCompat.getColor(itemView.getContext(), android.R.color.primary_text_light));
-        venue.setTextColor(ContextCompat.getColor(itemView.getContext(), android.R.color.primary_text_light));
-        tour.setTextColor(ContextCompat.getColor(itemView.getContext(), android.R.color.primary_text_light));
-        date.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.my_accent));
-        numSongs.setTextColor(ContextCompat.getColor(itemView.getContext(), android.R.color.secondary_text_light));
+        itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.appBackground));
+        band.setTextColor(ContextCompat.getColor(context, R.color.primaryText));
+        venue.setTextColor(ContextCompat.getColor(context,  R.color.primaryText));
+        tour.setTextColor(ContextCompat.getColor(context,  R.color.secondaryText));
+        date.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+        numSongs.setTextColor(ContextCompat.getColor(context, R.color.secondaryText));
       }
     }
 

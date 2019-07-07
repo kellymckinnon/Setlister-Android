@@ -295,7 +295,16 @@ public class SearchFragment extends Fragment {
                 }
 
                 mSuggestionListAdapter.clear();
-                addArtistsWithSetlists(response.body().getArtist());
+
+                List<Artist> artists = response.body().getArtist();
+                for (Artist artist : artists) {
+                  mNameToIdMap.put(artist.getName(), artist.getMbid());
+                  mSuggestionListAdapter.add(artist.getName());
+                }
+
+                mLoadingSpinner.setVisibility(View.GONE);
+                mSuggestionListView.setVisibility(View.VISIBLE);
+                mSuggestionListAdapter.notifyDataSetChanged();
               }
 
               @Override
@@ -313,51 +322,6 @@ public class SearchFragment extends Fragment {
       mNoResultsTextView.setVisibility(View.VISIBLE);
     } else {
       mNoConnectionTextView.setVisibility(View.VISIBLE);
-    }
-  }
-
-  private void addArtistsWithSetlists(final List<Artist> artists) {
-    for (int i = 0; i < artists.size(); i++) {
-      final Artist artist = artists.get(i);
-      final int finalI = i;
-      mSetlistFMService
-          .getSetlistsByArtistMbid(artist.getMbid(), 1)
-          .enqueue(
-              new Callback<Setlists>() {
-                @Override
-                public void onResponse(Call<Setlists> call, Response<Setlists> response) {
-                  // If artist has no setlists, request will return 404
-                  if (response.isSuccessful()) {
-                    mNameToIdMap.put(artist.getName(), artist.getMbid());
-                    mSuggestionListAdapter.add(artist.getName() + artist.getMbid());
-                  }
-
-                  // TODO: Handle case where artist only has empty setlists (EX: "77 Jefferson")
-
-                  /* If none of the artists had setlists, treat it the same as if no artists were returns */
-                  if (finalI == artists.size() - 1) {
-                    mLoadingSpinner.setVisibility(View.GONE);
-
-                    if (mSuggestionListAdapter.getCount() == 0) {
-                      mSuggestionListView.setVisibility(View.GONE);
-                      mLoadingSpinner.setVisibility(View.GONE);
-                      if (getActivity() != null && Utility.isNetworkConnected(getActivity())) {
-                        mNoResultsTextView.setVisibility(View.VISIBLE);
-                      } else {
-                        mNoConnectionTextView.setVisibility(View.VISIBLE);
-                      }
-                    } else {
-                      mSuggestionListView.setVisibility(View.VISIBLE);
-                      mSuggestionListAdapter.notifyDataSetChanged();
-                    }
-                  }
-                }
-
-                @Override
-                public void onFailure(Call<Setlists> call, Throwable t) {
-                  Log.e(getClass().getSimpleName(), t.toString());
-                }
-              });
     }
   }
 

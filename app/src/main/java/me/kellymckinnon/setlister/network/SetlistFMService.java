@@ -16,7 +16,7 @@ public interface SetlistFMService {
     "Accept: application/json",
     "Content-Type: application/json"
   })
-  @GET("search/artists/")
+  @GET("search/artists?sort=relevance")
   Call<Artists> getArtists(@Query("artistName") String artistName);
 
   @Headers({

@@ -13,6 +13,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.io.UnsupportedEncodingException;
@@ -29,7 +30,6 @@ import me.kellymckinnon.setlister.models.Song;
 import me.kellymckinnon.setlister.network.RetrofitClient;
 import me.kellymckinnon.setlister.network.SetlistFMService;
 import me.kellymckinnon.setlister.utils.Utility;
-import me.kellymckinnon.setlister.views.RecyclerViewDivider;
 import me.kellymckinnon.setlister.views.ShowAdapter;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -77,9 +77,8 @@ public class ListingFragment extends Fragment {
     mNoShowsTextView = rootView.findViewById(R.id.no_shows);
     mLoadingShowsProgressBar = rootView.findViewById(R.id.loading_shows);
     mRecyclerView = rootView.findViewById(R.id.show_list);
-    mRecyclerView.addItemDecoration(
-        new me.kellymckinnon.setlister.views.RecyclerViewDivider(
-            getActivity(), RecyclerViewDivider.VERTICAL_LIST));
+    DividerItemDecoration decoration = new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL);
+    mRecyclerView.addItemDecoration(decoration);
     mLinearLayoutManager = new LinearLayoutManager(getActivity());
 
     mFirstVisibleItemIndex = 0;

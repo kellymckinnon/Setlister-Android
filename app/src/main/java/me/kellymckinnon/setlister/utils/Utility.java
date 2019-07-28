@@ -1,13 +1,18 @@
 package me.kellymckinnon.setlister.utils;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import android.net.Uri;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import me.kellymckinnon.setlister.R;
 
 /** General utility class */
 public class Utility {
@@ -67,5 +72,20 @@ public class Utility {
 
     NetworkInfo activeNetwork = cm != null ? cm.getActiveNetworkInfo() : null;
     return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+  }
+
+  public static void showAboutDialog(Context context) {
+    new MaterialAlertDialogBuilder(context)
+        .setTitle(R.string.about_setlister)
+        .setView(R.layout.about_dialog)
+        .show();
+  }
+
+  public static void startFeedbackEmail(Activity callingActivity) {
+    Intent emailIntent =
+        new Intent(
+            Intent.ACTION_SENDTO, Uri.fromParts("mailto", callingActivity.getString(R.string.email), null));
+    emailIntent.putExtra(Intent.EXTRA_SUBJECT, callingActivity.getString(R.string.feedback_subject));
+    callingActivity.startActivity(Intent.createChooser(emailIntent, "Send email..."));
   }
 }

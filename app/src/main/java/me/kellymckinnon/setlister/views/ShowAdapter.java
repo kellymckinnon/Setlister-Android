@@ -108,7 +108,6 @@ public class ShowAdapter extends Adapter {
 
     @Override
     public void onClick(View view) {
-      // TODO: Prevent the list from being clicked multiple times
       mOnSetlistSelectedListener.onSetlistSelected(show);
     }
   }

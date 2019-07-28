@@ -65,17 +65,10 @@ public class SetlistActivity extends AppCompatActivity {
     int id = item.getItemId();
 
     if (id == R.id.action_about) {
-      new MaterialAlertDialogBuilder(this)
-              .setTitle(R.string.about_setlister)
-              .setView(R.layout.about_dialog)
-              .show();
+      Utility.showAboutDialog(this);
       return true;
     } else if (id == R.id.action_feedback) {
-      Intent emailIntent =
-          new Intent(
-              Intent.ACTION_SENDTO, Uri.fromParts("mailto", getString(R.string.email), null));
-      emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_subject));
-      startActivity(Intent.createChooser(emailIntent, getString(R.string.send_email)));
+      Utility.startFeedbackEmail(this);
       return true;
     }
 

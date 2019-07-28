@@ -15,6 +15,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import me.kellymckinnon.setlister.fragments.ListingFragment;
 import me.kellymckinnon.setlister.fragments.SearchFragment;
 import me.kellymckinnon.setlister.models.Show;
+import me.kellymckinnon.setlister.utils.Utility;
 
 /**
  * The launcher activity, which uses a SearchFragment to guide the user to search for an artist,
@@ -32,21 +33,14 @@ public class SearchActivity extends AppCompatActivity implements SearchFragment.
   public boolean onOptionsItemSelected(@NonNull MenuItem item) {
     switch(item.getItemId()) {
       case R.id.action_about:
-        new MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.about_setlister)
-            .setView(R.layout.about_dialog)
-            .show();
-        break;
+        Utility.showAboutDialog(this);
+        return true;
       case R.id.action_feedback:
-        Intent emailIntent =
-            new Intent(
-                Intent.ACTION_SENDTO, Uri.fromParts("mailto", getString(R.string.email), null));
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_subject));
-        startActivity(Intent.createChooser(emailIntent, "Send email..."));
-        break;
+        Utility.startFeedbackEmail(this);
+        return true;
       case android.R.id.home:
         onBackPressed();
-        break;
+        return true;
     }
     return super.onOptionsItemSelected(item);
   }

@@ -161,7 +161,7 @@ public class SearchFragment extends Fragment {
   }
 
   @Override
-  public void onAttach(Context context) {
+  public void onAttach(@NonNull Context context) {
     super.onAttach(context);
 
     try {
@@ -252,7 +252,7 @@ public class SearchFragment extends Fragment {
 
   /** Initiate a search of the selected type */
   private void startSearch() {
-    if (mCurrentSearch == mSearchEditText.getText().toString()) {
+    if (mCurrentSearch != null && mCurrentSearch.equals(mSearchEditText.getText().toString())) {
       return; // We're already performing the correct search
     }
 
@@ -266,7 +266,7 @@ public class SearchFragment extends Fragment {
             new Callback<Artists>() {
               @Override
               public void onResponse(Call<Artists> call, Response<Artists> response) {
-                if (!response.isSuccessful()) {
+                if (!response.isSuccessful() || response.body() == null) {
                   Log.e(
                       this.getClass().getSimpleName(),
                       "Artists search failed. Response code was: "
@@ -345,6 +345,10 @@ public class SearchFragment extends Fragment {
    * key and since no specific result was chosen, there is no associated id.
    */
   private void addRecentSearch(String query, String id) {
+    if (getActivity() == null) {
+      return;
+    }
+
     SharedPreferences recentFile =
         getActivity().getSharedPreferences(getString(R.string.prefs_name), Context.MODE_PRIVATE);
     SharedPreferences.Editor editor = recentFile.edit();

@@ -1,6 +1,5 @@
 package me.kellymckinnon.setlister.fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -44,18 +42,18 @@ import retrofit2.Response;
  */
 public class ListingFragment extends Fragment {
 
-  private LinearLayoutManager llm;
-  private RecyclerView rv;
-  private String query;
-  private TextView noShows;
-  private ProgressBar loadingShows;
-  private int pagesLoaded;
-  private int firstVisibleItem, visibleItemCount, totalItemCount;
-  private boolean loading = false;
-  private ShowAdapter adapter;
-  private int numPages; // Number of pages of setlists from API
-  private String id;
-  private SetlistFMService mService;
+  private LinearLayoutManager mLinearLayoutManager;
+  private RecyclerView mRecyclerView;
+  private String mQuery;
+  private TextView mNoShowsTextView;
+  private ProgressBar mLoadingShowsProgressBar;
+  private int mNumPagesLoaded;
+  private int mFirstVisibleItemIndex, mVisibleItemCount, mTotalItemCount;
+  private boolean mIsLoading = false;
+  private ShowAdapter mAdapter;
+  private int mNumSetlistPages; // Number of pages of setlists from API
+  private String mArtistId;
+  private SetlistFMService mSetlistFMService;
   private OnSetlistSelectedListener mOnSetlistSelectedListener;
 
   /**
@@ -71,41 +69,41 @@ public class ListingFragment extends Fragment {
   @Override
   public View onCreateView(
       @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    mService = RetrofitClient.getSetlistFMService();
+    mSetlistFMService = RetrofitClient.getSetlistFMService();
 
     View rootView = inflater.inflate(R.layout.fragment_listing, container, false);
-    query = getArguments().getString(SetlisterExtras.EXTRA_ARTIST_NAME);
-    id = getArguments().getString(SetlisterExtras.EXTRA_ARTIST_ID);
-    noShows = rootView.findViewById(R.id.no_shows);
-    loadingShows = rootView.findViewById(R.id.loading_shows);
-    rv = rootView.findViewById(R.id.show_list);
-    rv.addItemDecoration(
+    mQuery = getArguments().getString(SetlisterExtras.EXTRA_ARTIST_NAME);
+    mArtistId = getArguments().getString(SetlisterExtras.EXTRA_ARTIST_ID);
+    mNoShowsTextView = rootView.findViewById(R.id.no_shows);
+    mLoadingShowsProgressBar = rootView.findViewById(R.id.loading_shows);
+    mRecyclerView = rootView.findViewById(R.id.show_list);
+    mRecyclerView.addItemDecoration(
         new me.kellymckinnon.setlister.views.RecyclerViewDivider(
             getActivity(), RecyclerViewDivider.VERTICAL_LIST));
-    llm = new LinearLayoutManager(getActivity());
+    mLinearLayoutManager = new LinearLayoutManager(getActivity());
 
-    firstVisibleItem = 0;
-    visibleItemCount = 0;
-    totalItemCount = 0;
+    mFirstVisibleItemIndex = 0;
+    mVisibleItemCount = 0;
+    mTotalItemCount = 0;
 
-    adapter = new ShowAdapter(mOnSetlistSelectedListener);
-    rv.setAdapter(adapter);
-    rv.setHasFixedSize(true);
-    rv.setLayoutManager(llm);
-    rv.setItemAnimator(new DefaultItemAnimator());
+    mAdapter = new ShowAdapter(mOnSetlistSelectedListener);
+    mRecyclerView.setAdapter(mAdapter);
+    mRecyclerView.setHasFixedSize(true);
+    mRecyclerView.setLayoutManager(mLinearLayoutManager);
+    mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
     /* Load new page(s) if the user scrolls to the end */
-    rv.addOnScrollListener(
+    mRecyclerView.addOnScrollListener(
         new RecyclerView.OnScrollListener() {
           @Override
           public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
 
-            visibleItemCount = llm.getChildCount();
-            totalItemCount = llm.getItemCount();
-            firstVisibleItem = llm.findFirstVisibleItemPosition();
+            mVisibleItemCount = mLinearLayoutManager.getChildCount();
+            mTotalItemCount = mLinearLayoutManager.getItemCount();
+            mFirstVisibleItemIndex = mLinearLayoutManager.findFirstVisibleItemPosition();
 
-            if (!loading && pagesLoaded < numPages) {
-              if ((visibleItemCount + firstVisibleItem) >= totalItemCount - 10) {
+            if (!mIsLoading && mNumPagesLoaded < mNumSetlistPages) {
+              if ((mVisibleItemCount + mFirstVisibleItemIndex) >= mTotalItemCount - 10) {
                 getSetlists();
               }
             }
@@ -139,7 +137,7 @@ public class ListingFragment extends Fragment {
   }
 
   private void getSetlists() {
-    loading = true;
+    mIsLoading = true;
     Callback<Setlists> callback =
         new Callback<Setlists>() {
           @Override
@@ -151,13 +149,13 @@ public class ListingFragment extends Fragment {
             }
 
             // On first run, calculate total number of pages
-            if (pagesLoaded == 0) {
+            if (mNumPagesLoaded == 0) {
               int numShows = response.body().getTotal();
 
               // One 20-item array per page
-              numPages = numShows / 20;
+              mNumSetlistPages = numShows / 20;
               if (numShows % 20 != 0) {
-                numPages++;
+                mNumSetlistPages++;
               }
             }
 
@@ -168,18 +166,18 @@ public class ListingFragment extends Fragment {
                 continue;
               }
 
-              adapter.add(show);
+              mAdapter.add(show);
             }
 
-            pagesLoaded++;
+            mNumPagesLoaded++;
 
-            if (adapter.getItemCount() > 0) {
-              loadingShows.setVisibility(View.GONE);
-              rv.setVisibility(View.VISIBLE);
+            if (mAdapter.getItemCount() > 0) {
+              mLoadingShowsProgressBar.setVisibility(View.GONE);
+              mRecyclerView.setVisibility(View.VISIBLE);
             } else {
               showNullState();
             }
-            loading = false;
+            mIsLoading = false;
           }
 
           @Override
@@ -189,12 +187,12 @@ public class ListingFragment extends Fragment {
           }
         };
 
-    if (id != null) { // We have an MBID, use that
-      mService.getSetlistsByArtistMbid(id, pagesLoaded + 1).enqueue(callback);
+    if (mArtistId != null) { // We have an MBID, use that
+      mSetlistFMService.getSetlistsByArtistMbid(mArtistId, mNumPagesLoaded + 1).enqueue(callback);
     } else { // We have a plaintext name, use that
       try {
-        mService
-            .getSetlistsByArtistName(URLEncoder.encode(query, "UTF-8"), pagesLoaded + 1)
+        mSetlistFMService
+            .getSetlistsByArtistName(URLEncoder.encode(mQuery, "UTF-8"), mNumPagesLoaded + 1)
             .enqueue(callback);
       } catch (UnsupportedEncodingException e) {
         e.printStackTrace();
@@ -217,16 +215,18 @@ public class ListingFragment extends Fragment {
 
     String venue;
     try {
-      venue =
-          setlist.getVenue().getName()
-              + ", "
-              + setlist.getVenue().getCity().getName()
-              + ", "
-              + setlist.getVenue().getCity().getStateCode()
-              + ", "
-              + setlist.getVenue().getCity().getCountry().getCode();
+      StringBuilder builder = new StringBuilder();
+      builder.append(setlist.getVenue().getName());
+      builder.append(", ");
+      builder.append(setlist.getVenue().getCity().getName());
+      builder.append(", ");
+      builder.append(setlist.getVenue().getCity().getStateCode());
+      builder.append(", ");
+      builder.append(setlist.getVenue().getCity().getCountry().getCode());
+
+      venue = builder.toString();
     } catch (Exception e) {
-      venue = "Unknown venue";
+      venue = getString(R.string.unknown_venue);
     }
 
     String[] songs;
@@ -252,24 +252,21 @@ public class ListingFragment extends Fragment {
       return null;
     }
 
-    Show show =
-        new Show.Builder()
-            .setBand(setlist.getArtist().getName())
-            .setTour(tour)
-            .setDate(date)
-            .setVenue(venue)
-            .setSongs(songs)
-            .createShow();
-
-    return show;
+    return new Show.Builder()
+        .setBand(setlist.getArtist().getName())
+        .setTour(tour)
+        .setDate(date)
+        .setVenue(venue)
+        .setSongs(songs)
+        .createShow();
   }
 
   private void showNullState() {
-    loadingShows.setVisibility(View.GONE);
+    mLoadingShowsProgressBar.setVisibility(View.GONE);
     if (!Utility.isNetworkConnected(getActivity())) {
-      noShows.setText(R.string.no_connection); // Because there's no signal
+      mNoShowsTextView.setText(R.string.no_connection); // Because there's no signal
     } // Or because there are no shows for that query
-    noShows.setVisibility(View.VISIBLE);
-    rv.setVisibility(View.GONE);
+    mNoShowsTextView.setVisibility(View.VISIBLE);
+    mRecyclerView.setVisibility(View.GONE);
   }
 }

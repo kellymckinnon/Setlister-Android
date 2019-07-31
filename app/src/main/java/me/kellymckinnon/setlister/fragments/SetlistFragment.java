@@ -1,6 +1,5 @@
 package me.kellymckinnon.setlister.fragments;
 
-import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,7 +15,7 @@ import android.widget.ListView;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import me.kellymckinnon.setlister.R;
-import me.kellymckinnon.setlister.SetlisterExtras;
+import me.kellymckinnon.setlister.SetlisterConstants;
 import me.kellymckinnon.setlister.models.Show;
 import me.kellymckinnon.setlister.network.SpotifyHandler;
 import me.kellymckinnon.setlister.utils.Utility;
@@ -36,7 +35,7 @@ public class SetlistFragment extends Fragment {
 
     Bundle arguments = getArguments();
 
-    mShow = arguments.getParcelable(SetlisterExtras.EXTRA_SHOW);
+    mShow = arguments.getParcelable(SetlisterConstants.EXTRA_SHOW);
 
     ListView setlist = rootView.findViewById(R.id.setlist);
 

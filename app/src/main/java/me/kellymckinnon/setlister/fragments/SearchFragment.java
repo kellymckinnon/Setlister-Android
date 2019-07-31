@@ -1,6 +1,5 @@
 package me.kellymckinnon.setlister.fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -30,7 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import me.kellymckinnon.setlister.R;
-import me.kellymckinnon.setlister.SetlisterExtras;
 import me.kellymckinnon.setlister.models.Artist;
 import me.kellymckinnon.setlister.models.Artists;
 import me.kellymckinnon.setlister.network.RetrofitClient;

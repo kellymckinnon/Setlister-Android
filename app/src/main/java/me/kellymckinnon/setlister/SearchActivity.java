@@ -1,7 +1,6 @@
 package me.kellymckinnon.setlister;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -9,8 +8,6 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
-
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import me.kellymckinnon.setlister.fragments.ListingFragment;
 import me.kellymckinnon.setlister.fragments.SearchFragment;
@@ -61,11 +58,11 @@ public class SearchActivity extends AppCompatActivity implements SearchFragment.
   public void onArtistSelected(String artistName, String artistId) {
     ListingFragment listingFragment = new ListingFragment();
     Bundle args = new Bundle();
-    args.putString(SetlisterExtras.EXTRA_ARTIST_NAME, artistName);
+    args.putString(SetlisterConstants.EXTRA_ARTIST_NAME, artistName);
 
     // TODO: Change artistId to be @Nullable, instead of passing "0" everywhere
     if (!artistId.equals("0")) {
-      args.putString(SetlisterExtras.EXTRA_ARTIST_ID, artistId);
+      args.putString(SetlisterConstants.EXTRA_ARTIST_ID, artistId);
     }
 
     listingFragment.setArguments(args);
@@ -81,7 +78,7 @@ public class SearchActivity extends AppCompatActivity implements SearchFragment.
   @Override
   public void onSetlistSelected(Show show) {
     Intent intent = new Intent(this, SetlistActivity.class);
-    intent.putExtra(SetlisterExtras.EXTRA_SHOW, show);
+    intent.putExtra(SetlisterConstants.EXTRA_SHOW, show);
     startActivity(intent);
   }
 }

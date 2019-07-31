@@ -5,13 +5,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.ShareActionProvider;
 import androidx.core.content.ContextCompat;
@@ -19,8 +18,8 @@ import androidx.core.view.MenuItemCompat;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
-import com.spotify.sdk.android.authentication.SpotifyAuthentication;
 
 import me.kellymckinnon.setlister.models.Show;
 import org.json.JSONArray;
@@ -80,7 +79,7 @@ public class SetlistActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
 
     Bundle arguments = getIntent().getExtras();
-    mShow = arguments.getParcelable(SetlisterExtras.EXTRA_SHOW);
+    mShow = arguments.getParcelable(SetlisterConstants.EXTRA_SHOW);
 
     if (mShareActionProvider != null) {
       updateShareIntent();
@@ -91,36 +90,6 @@ public class SetlistActivity extends AppCompatActivity {
     SetlistFragment sf = new SetlistFragment();
     sf.setArguments(arguments);
     getSupportFragmentManager().beginTransaction().add(R.id.activity_setlist, sf).commit();
-  }
-
-  /** Called on return from Spotify authentication */
-  @Override
-  protected void onNewIntent(Intent intent) {
-    super.onNewIntent(intent);
-    Uri uri = intent.getData();
-
-    // Spotify authorization failed
-    if (uri == null) {
-      Snackbar.make(
-              findViewById(android.R.id.content),
-              getString(R.string.spotify_connection_failed_snackbar),
-              Snackbar.LENGTH_SHORT)
-          .show();
-      return;
-    }
-
-    // Create playlist in Spotify from setlist
-    AuthenticationResponse response = SpotifyAuthentication.parseOauthResponse(uri);
-    mAccessToken = response.getAccessToken();
-
-    Snackbar.make(
-            findViewById(android.R.id.content),
-            getString(R.string.spotify_creating_playlist_snackbar),
-            Snackbar.LENGTH_SHORT)
-        .show();
-
-    mFailedSpotifySongs = new ArrayList<>();
-    new PlaylistCreator().execute();
   }
 
   /** Provide information for share button */
@@ -140,6 +109,41 @@ public class SetlistActivity extends AppCompatActivity {
     intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
     intent.putExtra(Intent.EXTRA_TEXT, text.toString());
     mShareActionProvider.setShareIntent(intent);
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+
+    if (requestCode != SetlisterConstants.SPOTIFY_LOGIN_ACTIVITY_ID) {
+      return; // This shouldn't happen
+    }
+
+    AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, data);
+
+    switch (response.getType()) {
+      // Response was successful and contains auth token, we can create a Spotify playlist
+      case TOKEN:
+        mAccessToken = response.getAccessToken();
+        Snackbar.make(
+            findViewById(android.R.id.content),
+            getString(R.string.spotify_creating_playlist_snackbar),
+            Snackbar.LENGTH_SHORT)
+            .show();
+
+        mFailedSpotifySongs = new ArrayList<>();
+        new PlaylistCreator().execute();
+        break;
+
+      // Auth flow returned an error
+      case ERROR:
+        Snackbar.make(
+            findViewById(android.R.id.content),
+            getString(R.string.spotify_connection_failed_snackbar),
+            Snackbar.LENGTH_SHORT)
+            .show();
+      // Other cases mean that most likely auth flow was cancelled. We'll do nothing
+    }
   }
 
   /**

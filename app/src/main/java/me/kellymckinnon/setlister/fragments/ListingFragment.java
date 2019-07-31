@@ -21,7 +21,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import me.kellymckinnon.setlister.R;
-import me.kellymckinnon.setlister.SetlisterExtras;
+import me.kellymckinnon.setlister.SetlisterConstants;
 import me.kellymckinnon.setlister.models.Set;
 import me.kellymckinnon.setlister.models.Setlist;
 import me.kellymckinnon.setlister.models.Setlists;
@@ -72,8 +72,8 @@ public class ListingFragment extends Fragment {
     mSetlistFMService = RetrofitClient.getSetlistFMService();
 
     View rootView = inflater.inflate(R.layout.fragment_listing, container, false);
-    mQuery = getArguments().getString(SetlisterExtras.EXTRA_ARTIST_NAME);
-    mArtistId = getArguments().getString(SetlisterExtras.EXTRA_ARTIST_ID);
+    mQuery = getArguments().getString(SetlisterConstants.EXTRA_ARTIST_NAME);
+    mArtistId = getArguments().getString(SetlisterConstants.EXTRA_ARTIST_ID);
     mNoShowsTextView = rootView.findViewById(R.id.no_shows);
     mLoadingShowsProgressBar = rootView.findViewById(R.id.loading_shows);
     mRecyclerView = rootView.findViewById(R.id.show_list);
@@ -132,7 +132,7 @@ public class ListingFragment extends Fragment {
 
     ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
     actionBar.setDisplayHomeAsUpEnabled(true);
-    actionBar.setTitle(getArguments().getString(SetlisterExtras.EXTRA_ARTIST_NAME));
+    actionBar.setTitle(getArguments().getString(SetlisterConstants.EXTRA_ARTIST_NAME));
   }
 
   private void getSetlists() {

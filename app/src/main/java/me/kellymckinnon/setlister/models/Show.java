@@ -6,6 +6,18 @@ import android.os.Parcelable;
 /** Model for a concert */
 public class Show implements Parcelable {
 
+  public static final Creator<Show> CREATOR =
+      new Creator<Show>() {
+        @Override
+        public Show createFromParcel(Parcel in) {
+          return new Show(in);
+        }
+
+        @Override
+        public Show[] newArray(int size) {
+          return new Show[size];
+        }
+      };
   private String band;
   private String venue;
   private String date;
@@ -41,19 +53,6 @@ public class Show implements Parcelable {
   public int describeContents() {
     return 0;
   }
-
-  public static final Creator<Show> CREATOR =
-      new Creator<Show>() {
-        @Override
-        public Show createFromParcel(Parcel in) {
-          return new Show(in);
-        }
-
-        @Override
-        public Show[] newArray(int size) {
-          return new Show[size];
-        }
-      };
 
   public String getBand() {
     return band;

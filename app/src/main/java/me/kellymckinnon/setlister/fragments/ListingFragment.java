@@ -56,16 +56,6 @@ public class ListingFragment extends Fragment {
   private SetlistFMService mSetlistFMService;
   private OnSetlistSelectedListener mOnSetlistSelectedListener;
 
-  /**
-   * Callback to inform the activity that the user has selected a setlist and we should display
-   * relevant details for that setlist.
-   */
-  public interface OnSetlistSelectedListener {
-
-    /** Notifies listener that setlist has been selected */
-    void onSetlistSelected(Show show);
-  }
-
   @Override
   public View onCreateView(
       @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -268,5 +258,15 @@ public class ListingFragment extends Fragment {
     } // Or because there are no shows for that query
     mNoShowsTextView.setVisibility(View.VISIBLE);
     mRecyclerView.setVisibility(View.GONE);
+  }
+
+  /**
+   * Callback to inform the activity that the user has selected a setlist and we should display
+   * relevant details for that setlist.
+   */
+  public interface OnSetlistSelectedListener {
+
+    /** Notifies listener that setlist has been selected */
+    void onSetlistSelected(Show show);
   }
 }

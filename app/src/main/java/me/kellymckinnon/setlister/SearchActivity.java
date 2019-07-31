@@ -4,11 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
-
 import me.kellymckinnon.setlister.fragments.ListingFragment;
 import me.kellymckinnon.setlister.fragments.SearchFragment;
 import me.kellymckinnon.setlister.models.Show;
@@ -18,7 +16,8 @@ import me.kellymckinnon.setlister.utils.Utility;
  * The launcher activity, which uses a SearchFragment to guide the user to search for an artist,
  * venue, or city.
  */
-public class SearchActivity extends AppCompatActivity implements SearchFragment.OnArtistSelectedListener, ListingFragment.OnSetlistSelectedListener {
+public class SearchActivity extends AppCompatActivity
+    implements SearchFragment.OnArtistSelectedListener, ListingFragment.OnSetlistSelectedListener {
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -28,7 +27,7 @@ public class SearchActivity extends AppCompatActivity implements SearchFragment.
 
   @Override
   public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-    switch(item.getItemId()) {
+    switch (item.getItemId()) {
       case R.id.action_about:
         Utility.showAboutDialog(this);
         return true;

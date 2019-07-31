@@ -1,8 +1,6 @@
 package me.kellymckinnon.setlister;
 
-/**
- * Holds intent extras and other constants to be used across classes.
- */
+/** Holds intent extras and other constants to be used across classes. */
 public class SetlisterConstants {
   public static final String EXTRA_ARTIST_NAME = "ARTIST_NAME";
   public static final String EXTRA_ARTIST_ID = "ARTIST_ID";

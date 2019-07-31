@@ -63,23 +63,6 @@ public class SearchFragment extends Fragment {
   private OnArtistSelectedListener mOnArtistSelectedListener;
   private String mCurrentSearch;
 
-  /**
-   * Callback to inform the activity that the user has selected an artist and we should display
-   * relevant setlists for that artist.
-   */
-  public interface OnArtistSelectedListener {
-    // TODO: Change artistId to be @Nullable, instead of passing "0" everywhere
-
-    /**
-     * Notifies listener that artist has been selected
-     *
-     * @param artistName query, like "The Killers"
-     * @param artistId ID for the artist, if available. Due to the way setlist.fm works, sometimes
-     *     we do not have the ID, only the name.
-     */
-    void onArtistSelected(String artistName, String artistId);
-  }
-
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -369,5 +352,22 @@ public class SearchFragment extends Fragment {
     editor.putString("search" + 0, query);
     editor.putString("id" + 0, id);
     editor.apply();
+  }
+
+  /**
+   * Callback to inform the activity that the user has selected an artist and we should display
+   * relevant setlists for that artist.
+   */
+  public interface OnArtistSelectedListener {
+    // TODO: Change artistId to be @Nullable, instead of passing "0" everywhere
+
+    /**
+     * Notifies listener that artist has been selected
+     *
+     * @param artistName query, like "The Killers"
+     * @param artistId ID for the artist, if available. Due to the way setlist.fm works, sometimes
+     *     we do not have the ID, only the name.
+     */
+    void onArtistSelected(String artistName, String artistId);
   }
 }

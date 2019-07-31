@@ -1,16 +1,14 @@
 package me.kellymckinnon.setlister.utils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
 import javax.net.ssl.HttpsURLConnection;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Helper class that sends a GET or POST request through the passed url and returns the JSON object

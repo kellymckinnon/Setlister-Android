@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -13,7 +16,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.ShareActionProvider;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -40,17 +45,21 @@ public class SetlistFragment extends Fragment {
 
   private String mAccessToken;
   private ArrayList<String> mFailedSpotifySongs = new ArrayList<>();
+  private ShareActionProvider mShareActionProvider;
   private Show mShow;
   private View mRootView;
+
+  @Override
+  public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    mShow = getArguments().getParcelable(SetlisterConstants.EXTRA_SHOW);
+    setHasOptionsMenu(true);
+  }
 
   @Override
   public View onCreateView(
       @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     mRootView = inflater.inflate(R.layout.fragment_setlist, container, false);
-
-    Bundle arguments = getArguments();
-
-    mShow = arguments.getParcelable(SetlisterConstants.EXTRA_SHOW);
 
     ListView setlist = mRootView.findViewById(R.id.setlist);
 
@@ -68,6 +77,38 @@ public class SetlistFragment extends Fragment {
           }
         });
     return mRootView;
+  }
+
+  @Override
+  public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+    inflater.inflate(R.menu.menu_setlister, menu);
+    MenuItem item = menu.findItem(R.id.action_share);
+    item.setVisible(true);
+    mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+    Intent intent = new Intent(Intent.ACTION_SEND);
+    intent.setType("text/plain");
+    if (mShow != null) {
+      updateShareIntent();
+    }
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+    if (getActivity() == null) {
+      return false;
+    }
+
+    int id = item.getItemId();
+
+    if (id == R.id.action_about) {
+      Utility.showAboutDialog(getContext());
+      return true;
+    } else if (id == R.id.action_feedback) {
+      Utility.startFeedbackEmail(getActivity());
+      return true;
+    }
+
+    return super.onOptionsItemSelected(item);
   }
 
   @Override
@@ -116,6 +157,25 @@ public class SetlistFragment extends Fragment {
 
     actionBar.setTitle(formattedDate);
     actionBar.setSubtitle(mShow.getBand());
+  }
+
+  /** Provide information for share button */
+  private void updateShareIntent() {
+    String shareTitle =
+        getString(R.string.setlist_share_title, mShow.getBand(), mShow.getDate(), mShow.getVenue());
+
+    Intent intent = new Intent(Intent.ACTION_SEND);
+    intent.setType("text/plain");
+    intent.putExtra(Intent.EXTRA_SUBJECT, shareTitle);
+    StringBuilder text = new StringBuilder();
+    text.append(shareTitle).append(":\n");
+    for (String s : mShow.getSongs()) {
+      text.append("\n");
+      text.append(s);
+    }
+    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+    intent.putExtra(Intent.EXTRA_TEXT, text.toString());
+    mShareActionProvider.setShareIntent(intent);
   }
 
   /**

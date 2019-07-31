@@ -1,7 +1,6 @@
 package me.kellymckinnon.setlister.models;
 
 import com.squareup.moshi.Json;
-
 import java.util.List;
 
 public class Set {

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-
 import android.net.Uri;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.text.ParseException;
@@ -84,8 +83,10 @@ public class Utility {
   public static void startFeedbackEmail(Activity callingActivity) {
     Intent emailIntent =
         new Intent(
-            Intent.ACTION_SENDTO, Uri.fromParts("mailto", callingActivity.getString(R.string.email), null));
-    emailIntent.putExtra(Intent.EXTRA_SUBJECT, callingActivity.getString(R.string.feedback_subject));
+            Intent.ACTION_SENDTO,
+            Uri.fromParts("mailto", callingActivity.getString(R.string.email), null));
+    emailIntent.putExtra(
+        Intent.EXTRA_SUBJECT, callingActivity.getString(R.string.feedback_subject));
     callingActivity.startActivity(Intent.createChooser(emailIntent, "Send email..."));
   }
 }

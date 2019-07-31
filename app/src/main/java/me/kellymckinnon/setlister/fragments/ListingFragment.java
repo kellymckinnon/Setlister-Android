@@ -77,7 +77,8 @@ public class ListingFragment extends Fragment {
     mNoShowsTextView = rootView.findViewById(R.id.no_shows);
     mLoadingShowsProgressBar = rootView.findViewById(R.id.loading_shows);
     mRecyclerView = rootView.findViewById(R.id.show_list);
-    DividerItemDecoration decoration = new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL);
+    DividerItemDecoration decoration =
+        new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
     mRecyclerView.addItemDecoration(decoration);
     mLinearLayoutManager = new LinearLayoutManager(getActivity());
 

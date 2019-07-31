@@ -1,24 +1,36 @@
 package me.kellymckinnon.setlister.fragments;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import com.getbase.floatingactionbutton.FloatingActionButton;
-
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
+import com.spotify.sdk.android.authentication.AuthenticationClient;
+import com.spotify.sdk.android.authentication.AuthenticationResponse;
+import java.io.IOException;
+import java.util.ArrayList;
 import me.kellymckinnon.setlister.R;
 import me.kellymckinnon.setlister.SetlisterConstants;
 import me.kellymckinnon.setlister.models.Show;
 import me.kellymckinnon.setlister.network.SpotifyHandler;
+import me.kellymckinnon.setlister.utils.JSONRetriever;
 import me.kellymckinnon.setlister.utils.Utility;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Displays the setlist for the given show and uses a floating action button to give user the option
@@ -26,33 +38,71 @@ import me.kellymckinnon.setlister.utils.Utility;
  */
 public class SetlistFragment extends Fragment {
 
+  private String mAccessToken;
+  private ArrayList<String> mFailedSpotifySongs = new ArrayList<>();
   private Show mShow;
+  private View mRootView;
 
   @Override
   public View onCreateView(
-          @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    View rootView = inflater.inflate(R.layout.fragment_setlist, container, false);
+      @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    mRootView = inflater.inflate(R.layout.fragment_setlist, container, false);
 
     Bundle arguments = getArguments();
 
     mShow = arguments.getParcelable(SetlisterConstants.EXTRA_SHOW);
 
-    ListView setlist = rootView.findViewById(R.id.setlist);
+    ListView setlist = mRootView.findViewById(R.id.setlist);
 
     ArrayAdapter<String> adapter =
         new ArrayAdapter<>(getActivity(), R.layout.single_line_list_row, mShow.getSongs());
 
     setlist.setAdapter(adapter);
 
-    FloatingActionButton spotify = rootView.findViewById(R.id.spotify);
+    FloatingActionButton spotify = mRootView.findViewById(R.id.spotify);
     spotify.setOnClickListener(
         new View.OnClickListener() {
           @Override
           public void onClick(View v) {
-            SpotifyHandler.authenticateUser(getActivity());
+            SpotifyHandler.authenticateUser(SetlistFragment.this);
           }
         });
-    return rootView;
+    return mRootView;
+  }
+
+  @Override
+  public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+
+    if (requestCode != SetlisterConstants.SPOTIFY_LOGIN_ACTIVITY_ID) {
+      return; // This shouldn't happen
+    }
+
+    AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, data);
+
+    switch (response.getType()) {
+        // Response was successful and contains auth token, we can create a Spotify playlist
+      case TOKEN:
+        mAccessToken = response.getAccessToken();
+        Snackbar.make(
+                mRootView,
+                getString(R.string.spotify_creating_playlist_snackbar),
+                Snackbar.LENGTH_SHORT)
+            .show();
+
+        mFailedSpotifySongs = new ArrayList<>();
+        new PlaylistCreator().execute();
+        break;
+
+        // Auth flow returned an error
+      case ERROR:
+        Snackbar.make(
+                mRootView,
+                getString(R.string.spotify_connection_failed_snackbar),
+                Snackbar.LENGTH_SHORT)
+            .show();
+        // Other cases mean that most likely auth flow was cancelled. We'll do nothing
+    }
   }
 
   @Override
@@ -66,5 +116,139 @@ public class SetlistFragment extends Fragment {
 
     actionBar.setTitle(formattedDate);
     actionBar.setSubtitle(mShow.getBand());
+  }
+
+  /**
+   * Uses the Spotify API to create a playlist and add the songs from the setlist to the playlist
+   */
+  private class PlaylistCreator extends AsyncTask<Void, Void, Void> {
+
+    @Override
+    protected Void doInBackground(Void... params) {
+      try {
+        // Get username, which we need to create a playlist
+        JSONObject userJson =
+            JSONRetriever.getRequest("https://api.spotify.com/v1/me", "Bearer", mAccessToken);
+        String username = userJson.getString("id");
+
+        // Create an empty playlist for the authenticated user
+        String createPlaylistUrl = "https://api.spotify.com/v1/users/" + username + "/playlists";
+        JSONObject playlistInfo = new JSONObject();
+        playlistInfo.put(
+            "name", mShow.getBand() + ", " + mShow.getVenue() + ", " + mShow.getDate());
+        playlistInfo.put("public", "true");
+        JSONObject createPlaylistJson =
+            JSONRetriever.postRequest(createPlaylistUrl, "Bearer", mAccessToken, playlistInfo);
+
+        // Get the newly created playlist so the fun can begin
+        String playlistId = createPlaylistJson.getString("id");
+        StringBuilder tracks = new StringBuilder();
+        int numSongsAdded = 0;
+
+        // Add songs one at a time
+        for (String s : mShow.getSongs()) {
+          // Only 100 songs can be added through the API
+          if (numSongsAdded > 100) {
+            mFailedSpotifySongs.add(s);
+          }
+
+          String songQuery = s.replace(' ', '+');
+          String artistQuery = mShow.getBand().replace(' ', '+');
+          try {
+            JSONObject trackJson =
+                JSONRetriever.getRequest(
+                    "https://api.spotify.com/v1/search?q=track:"
+                        + songQuery
+                        + "%20artist:"
+                        + artistQuery
+                        + "&type=track&limit=5",
+                    "Bearer",
+                    mAccessToken);
+            JSONObject tracking = trackJson.getJSONObject("tracks");
+            JSONArray items = tracking.getJSONArray("items");
+            JSONObject firstChoice = (JSONObject) items.get(0);
+
+            // The first match isn't always the best one (e.g. X remix), so we check if
+            // any of the top 5 are an exact match to X
+            for (int i = 0; i < items.length(); i++) {
+              JSONObject currentTrack = (JSONObject) items.get(i);
+              if (currentTrack.getString("name").equals(s)) {
+                firstChoice = currentTrack;
+                break;
+              }
+            }
+
+            tracks.append(firstChoice.getString("uri"));
+
+            tracks.append(",");
+            numSongsAdded++;
+          } catch (JSONException e) {
+            mFailedSpotifySongs.add(s);
+          } catch (IOException e) {
+            mFailedSpotifySongs.add(s);
+          }
+        }
+
+        tracks.deleteCharAt(tracks.length() - 1); // Delete last comma
+
+        String addSongsUrl =
+            createPlaylistUrl + "/" + playlistId + "/tracks?uris=" + tracks.toString();
+        JSONRetriever.postRequest(addSongsUrl, "Bearer", mAccessToken, null);
+      } catch (JSONException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
+      return null;
+    }
+
+    @SuppressLint("WrongConstant")
+    @Override
+    protected void onPostExecute(Void aVoid) {
+      if (getActivity() == null) {
+        return;
+      }
+
+      Snackbar snackbar =
+          Snackbar.make(
+              mRootView,
+              getString(R.string.spotify_playlist_created_snackbar),
+              Snackbar.LENGTH_SHORT);
+
+      // If there were missed songs, give the user the option to see what they were
+      if (!mFailedSpotifySongs.isEmpty()) {
+        snackbar
+            .setDuration(Snackbar.LENGTH_LONG)
+            .setAction(
+                getResources()
+                    .getQuantityString(
+                        R.plurals.spotify_missing_songs_snackbar,
+                        mFailedSpotifySongs.size(),
+                        mFailedSpotifySongs.size()),
+                new View.OnClickListener() {
+                  @Override
+                  public void onClick(View view) {
+                    StringBuilder content = new StringBuilder();
+                    content.append(getString(R.string.spotify_missing_songs_dialog_body));
+                    content.append("\n");
+                    for (String s : mFailedSpotifySongs) {
+                      content.append("\n");
+                      content.append("• ");
+                      content.append(s);
+                    }
+
+                    new MaterialAlertDialogBuilder(getActivity())
+                        .setTitle(R.string.spotify_missing_songs_dialog_title)
+                        .setMessage(content)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show();
+                  }
+                })
+            .setActionTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
+      }
+      snackbar.show();
+      super.onPostExecute(aVoid);
+    }
   }
 }

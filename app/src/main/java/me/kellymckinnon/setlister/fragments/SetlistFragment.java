@@ -49,6 +49,16 @@ public class SetlistFragment extends Fragment {
   private Show mShow;
   private View mRootView;
 
+  public static SetlistFragment newInstance(Show show) {
+    SetlistFragment setlistFragment = new SetlistFragment();
+
+    Bundle args = new Bundle();
+    args.putParcelable(SetlisterConstants.EXTRA_SHOW, show);
+    setlistFragment.setArguments(args);
+
+    return setlistFragment;
+  }
+
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);

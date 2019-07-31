@@ -56,6 +56,20 @@ public class ListingFragment extends Fragment {
   private SetlistFMService mSetlistFMService;
   private OnSetlistSelectedListener mOnSetlistSelectedListener;
 
+  public static ListingFragment newInstance(String artistName, String artistId) {
+    ListingFragment listingFragment = new ListingFragment();
+    Bundle args = new Bundle();
+    args.putString(SetlisterConstants.EXTRA_ARTIST_NAME, artistName);
+
+    // TODO: Change artistId to be @Nullable, instead of passing "0" everywhere
+    if (!artistId.equals("0")) {
+      args.putString(SetlisterConstants.EXTRA_ARTIST_ID, artistId);
+    }
+
+    listingFragment.setArguments(args);
+    return listingFragment;
+  }
+
   @Override
   public View onCreateView(
       @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

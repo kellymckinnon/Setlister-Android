@@ -39,7 +39,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Fragment opened by SearchActivity that holds a search bar and displays recent results as well as
+ * Fragment opened by SetlisterActivity that holds a search bar and displays recent results as well as
  * suggestions as the user types
  */
 public class SearchFragment extends Fragment {

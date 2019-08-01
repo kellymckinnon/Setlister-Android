@@ -7,21 +7,38 @@ import retrofit2.converter.moshi.MoshiConverterFactory;
 public class RetrofitClient {
 
   private static final String SETLIST_FM_BASE_URL = "https://api.setlist.fm/rest/1.0/";
+  private static final String SPOTIFY_BASE_URL = "https://api.spotify.com/v1/";
 
-  private static Retrofit retrofit = null;
+  private static Retrofit setlistFMRetrofit = null;
+  private static Retrofit spotifyRetrofit = null;
 
   public static SetlistFMService getSetlistFMService() {
-    return getClient().create(SetlistFMService.class);
+    return getSetlistFMClient().create(SetlistFMService.class);
   }
 
-  private static Retrofit getClient() {
-    if (retrofit == null) {
-      retrofit =
+  public static SpotifyService getSpotifyService() {
+    return getSpotifyClient().create(SpotifyService.class);
+  }
+
+  private static Retrofit getSetlistFMClient() {
+    if (setlistFMRetrofit == null) {
+      setlistFMRetrofit =
           new Retrofit.Builder()
               .baseUrl(SETLIST_FM_BASE_URL)
               .addConverterFactory(MoshiConverterFactory.create())
               .build();
     }
-    return retrofit;
+    return setlistFMRetrofit;
+  }
+
+  private static Retrofit getSpotifyClient() {
+    if (spotifyRetrofit == null) {
+      spotifyRetrofit =
+          new Retrofit.Builder()
+              .baseUrl(SPOTIFY_BASE_URL)
+              .addConverterFactory(MoshiConverterFactory.create())
+              .build();
+    }
+    return spotifyRetrofit;
   }
 }

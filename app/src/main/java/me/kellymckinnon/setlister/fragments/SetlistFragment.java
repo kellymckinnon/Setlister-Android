@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,15 +28,23 @@ import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import me.kellymckinnon.setlister.R;
 import me.kellymckinnon.setlister.SetlisterConstants;
 import me.kellymckinnon.setlister.models.Show;
+import me.kellymckinnon.setlister.models.SpotifyPlaylist;
+import me.kellymckinnon.setlister.models.SpotifyUser;
+import me.kellymckinnon.setlister.network.RetrofitClient;
 import me.kellymckinnon.setlister.network.SpotifyHandler;
 import me.kellymckinnon.setlister.utils.JSONRetriever;
 import me.kellymckinnon.setlister.utils.Utility;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Displays the setlist for the given show and uses a floating action button to give user the option
@@ -142,7 +151,60 @@ public class SetlistFragment extends Fragment {
             .show();
 
         mFailedSpotifySongs = new ArrayList<>();
-        new PlaylistCreator().execute();
+
+        final String accessTokenHeader = "Bearer " + mAccessToken;
+
+        RetrofitClient.getSpotifyService()
+            .getUser(accessTokenHeader)
+            .enqueue(
+                new Callback<SpotifyUser>() {
+                  @Override
+                  public void onResponse(Call<SpotifyUser> call, Response<SpotifyUser> response) {
+                    if (response.body() == null) {
+                      Log.e(
+                          SetlistFragment.class.getSimpleName(),
+                          "Response when getting username was null");
+                      return;
+                    }
+
+                    final String userId = response.body().getId();
+                    String playlistName =
+                        mShow.getBand() + ", " + mShow.getVenue() + ", " + mShow.getDate();
+                    Map<String, String> playlistCreationParams = new HashMap<>();
+                    playlistCreationParams.put("name", playlistName);
+                    RetrofitClient.getSpotifyService()
+                        .createPlaylist(accessTokenHeader, userId, playlistCreationParams)
+                        .enqueue(
+                            new Callback<SpotifyPlaylist>() {
+                              @Override
+                              public void onResponse(
+                                  Call<SpotifyPlaylist> call, Response<SpotifyPlaylist> response) {
+                                if (response.body() == null) {
+                                  Log.e(
+                                      SetlistFragment.class.getSimpleName(),
+                                      "Response for creating empty Spotify playlist was null");
+                                  return;
+                                }
+
+                                new PlaylistCreator().execute(userId, response.body().getId());
+                              }
+
+                              @Override
+                              public void onFailure(Call<SpotifyPlaylist> call, Throwable t) {
+                                Log.e(
+                                    SetlistFragment.class.getSimpleName(),
+                                    "Failed to get spotify playlist: " + t);
+                              }
+                            });
+                  }
+
+                  @Override
+                  public void onFailure(Call<SpotifyUser> call, Throwable t) {
+                    Log.e(
+                        SetlistFragment.class.getSimpleName(),
+                        "Failed to get Spotify username: " + t);
+                  }
+                });
         break;
 
         // Auth flow returned an error
@@ -191,84 +253,66 @@ public class SetlistFragment extends Fragment {
   /**
    * Uses the Spotify API to create a playlist and add the songs from the setlist to the playlist
    */
-  private class PlaylistCreator extends AsyncTask<Void, Void, Void> {
+  private class PlaylistCreator extends AsyncTask<String, Void, Void> {
 
     @Override
-    protected Void doInBackground(Void... params) {
-      try {
-        // Get username, which we need to create a playlist
-        JSONObject userJson =
-            JSONRetriever.getRequest("https://api.spotify.com/v1/me", "Bearer", mAccessToken);
-        String username = userJson.getString("id");
+    protected Void doInBackground(String... strings) {
+      String userId = strings[0];
+      String playlistId = strings[1];
+      String createPlaylistUrl = "https://api.spotify.com/v1/users/" + userId + "/playlists";
 
-        // Create an empty playlist for the authenticated user
-        String createPlaylistUrl = "https://api.spotify.com/v1/users/" + username + "/playlists";
-        JSONObject playlistInfo = new JSONObject();
-        playlistInfo.put(
-            "name", mShow.getBand() + ", " + mShow.getVenue() + ", " + mShow.getDate());
-        playlistInfo.put("public", "true");
-        JSONObject createPlaylistJson =
-            JSONRetriever.postRequest(createPlaylistUrl, "Bearer", mAccessToken, playlistInfo);
+      StringBuilder tracks = new StringBuilder();
+      int numSongsAdded = 0;
 
-        // Get the newly created playlist so the fun can begin
-        String playlistId = createPlaylistJson.getString("id");
-        StringBuilder tracks = new StringBuilder();
-        int numSongsAdded = 0;
-
-        // Add songs one at a time
-        for (String s : mShow.getSongs()) {
-          // Only 100 songs can be added through the API
-          if (numSongsAdded > 100) {
-            mFailedSpotifySongs.add(s);
-          }
-
-          String songQuery = s.replace(' ', '+');
-          String artistQuery = mShow.getBand().replace(' ', '+');
-          try {
-            JSONObject trackJson =
-                JSONRetriever.getRequest(
-                    "https://api.spotify.com/v1/search?q=track:"
-                        + songQuery
-                        + "%20artist:"
-                        + artistQuery
-                        + "&type=track&limit=5",
-                    "Bearer",
-                    mAccessToken);
-            JSONObject tracking = trackJson.getJSONObject("tracks");
-            JSONArray items = tracking.getJSONArray("items");
-            JSONObject firstChoice = (JSONObject) items.get(0);
-
-            // The first match isn't always the best one (e.g. X remix), so we check if
-            // any of the top 5 are an exact match to X
-            for (int i = 0; i < items.length(); i++) {
-              JSONObject currentTrack = (JSONObject) items.get(i);
-              if (currentTrack.getString("name").equals(s)) {
-                firstChoice = currentTrack;
-                break;
-              }
-            }
-
-            tracks.append(firstChoice.getString("uri"));
-
-            tracks.append(",");
-            numSongsAdded++;
-          } catch (JSONException e) {
-            mFailedSpotifySongs.add(s);
-          } catch (IOException e) {
-            mFailedSpotifySongs.add(s);
-          }
+      // Add songs one at a time
+      for (String s : mShow.getSongs()) {
+        // Only 100 songs can be added through the API
+        if (numSongsAdded > 100) {
+          mFailedSpotifySongs.add(s);
         }
 
-        tracks.deleteCharAt(tracks.length() - 1); // Delete last comma
+        String songQuery = s.replace(' ', '+');
+        String artistQuery = mShow.getBand().replace(' ', '+');
+        try {
+          JSONObject trackJson =
+              JSONRetriever.getRequest(
+                  "https://api.spotify.com/v1/search?q=track:"
+                      + songQuery
+                      + "%20artist:"
+                      + artistQuery
+                      + "&type=track&limit=5",
+                  "Bearer",
+                  mAccessToken);
+          JSONObject tracking = trackJson.getJSONObject("tracks");
+          JSONArray items = tracking.getJSONArray("items");
+          JSONObject firstChoice = (JSONObject) items.get(0);
 
-        String addSongsUrl =
-            createPlaylistUrl + "/" + playlistId + "/tracks?uris=" + tracks.toString();
-        JSONRetriever.postRequest(addSongsUrl, "Bearer", mAccessToken, null);
-      } catch (JSONException e) {
-        e.printStackTrace();
-      } catch (IOException e) {
-        e.printStackTrace();
+          // The first match isn't always the best one (e.g. X remix), so we check if
+          // any of the top 5 are an exact match to X
+          for (int i = 0; i < items.length(); i++) {
+            JSONObject currentTrack = (JSONObject) items.get(i);
+            if (currentTrack.getString("name").equals(s)) {
+              firstChoice = currentTrack;
+              break;
+            }
+          }
+
+          tracks.append(firstChoice.getString("uri"));
+
+          tracks.append(",");
+          numSongsAdded++;
+        } catch (JSONException e) {
+          mFailedSpotifySongs.add(s);
+        } catch (IOException e) {
+          mFailedSpotifySongs.add(s);
+        }
       }
+
+      tracks.deleteCharAt(tracks.length() - 1); // Delete last comma
+
+      String addSongsUrl =
+          createPlaylistUrl + "/" + playlistId + "/tracks?uris=" + tracks.toString();
+      JSONRetriever.postRequest(addSongsUrl, "Bearer", mAccessToken, null);
 
       return null;
     }

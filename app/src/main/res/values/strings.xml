@@ -58,6 +58,7 @@
     <string name="spotify_missing_songs_dialog_body">The following songs were not found on Spotify:</string>
     <string name="spotify_missing_songs_dialog_title">Missing songs</string>
     <string name="unknown_venue">Unknown venue</string>
+    <string name="generic_error">Sorry, something went wrong.</string>
     <plurals name="spotify_missing_songs_snackbar">
         <item quantity="one">Show %d missing song</item>
         <item quantity="other">Show %d missing songs</item>

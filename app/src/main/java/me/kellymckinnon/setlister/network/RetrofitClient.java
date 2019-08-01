@@ -1,6 +1,7 @@
 package me.kellymckinnon.setlister.network;
 
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.moshi.MoshiConverterFactory;
 
 /** Interface used by Retrofit to issue network requests to the setlist.fm API */
@@ -26,6 +27,7 @@ public class RetrofitClient {
           new Retrofit.Builder()
               .baseUrl(SETLIST_FM_BASE_URL)
               .addConverterFactory(MoshiConverterFactory.create())
+              .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
               .build();
     }
     return setlistFMRetrofit;
@@ -37,6 +39,7 @@ public class RetrofitClient {
           new Retrofit.Builder()
               .baseUrl(SPOTIFY_BASE_URL)
               .addConverterFactory(MoshiConverterFactory.create())
+              .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
               .build();
     }
     return spotifyRetrofit;

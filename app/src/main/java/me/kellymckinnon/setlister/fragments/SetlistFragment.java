@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -26,6 +27,12 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Function;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,9 +49,6 @@ import me.kellymckinnon.setlister.utils.Utility;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Displays the setlist for the given show and uses a floating action button to give user the option
@@ -57,6 +61,11 @@ public class SetlistFragment extends Fragment {
   private ShareActionProvider mShareActionProvider;
   private Show mShow;
   private View mRootView;
+
+  /** Collects all subscriptions to unsubscribe later */
+  @NonNull private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+
+  private String mSpotifyUserId;
 
   public static SetlistFragment newInstance(Show show) {
     SetlistFragment setlistFragment = new SetlistFragment();
@@ -152,59 +161,7 @@ public class SetlistFragment extends Fragment {
 
         mFailedSpotifySongs = new ArrayList<>();
 
-        final String accessTokenHeader = "Bearer " + mAccessToken;
-
-        RetrofitClient.getSpotifyService()
-            .getUser(accessTokenHeader)
-            .enqueue(
-                new Callback<SpotifyUser>() {
-                  @Override
-                  public void onResponse(Call<SpotifyUser> call, Response<SpotifyUser> response) {
-                    if (response.body() == null) {
-                      Log.e(
-                          SetlistFragment.class.getSimpleName(),
-                          "Response when getting username was null");
-                      return;
-                    }
-
-                    final String userId = response.body().getId();
-                    String playlistName =
-                        mShow.getBand() + ", " + mShow.getVenue() + ", " + mShow.getDate();
-                    Map<String, String> playlistCreationParams = new HashMap<>();
-                    playlistCreationParams.put("name", playlistName);
-                    RetrofitClient.getSpotifyService()
-                        .createPlaylist(accessTokenHeader, userId, playlistCreationParams)
-                        .enqueue(
-                            new Callback<SpotifyPlaylist>() {
-                              @Override
-                              public void onResponse(
-                                  Call<SpotifyPlaylist> call, Response<SpotifyPlaylist> response) {
-                                if (response.body() == null) {
-                                  Log.e(
-                                      SetlistFragment.class.getSimpleName(),
-                                      "Response for creating empty Spotify playlist was null");
-                                  return;
-                                }
-
-                                new PlaylistCreator().execute(userId, response.body().getId());
-                              }
-
-                              @Override
-                              public void onFailure(Call<SpotifyPlaylist> call, Throwable t) {
-                                Log.e(
-                                    SetlistFragment.class.getSimpleName(),
-                                    "Failed to get spotify playlist: " + t);
-                              }
-                            });
-                  }
-
-                  @Override
-                  public void onFailure(Call<SpotifyUser> call, Throwable t) {
-                    Log.e(
-                        SetlistFragment.class.getSimpleName(),
-                        "Failed to get Spotify username: " + t);
-                  }
-                });
+        createSpotifyPlaylist();
         break;
 
         // Auth flow returned an error
@@ -216,6 +173,54 @@ public class SetlistFragment extends Fragment {
             .show();
         // Other cases mean that most likely auth flow was cancelled. We'll do nothing
     }
+  }
+
+  private void createSpotifyPlaylist() {
+    final String accessTokenHeader = "Bearer " + mAccessToken;
+
+    mCompositeDisposable.add(
+        RetrofitClient.getSpotifyService()
+            .getUser(accessTokenHeader)
+            .flatMap(
+                new Function<SpotifyUser, Single<SpotifyPlaylist>>() {
+                  @Override
+                  public Single<SpotifyPlaylist> apply(SpotifyUser spotifyUser) {
+                    if (spotifyUser == null) {
+                      Toast.makeText(getContext(), R.string.generic_error, Toast.LENGTH_SHORT)
+                          .show();
+                    }
+
+                    mSpotifyUserId = spotifyUser.getId();
+
+                    String playlistName =
+                        mShow.getBand() + ", " + mShow.getVenue() + ", " + mShow.getDate();
+                    Map<String, String> playlistCreationParams = new HashMap<>();
+                    playlistCreationParams.put("name", playlistName);
+
+                    return RetrofitClient.getSpotifyService()
+                        .createPlaylist(accessTokenHeader, mSpotifyUserId, playlistCreationParams);
+                  }
+                })
+            .subscribeOn(Schedulers.io()) // Work on IO thread
+            .observeOn(AndroidSchedulers.mainThread()) // Observe on UI thread
+            .subscribeWith(
+                new DisposableSingleObserver<SpotifyPlaylist>() {
+                  @Override
+                  public void onSuccess(SpotifyPlaylist spotifyPlaylist) {
+                    if (spotifyPlaylist == null) {
+                      Toast.makeText(getContext(), R.string.generic_error, Toast.LENGTH_SHORT)
+                          .show();
+                    }
+
+                    new PlaylistCreator().execute(mSpotifyUserId, spotifyPlaylist.getId());
+                  }
+
+                  @Override
+                  public void onError(Throwable e) {
+                    Toast.makeText(getContext(), R.string.generic_error, Toast.LENGTH_SHORT).show();
+                    Log.e(SetlistFragment.class.getSimpleName(), e.toString());
+                  }
+                }));
   }
 
   @Override
@@ -364,5 +369,11 @@ public class SetlistFragment extends Fragment {
       snackbar.show();
       super.onPostExecute(aVoid);
     }
+  }
+
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+    mCompositeDisposable.clear();
   }
 }

@@ -1,5 +1,6 @@
 package me.kellymckinnon.setlister.network;
 
+import io.reactivex.Single;
 import java.util.Map;
 import me.kellymckinnon.setlister.models.SpotifyPlaylist;
 import me.kellymckinnon.setlister.models.SpotifyUser;
@@ -21,7 +22,7 @@ public interface SpotifyService {
    *     User's Profile</a>
    */
   @GET("me")
-  Call<SpotifyUser> getUser(@Header("Authorization") String accessToken);
+  Single<SpotifyUser> getUser(@Header("Authorization") String accessToken);
 
   /**
    * Create a playlist
@@ -32,7 +33,7 @@ public interface SpotifyService {
    * @see <a href="https://developer.spotify.com/web-api/create-playlist/">Create a Playlist</a>
    */
   @POST("users/{user_id}/playlists")
-  Call<SpotifyPlaylist> createPlaylist(
+  Single<SpotifyPlaylist> createPlaylist(
       @Header("Authorization") String accessToken,
       @Path("user_id") String userId,
       @Body Map<String, String> body);

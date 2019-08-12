@@ -199,6 +199,11 @@ public class ArtistSearchFragment extends Fragment {
 
           @Override
           public void afterTextChanged(Editable s) {
+            if (s.toString().equals(mCurrentSearch)) {
+              // This prevents us from re-searching after we return to the fragment.
+              return;
+            }
+
             // Stop any current searches
             mSearchHandler.removeMessages(TRIGGER_SEARCH);
 
@@ -292,6 +297,7 @@ public class ArtistSearchFragment extends Fragment {
       mNoRecentSearchesText.setVisibility(View.VISIBLE);
     } else {
       mNoRecentSearchesText.setVisibility(View.GONE);
+      mCurrentSearch = null;
       mSuggestionListAdapter.clear();
       mSuggestionListAdapter.addAll(searchedArtists);
       mSuggestionListView.setVisibility(View.VISIBLE);

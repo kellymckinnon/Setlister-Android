@@ -4,6 +4,7 @@ import static me.kellymckinnon.setlister.network.SpotifyService.PLAYLIST_NAME_EX
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -95,7 +96,7 @@ public class SpotifyPlaylistCreator {
         .flatMap( // Search Spotify for a list of track suggestions for each song
             setlistFmSongName ->
                 RetrofitClient.getSpotifyService()
-                    .searchTracks(auth, "track:" + setlistFmSongName + " artist:" + show.getBand())
+                    .searchTracks(auth, "track:" + setlistFmSongName.replace("'", "") + " artist:" + show.getBand())
                     .map(
                         spotifySearchResults ->
                             new Pair<>(setlistFmSongName, spotifySearchResults)))

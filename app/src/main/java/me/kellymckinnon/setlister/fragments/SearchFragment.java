@@ -134,7 +134,7 @@ public class SearchFragment extends Fragment {
             String query = (String) mSuggestionListView.getItemAtPosition(position);
             String searchId = mNameToIdMap.get(query);
             addRecentSearch(query, searchId);
-            mOnArtistSelectedListener.onArtistSelected(query, "0" /* artistId */);
+            mOnArtistSelectedListener.onArtistSelected(query, searchId /* artistId */);
           }
         });
 

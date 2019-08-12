@@ -195,14 +195,9 @@ public class ListingFragment extends Fragment {
     if (mArtistId != null) { // We have an MBID, use that
       mSetlistFMService.getSetlistsByArtistMbid(mArtistId, mNumPagesLoaded + 1).enqueue(callback);
     } else { // We have a plaintext name, use that
-      try {
-        mSetlistFMService
-            .getSetlistsByArtistName(URLEncoder.encode(mQuery, "UTF-8"), mNumPagesLoaded + 1)
-            .enqueue(callback);
-      } catch (UnsupportedEncodingException e) {
-        e.printStackTrace();
-        showNullState();
-      }
+      mSetlistFMService
+          .getSetlistsByArtistName(mQuery, mNumPagesLoaded + 1)
+          .enqueue(callback);
     }
   }
 

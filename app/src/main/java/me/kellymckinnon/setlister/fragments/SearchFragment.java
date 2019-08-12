@@ -159,6 +159,7 @@ public class SearchFragment extends Fragment {
     ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
     actionBar.setDisplayHomeAsUpEnabled(false);
     actionBar.setTitle(R.string.app_name);
+    actionBar.setSubtitle(null);
 
     // Don't search until user has stopped typing
     final Handler handler =

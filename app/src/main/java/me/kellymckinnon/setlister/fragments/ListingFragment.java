@@ -138,6 +138,7 @@ public class ListingFragment extends Fragment {
     ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
     actionBar.setDisplayHomeAsUpEnabled(true);
     actionBar.setTitle(getArguments().getString(SetlisterConstants.EXTRA_ARTIST_NAME));
+    actionBar.setSubtitle(null);
   }
 
   private void getSetlists() {

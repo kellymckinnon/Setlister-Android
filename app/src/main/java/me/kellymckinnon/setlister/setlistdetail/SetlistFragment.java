@@ -1,4 +1,4 @@
-package me.kellymckinnon.setlister.fragments;
+package me.kellymckinnon.setlister.setlistdetail;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,11 +23,10 @@ import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import io.reactivex.disposables.CompositeDisposable;
 import me.kellymckinnon.setlister.R;
-import me.kellymckinnon.setlister.SetlisterConstants;
-import me.kellymckinnon.setlister.SpotifyPlaylistCreator;
+import me.kellymckinnon.setlister.common.SetlisterConstants;
 import me.kellymckinnon.setlister.models.Show;
 import me.kellymckinnon.setlister.network.SpotifyHandler;
-import me.kellymckinnon.setlister.utils.Utility;
+import me.kellymckinnon.setlister.common.Utility;
 
 /**
  * Displays the setlist for the given show and uses a floating action button to give user the option

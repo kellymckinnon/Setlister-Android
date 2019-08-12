@@ -1,4 +1,4 @@
-package me.kellymckinnon.setlister.fragments;
+package me.kellymckinnon.setlister.showlist;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -18,15 +18,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import me.kellymckinnon.setlister.R;
-import me.kellymckinnon.setlister.SetlisterConstants;
+import me.kellymckinnon.setlister.common.SetlisterConstants;
 import me.kellymckinnon.setlister.models.SearchedArtist;
 import me.kellymckinnon.setlister.models.Setlist;
 import me.kellymckinnon.setlister.models.Setlists;
 import me.kellymckinnon.setlister.models.Show;
 import me.kellymckinnon.setlister.network.RetrofitClient;
 import me.kellymckinnon.setlister.network.SetlistFMService;
-import me.kellymckinnon.setlister.utils.Utility;
-import me.kellymckinnon.setlister.views.ShowAdapter;
+import me.kellymckinnon.setlister.common.Utility;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -36,7 +35,7 @@ import retrofit2.Response;
  * shows, and displays them in a list that contains the artist, date, location, tour, and number of
  * songs in the setlist for that show.
  */
-public class ListingFragment extends Fragment {
+public class ShowListFragment extends Fragment {
 
   // Passed in information about the artist we want to search setlists for
   private String mArtistName;
@@ -46,15 +45,15 @@ public class ListingFragment extends Fragment {
   private TextView mNoShowsTextView;
   private ProgressBar mLoadingShowsProgressBar;
 
-  private ShowAdapter mAdapter;
+  private ShowListAdapter mAdapter;
   private int mNumPagesLoaded = 0;
   private boolean mIsLoading = false;
   private int mNumSetlistPages; // Number of pages of setlists from API
   private SetlistFMService mSetlistFMService;
   private OnSetlistSelectedListener mOnSetlistSelectedListener;
 
-  public static ListingFragment newInstance(SearchedArtist artist) {
-    ListingFragment listingFragment = new ListingFragment();
+  public static ShowListFragment newInstance(SearchedArtist artist) {
+    ShowListFragment showListFragment = new ShowListFragment();
     Bundle args = new Bundle();
     args.putString(SetlisterConstants.EXTRA_ARTIST_NAME, artist.getName());
 
@@ -63,8 +62,8 @@ public class ListingFragment extends Fragment {
       args.putString(SetlisterConstants.EXTRA_ARTIST_ID, artist.getMbid());
     }
 
-    listingFragment.setArguments(args);
-    return listingFragment;
+    showListFragment.setArguments(args);
+    return showListFragment;
   }
 
   @Override
@@ -85,7 +84,7 @@ public class ListingFragment extends Fragment {
     if (mArtistName == null) { // Fragment's first time being created
       mArtistName = getArguments().getString(SetlisterConstants.EXTRA_ARTIST_NAME);
       mArtistId = getArguments().getString(SetlisterConstants.EXTRA_ARTIST_ID);
-      mAdapter = new ShowAdapter(mOnSetlistSelectedListener);
+      mAdapter = new ShowListAdapter(mOnSetlistSelectedListener);
       getSetlists();
     } else { // Fragment is being recreated
       mRecyclerView.setVisibility(View.VISIBLE);

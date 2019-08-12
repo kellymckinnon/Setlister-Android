@@ -1,4 +1,4 @@
-package me.kellymckinnon.setlister.utils;
+package me.kellymckinnon.setlister.common;
 
 import android.app.Activity;
 import android.content.Context;

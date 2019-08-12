@@ -1,11 +1,9 @@
-package me.kellymckinnon.setlister;
+package me.kellymckinnon.setlister.artistsearch;
 
 import android.app.Application;
 import android.os.AsyncTask;
 import androidx.lifecycle.LiveData;
 import java.util.List;
-import me.kellymckinnon.setlister.db.SearchedArtistDao;
-import me.kellymckinnon.setlister.db.SearchedArtistRoomDatabase;
 import me.kellymckinnon.setlister.models.SearchedArtist;
 
 /**
@@ -14,11 +12,11 @@ import me.kellymckinnon.setlister.models.SearchedArtist;
  *
  * <p>// TODO: Move all networking code here as well
  */
-class SearchRepository {
+class ArtistSearchRepository {
   private SearchedArtistDao mSearchedArtistDao;
   private LiveData<List<SearchedArtist>> mSearchedArtists;
 
-  SearchRepository(Application application) {
+  ArtistSearchRepository(Application application) {
     SearchedArtistRoomDatabase db = SearchedArtistRoomDatabase.getDatabase(application);
     mSearchedArtistDao = db.artistDao();
     mSearchedArtists = mSearchedArtistDao.getAllArtists();

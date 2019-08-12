@@ -1,7 +1,7 @@
-package me.kellymckinnon.setlister.views;
+package me.kellymckinnon.setlister.showlist;
 
 import static androidx.recyclerview.widget.RecyclerView.Adapter;
-import static androidx.recyclerview.widget.RecyclerView.OnClickListener;
+import static android.view.View.OnClickListener;
 import static androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import android.content.Context;
@@ -16,16 +16,16 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import me.kellymckinnon.setlister.R;
-import me.kellymckinnon.setlister.fragments.ListingFragment.OnSetlistSelectedListener;
+import me.kellymckinnon.setlister.showlist.ShowListFragment.OnSetlistSelectedListener;
 import me.kellymckinnon.setlister.models.Show;
 
-/** Adapter for ListingFragment to display show information in RecyclerView */
-public class ShowAdapter extends Adapter {
+/** Adapter for ShowListFragment to display show information in RecyclerView */
+public class ShowListAdapter extends Adapter {
 
   private final ArrayList<Show> mShowList;
   private final OnSetlistSelectedListener mOnSetlistSelectedListener;
 
-  public ShowAdapter(OnSetlistSelectedListener onSetlistSelectedListener) {
+  public ShowListAdapter(OnSetlistSelectedListener onSetlistSelectedListener) {
     mShowList = new ArrayList<>();
     mOnSetlistSelectedListener = onSetlistSelectedListener;
   }

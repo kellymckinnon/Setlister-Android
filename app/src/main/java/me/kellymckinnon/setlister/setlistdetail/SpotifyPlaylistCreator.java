@@ -1,4 +1,4 @@
-package me.kellymckinnon.setlister;
+package me.kellymckinnon.setlister.setlistdetail;
 
 import static me.kellymckinnon.setlister.network.SpotifyService.PLAYLIST_NAME_EXTRA;
 
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import me.kellymckinnon.setlister.R;
 import me.kellymckinnon.setlister.models.Show;
 import me.kellymckinnon.setlister.models.SpotifyPlaylist;
 import me.kellymckinnon.setlister.models.SpotifyTrack;

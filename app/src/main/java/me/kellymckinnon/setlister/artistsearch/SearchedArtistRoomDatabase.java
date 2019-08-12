@@ -1,4 +1,4 @@
-package me.kellymckinnon.setlister.db;
+package me.kellymckinnon.setlister.artistsearch;
 
 import android.content.Context;
 import androidx.room.Database;

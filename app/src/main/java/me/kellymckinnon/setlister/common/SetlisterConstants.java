@@ -1,4 +1,4 @@
-package me.kellymckinnon.setlister;
+package me.kellymckinnon.setlister.common;
 
 /** Holds intent extras and other constants to be used across classes. */
 public class SetlisterConstants {

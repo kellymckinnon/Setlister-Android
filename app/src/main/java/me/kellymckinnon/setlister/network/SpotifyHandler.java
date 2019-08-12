@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
-import me.kellymckinnon.setlister.SetlisterConstants;
+import me.kellymckinnon.setlister.common.SetlisterConstants;
 
 /** Connects to Spotify to authenticate user */
 public class SpotifyHandler {

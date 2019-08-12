@@ -5,19 +5,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import me.kellymckinnon.setlister.fragments.ListingFragment;
-import me.kellymckinnon.setlister.fragments.SearchFragment;
-import me.kellymckinnon.setlister.fragments.SetlistFragment;
+import me.kellymckinnon.setlister.showlist.ShowListFragment;
+import me.kellymckinnon.setlister.artistsearch.ArtistSearchFragment;
+import me.kellymckinnon.setlister.setlistdetail.SetlistFragment;
 import me.kellymckinnon.setlister.models.SearchedArtist;
 import me.kellymckinnon.setlister.models.Show;
-import me.kellymckinnon.setlister.utils.Utility;
+import me.kellymckinnon.setlister.common.Utility;
 
 /**
- * The launcher activity, which uses a SearchFragment to guide the user to search for an artist,
+ * The launcher activity, which uses a ArtistSearchFragment to guide the user to search for an artist,
  * venue, or city.
  */
 public class SetlisterActivity extends AppCompatActivity
-    implements SearchFragment.OnArtistSelectedListener, ListingFragment.OnSetlistSelectedListener {
+    implements ArtistSearchFragment.OnArtistSelectedListener, ShowListFragment.OnSetlistSelectedListener {
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -48,7 +48,7 @@ public class SetlisterActivity extends AppCompatActivity
     if (savedInstanceState == null) {
       getSupportFragmentManager()
           .beginTransaction()
-          .add(R.id.fragment_container, new SearchFragment())
+          .add(R.id.fragment_container, new ArtistSearchFragment())
           .commit();
     }
   }
@@ -57,7 +57,7 @@ public class SetlisterActivity extends AppCompatActivity
   public void onArtistSelected(SearchedArtist artist) {
     getSupportFragmentManager()
         .beginTransaction()
-        .replace(R.id.fragment_container, ListingFragment.newInstance(artist))
+        .replace(R.id.fragment_container, ShowListFragment.newInstance(artist))
         .addToBackStack(null)
         .commit();
   }

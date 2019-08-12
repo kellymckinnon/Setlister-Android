@@ -1,4 +1,4 @@
-package me.kellymckinnon.setlister;
+package me.kellymckinnon.setlister.artistsearch;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -8,7 +8,7 @@ import java.util.List;
 import me.kellymckinnon.setlister.models.SearchedArtist;
 
 /**
- * The ViewModel's role is to provide data to the SearchFragment and survive configuration changes.
+ * The ViewModel's role is to provide data to the ArtistSearchFragment and survive configuration changes.
  * It acts as a communication center between the Repository and the UI.
  *
  * <p>Separating your app's UI data from your Activity and Fragment classes lets you better follow
@@ -16,14 +16,14 @@ import me.kellymckinnon.setlister.models.SearchedArtist;
  * data to the screen, while your ViewModel can take care of holding and processing all the data
  * needed for the UI.
  */
-public class SearchViewModel extends AndroidViewModel {
+public class ArtistSearchViewModel extends AndroidViewModel {
 
-  private final SearchRepository mRepository;
+  private final ArtistSearchRepository mRepository;
   private final LiveData<List<SearchedArtist>> mSearchedArtists;
 
-  public SearchViewModel(@NonNull Application application) {
+  public ArtistSearchViewModel(@NonNull Application application) {
     super(application);
-    mRepository = new SearchRepository(application);
+    mRepository = new ArtistSearchRepository(application);
     mSearchedArtists = mRepository.getSearchedArtists();
   }
 

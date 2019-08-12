@@ -1,4 +1,4 @@
-package me.kellymckinnon.setlister.fragments;
+package me.kellymckinnon.setlister.artistsearch;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -27,13 +27,12 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import java.util.List;
 import me.kellymckinnon.setlister.R;
-import me.kellymckinnon.setlister.SearchViewModel;
 import me.kellymckinnon.setlister.models.Artist;
 import me.kellymckinnon.setlister.models.Artists;
 import me.kellymckinnon.setlister.models.SearchedArtist;
 import me.kellymckinnon.setlister.network.RetrofitClient;
 import me.kellymckinnon.setlister.network.SetlistFMService;
-import me.kellymckinnon.setlister.utils.Utility;
+import me.kellymckinnon.setlister.common.Utility;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -42,7 +41,7 @@ import retrofit2.Response;
  * Fragment opened by SetlisterActivity that holds a search bar and displays recent results as well
  * as suggestions as the user types
  */
-public class SearchFragment extends Fragment {
+public class ArtistSearchFragment extends Fragment {
 
   private static final int TRIGGER_SEARCH = 1;
   private static final long SEARCH_DELAY_IN_MS = 500;
@@ -59,15 +58,15 @@ public class SearchFragment extends Fragment {
   private SetlistFMService mSetlistFMService;
   private OnArtistSelectedListener mOnArtistSelectedListener;
   private String mCurrentSearch;
-  private SearchViewModel mSearchViewModel;
+  private ArtistSearchViewModel mArtistSearchViewModel;
   private Handler mSearchHandler;
 
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     mSetlistFMService = RetrofitClient.getSetlistFMService();
-    mSearchViewModel = ViewModelProviders.of(this).get(SearchViewModel.class);
-    mSearchViewModel
+    mArtistSearchViewModel = ViewModelProviders.of(this).get(ArtistSearchViewModel.class);
+    mArtistSearchViewModel
         .getSearchedArtists()
         .observe(
             this,
@@ -131,7 +130,7 @@ public class SearchFragment extends Fragment {
                 && text.length() != 0) {
               String formattedQuery = Utility.capitalizeFirstLetters(text);
               SearchedArtist searchedArtist = new SearchedArtist(null /* mbid */, formattedQuery);
-              mSearchViewModel.insertSearchedArtist(searchedArtist);
+              mArtistSearchViewModel.insertSearchedArtist(searchedArtist);
               mOnArtistSelectedListener.onArtistSelected(searchedArtist);
               return true;
             }
@@ -150,7 +149,7 @@ public class SearchFragment extends Fragment {
           public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             SearchedArtist artist =
                 (SearchedArtist) mSuggestionListView.getItemAtPosition(position);
-            mSearchViewModel.insertSearchedArtist(artist);
+            mArtistSearchViewModel.insertSearchedArtist(artist);
             mOnArtistSelectedListener.onArtistSelected(artist);
           }
         });
@@ -286,7 +285,7 @@ public class SearchFragment extends Fragment {
     mNoResultsTextView.setVisibility(View.GONE);
     mNoConnectionTextView.setVisibility(View.GONE);
 
-    List<SearchedArtist> searchedArtists = mSearchViewModel.getSearchedArtists().getValue();
+    List<SearchedArtist> searchedArtists = mArtistSearchViewModel.getSearchedArtists().getValue();
 
     if (searchedArtists == null || searchedArtists.isEmpty()) {
       mSuggestionListView.setVisibility(View.GONE);

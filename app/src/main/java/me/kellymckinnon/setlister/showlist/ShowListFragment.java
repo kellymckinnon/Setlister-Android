@@ -19,13 +19,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import me.kellymckinnon.setlister.R;
 import me.kellymckinnon.setlister.common.SetlisterConstants;
+import me.kellymckinnon.setlister.common.Utility;
 import me.kellymckinnon.setlister.models.SearchedArtist;
 import me.kellymckinnon.setlister.models.Setlist;
 import me.kellymckinnon.setlister.models.Setlists;
 import me.kellymckinnon.setlister.models.Show;
 import me.kellymckinnon.setlister.network.RetrofitClient;
 import me.kellymckinnon.setlister.network.SetlistFMService;
-import me.kellymckinnon.setlister.common.Utility;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -57,7 +57,6 @@ public class ShowListFragment extends Fragment {
     Bundle args = new Bundle();
     args.putString(SetlisterConstants.EXTRA_ARTIST_NAME, artist.getName());
 
-    // TODO: Change artistId to be @Nullable, instead of passing "0" everywhere
     if (artist.getMbid() != null) {
       args.putString(SetlisterConstants.EXTRA_ARTIST_ID, artist.getMbid());
     }

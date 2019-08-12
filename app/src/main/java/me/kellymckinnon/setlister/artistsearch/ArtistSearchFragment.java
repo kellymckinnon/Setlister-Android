@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,15 +26,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import java.util.List;
 import me.kellymckinnon.setlister.R;
+import me.kellymckinnon.setlister.common.Utility;
 import me.kellymckinnon.setlister.models.Artist;
-import me.kellymckinnon.setlister.models.Artists;
 import me.kellymckinnon.setlister.models.SearchedArtist;
 import me.kellymckinnon.setlister.network.RetrofitClient;
 import me.kellymckinnon.setlister.network.SetlistFMService;
-import me.kellymckinnon.setlister.common.Utility;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Fragment opened by SetlisterActivity that holds a search bar and displays recent results as well
@@ -108,9 +103,7 @@ public class ArtistSearchFragment extends Fragment {
 
             // Stop searches that have not yet started, but are scheduled to
             mSearchHandler.removeMessages(TRIGGER_SEARCH);
-
-            // Stop searches that are already in progress
-            mSetlistFMService.getArtists(mCurrentSearch).cancel();
+            mArtistSearchViewModel.cancelSearch(mCurrentSearch);
           }
         });
 
@@ -229,49 +222,26 @@ public class ArtistSearchFragment extends Fragment {
       return; // We're already performing the correct search
     }
 
-    mSetlistFMService.getArtists(mCurrentSearch).cancel();
-
-    mCurrentSearch = mSearchEditText.getText().toString();
-
-    mSetlistFMService
-        .getArtists(mSearchEditText.getText().toString())
-        .enqueue(
-            new Callback<Artists>() {
-              @Override
-              public void onResponse(Call<Artists> call, Response<Artists> response) {
-                if (!response.isSuccessful() || response.body() == null) {
-                  Log.e(
-                      this.getClass().getSimpleName(),
-                      "Artists search failed. Response code was: "
-                          + response.code()
-                          + ". Message was: "
-                          + response.errorBody());
-                  showNullState();
-                  return;
-                }
-
-                if (response.body().getTotal() == 0) { // No results
-                  showNullState();
-                  return;
-                }
-
-                mSuggestionListAdapter.clear();
-
-                List<Artist> artists = response.body().getArtist();
-                for (Artist artist : artists) {
-                  mSuggestionListAdapter.add(new SearchedArtist(artist));
-                }
-
-                mLoadingSpinner.setVisibility(View.GONE);
-                mSuggestionListView.setVisibility(View.VISIBLE);
-                mSuggestionListAdapter.notifyDataSetChanged();
-              }
-
-              @Override
-              public void onFailure(Call<Artists> call, Throwable t) {
-                Log.e(getClass().getSimpleName(), t.toString());
+    mArtistSearchViewModel.cancelSearch(mCurrentSearch);
+    mArtistSearchViewModel
+        .getArtistSuggestions(mCurrentSearch)
+        .observe(
+            this,
+            artists -> {
+              if (artists.isEmpty()) {
                 showNullState();
+                return;
               }
+
+              mSuggestionListAdapter.clear();
+
+              for (Artist artist : artists) {
+                mSuggestionListAdapter.add(new SearchedArtist(artist));
+              }
+
+              mLoadingSpinner.setVisibility(View.GONE);
+              mSuggestionListView.setVisibility(View.VISIBLE);
+              mSuggestionListAdapter.notifyDataSetChanged();
             });
   }
 
@@ -319,7 +289,6 @@ public class ArtistSearchFragment extends Fragment {
    * relevant setlists for that artist.
    */
   public interface OnArtistSelectedListener {
-    // TODO: Change artistId to be @Nullable, instead of passing "0" everywhere
 
     /**
      * Notifies listener that artist has been selected

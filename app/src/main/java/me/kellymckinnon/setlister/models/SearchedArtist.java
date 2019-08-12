@@ -1,16 +1,16 @@
 package me.kellymckinnon.setlister.models;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 /**
- * This is used only for storing the user's searched artists in the DB.
- * We cannot use {@link Artist} directly because sometimes, a user's search includes a full
- * Artist object (MBID, name), and sometimes it's just the name if they don't wait for the
- * suggestions to come up before searching.
+ * This is used only for storing the user's searched artists in the DB. We cannot use {@link Artist}
+ * directly because sometimes, a user's search includes a full Artist object (MBID, name), and
+ * sometimes it's just the name if they don't wait for the suggestions to come up before searching.
  */
 @Entity(tableName = "searched_artist_table")
 public class SearchedArtist {
@@ -19,6 +19,7 @@ public class SearchedArtist {
   private long mTimeSearched;
 
   @ColumnInfo(name = "mbid")
+  @Nullable
   private String mMbid;
 
   @PrimaryKey
@@ -26,14 +27,14 @@ public class SearchedArtist {
   @ColumnInfo(name = "name")
   private String mName;
 
-  public SearchedArtist(long timeSearched, String mbid, @NonNull String name) {
+  public SearchedArtist(long timeSearched, @Nullable String mbid, @NonNull String name) {
     mTimeSearched = timeSearched;
     mMbid = mbid;
     mName = name;
   }
 
   @Ignore
-  public SearchedArtist(String mbid, @NonNull String name) {
+  public SearchedArtist(@Nullable String mbid, @NonNull String name) {
     mMbid = mbid;
     mName = name;
   }
@@ -44,14 +45,13 @@ public class SearchedArtist {
     mName = artist.getName();
   }
 
-  public String getMbid() {
+  public @Nullable String getMbid() {
     return mMbid;
   }
 
   public String getName() {
     return mName;
   }
-
 
   public long getTimeSearched() {
     return mTimeSearched;

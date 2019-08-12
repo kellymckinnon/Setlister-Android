@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import me.kellymckinnon.setlister.R;
 import me.kellymckinnon.setlister.SetlisterConstants;
+import me.kellymckinnon.setlister.models.SearchedArtist;
 import me.kellymckinnon.setlister.models.Setlist;
 import me.kellymckinnon.setlister.models.Setlists;
 import me.kellymckinnon.setlister.models.Show;
@@ -52,14 +53,14 @@ public class ListingFragment extends Fragment {
   private SetlistFMService mSetlistFMService;
   private OnSetlistSelectedListener mOnSetlistSelectedListener;
 
-  public static ListingFragment newInstance(String artistName, String artistId) {
+  public static ListingFragment newInstance(SearchedArtist artist) {
     ListingFragment listingFragment = new ListingFragment();
     Bundle args = new Bundle();
-    args.putString(SetlisterConstants.EXTRA_ARTIST_NAME, artistName);
+    args.putString(SetlisterConstants.EXTRA_ARTIST_NAME, artist.getName());
 
     // TODO: Change artistId to be @Nullable, instead of passing "0" everywhere
-    if (!artistId.equals("0")) {
-      args.putString(SetlisterConstants.EXTRA_ARTIST_ID, artistId);
+    if (artist.getMbid() != null) {
+      args.putString(SetlisterConstants.EXTRA_ARTIST_ID, artist.getMbid());
     }
 
     listingFragment.setArguments(args);

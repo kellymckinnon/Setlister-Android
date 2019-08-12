@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import me.kellymckinnon.setlister.fragments.ListingFragment;
 import me.kellymckinnon.setlister.fragments.SearchFragment;
 import me.kellymckinnon.setlister.fragments.SetlistFragment;
+import me.kellymckinnon.setlister.models.SearchedArtist;
 import me.kellymckinnon.setlister.models.Show;
 import me.kellymckinnon.setlister.utils.Utility;
 
@@ -53,10 +54,10 @@ public class SetlisterActivity extends AppCompatActivity
   }
 
   @Override
-  public void onArtistSelected(String artistName, String artistId) {
+  public void onArtistSelected(SearchedArtist artist) {
     getSupportFragmentManager()
         .beginTransaction()
-        .replace(R.id.fragment_container, ListingFragment.newInstance(artistName, artistId))
+        .replace(R.id.fragment_container, ListingFragment.newInstance(artist))
         .addToBackStack(null)
         .commit();
   }

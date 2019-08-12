@@ -1,7 +1,6 @@
 package me.kellymckinnon.setlister.fragments;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -25,12 +24,13 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import java.util.ArrayList;
-import java.util.HashMap;
+import androidx.lifecycle.ViewModelProviders;
 import java.util.List;
 import me.kellymckinnon.setlister.R;
+import me.kellymckinnon.setlister.SearchViewModel;
 import me.kellymckinnon.setlister.models.Artist;
 import me.kellymckinnon.setlister.models.Artists;
+import me.kellymckinnon.setlister.models.SearchedArtist;
 import me.kellymckinnon.setlister.network.RetrofitClient;
 import me.kellymckinnon.setlister.network.SetlistFMService;
 import me.kellymckinnon.setlister.utils.Utility;
@@ -39,34 +39,47 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Fragment opened by SetlisterActivity that holds a search bar and displays recent results as well as
- * suggestions as the user types
+ * Fragment opened by SetlisterActivity that holds a search bar and displays recent results as well
+ * as suggestions as the user types
  */
 public class SearchFragment extends Fragment {
 
   private static final int TRIGGER_SEARCH = 1;
   private static final long SEARCH_DELAY_IN_MS = 500;
-  private static final int NUM_RECENT_SEARCHES = 5;
 
   private ProgressBar mLoadingSpinner;
   private EditText mSearchEditText;
   private ListView mSuggestionListView;
-  private ArrayAdapter<String> mSuggestionListAdapter;
-  private HashMap<String, String> mNameToIdMap;
+  private ArrayAdapter<SearchedArtist> mSuggestionListAdapter;
   private View mRootView;
   private TextView mNoResultsTextView;
   private TextView mNoConnectionTextView;
   private TextView mSuggestionsHeader;
   private TextView mNoRecentSearchesText;
-  private ArrayList<String> mRecentSearchesList;
   private SetlistFMService mSetlistFMService;
   private OnArtistSelectedListener mOnArtistSelectedListener;
   private String mCurrentSearch;
+  private SearchViewModel mSearchViewModel;
+  private Handler mSearchHandler;
 
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     mSetlistFMService = RetrofitClient.getSetlistFMService();
+    mSearchViewModel = ViewModelProviders.of(this).get(SearchViewModel.class);
+    mSearchViewModel
+        .getSearchedArtists()
+        .observe(
+            this,
+            artists -> {
+              if (mSuggestionListAdapter != null
+                  && mSuggestionsHeader != null
+                  && mSuggestionsHeader
+                      .getText()
+                      .equals(getString(R.string.recent_searches_header))) {
+                showRecentSearchesView();
+              }
+            });
   }
 
   @Override
@@ -92,11 +105,15 @@ public class SearchFragment extends Fragment {
           @Override
           public void onClick(View v) {
             mSearchEditText.setText("");
+            showRecentSearchesView();
+
+            // Stop searches that have not yet started, but are scheduled to
+            mSearchHandler.removeMessages(TRIGGER_SEARCH);
+
+            // Stop searches that are already in progress
+            mSetlistFMService.getArtists(mCurrentSearch).cancel();
           }
         });
-
-    updateRecentSearchesList();
-    showRecentSearchesView();
 
     // Search when enter is pressed
     mSearchEditText.setOnKeyListener(
@@ -113,8 +130,9 @@ public class SearchFragment extends Fragment {
             if ((keyCode == KeyEvent.KEYCODE_ENTER || keyCode == EditorInfo.IME_ACTION_SEARCH)
                 && text.length() != 0) {
               String formattedQuery = Utility.capitalizeFirstLetters(text);
-              addRecentSearch(formattedQuery, "0");
-              mOnArtistSelectedListener.onArtistSelected(formattedQuery, "0" /* artistId */);
+              SearchedArtist searchedArtist = new SearchedArtist(null /* mbid */, formattedQuery);
+              mSearchViewModel.insertSearchedArtist(searchedArtist);
+              mOnArtistSelectedListener.onArtistSelected(searchedArtist);
               return true;
             }
             return false;
@@ -124,17 +142,16 @@ public class SearchFragment extends Fragment {
     // Populate list with recent searches
     mSuggestionListAdapter = new ArrayAdapter<>(getActivity(), R.layout.single_line_list_row);
     mSuggestionListView.setAdapter(mSuggestionListAdapter);
-    mSuggestionListAdapter.addAll(mRecentSearchesList);
 
     // Search for the clicked suggestion/recent search
     mSuggestionListView.setOnItemClickListener(
         new AdapterView.OnItemClickListener() {
           @Override
           public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            String query = (String) mSuggestionListView.getItemAtPosition(position);
-            String searchId = mNameToIdMap.get(query);
-            addRecentSearch(query, searchId);
-            mOnArtistSelectedListener.onArtistSelected(query, searchId /* artistId */);
+            SearchedArtist artist =
+                (SearchedArtist) mSuggestionListView.getItemAtPosition(position);
+            mSearchViewModel.insertSearchedArtist(artist);
+            mOnArtistSelectedListener.onArtistSelected(artist);
           }
         });
 
@@ -162,7 +179,7 @@ public class SearchFragment extends Fragment {
     actionBar.setSubtitle(null);
 
     // Don't search until user has stopped typing
-    final Handler handler =
+    mSearchHandler =
         new Handler() {
           @Override
           public void handleMessage(Message msg) {
@@ -183,52 +200,22 @@ public class SearchFragment extends Fragment {
 
           @Override
           public void afterTextChanged(Editable s) {
+            // Stop any current searches
+            mSearchHandler.removeMessages(TRIGGER_SEARCH);
+
             if (s.length() == 0) { // Empty search, show recent searches
               showRecentSearchesView();
-
-              // Stop any current searches
-              handler.removeMessages(TRIGGER_SEARCH);
-
-              if (mSuggestionListAdapter != null) {
-                mSuggestionListAdapter.clear();
-                mSuggestionListAdapter.addAll(mRecentSearchesList);
-              }
             } else { // There is a query, get suggestions
               showLoadingView();
-              handler.removeMessages(TRIGGER_SEARCH);
-              handler.sendEmptyMessageDelayed(TRIGGER_SEARCH, SEARCH_DELAY_IN_MS);
+              mSearchHandler.sendEmptyMessageDelayed(TRIGGER_SEARCH, SEARCH_DELAY_IN_MS);
             }
           }
         });
 
-    updateRecentSearchesList();
-
     if (mSuggestionListAdapter != null
         && mSuggestionsHeader != null
         && mSuggestionsHeader.getText().equals(getString(R.string.recent_searches_header))) {
-      mSuggestionListAdapter.clear();
-      mSuggestionListAdapter.addAll(mRecentSearchesList);
-    }
-  }
-
-  private void updateRecentSearchesList() {
-    SharedPreferences recentFile =
-        getActivity().getSharedPreferences(getString(R.string.prefs_name), Context.MODE_PRIVATE);
-
-    mRecentSearchesList = new ArrayList<>();
-
-    if (mNameToIdMap == null) {
-      mNameToIdMap = new HashMap<>();
-    }
-
-    // Recent searches are stored as search0, search1, search2, etc up to search4 (5 maximum)
-    for (int i = 0; i < NUM_RECENT_SEARCHES; i++) {
-      if (recentFile.contains("search" + i)) {
-        String query = recentFile.getString("search" + i, "");
-        String id = recentFile.getString("id" + i, "0");
-        mRecentSearchesList.add(query);
-        mNameToIdMap.put(query, id);
-      }
+      showRecentSearchesView();
     }
   }
 
@@ -268,8 +255,7 @@ public class SearchFragment extends Fragment {
 
                 List<Artist> artists = response.body().getArtist();
                 for (Artist artist : artists) {
-                  mNameToIdMap.put(artist.getName(), artist.getMbid());
-                  mSuggestionListAdapter.add(artist.getName());
+                  mSuggestionListAdapter.add(new SearchedArtist(artist));
                 }
 
                 mLoadingSpinner.setVisibility(View.GONE);
@@ -300,10 +286,15 @@ public class SearchFragment extends Fragment {
     mNoResultsTextView.setVisibility(View.GONE);
     mNoConnectionTextView.setVisibility(View.GONE);
 
-    if (mRecentSearchesList.isEmpty()) {
+    List<SearchedArtist> searchedArtists = mSearchViewModel.getSearchedArtists().getValue();
+
+    if (searchedArtists == null || searchedArtists.isEmpty()) {
       mSuggestionListView.setVisibility(View.GONE);
       mNoRecentSearchesText.setVisibility(View.VISIBLE);
     } else {
+      mNoRecentSearchesText.setVisibility(View.GONE);
+      mSuggestionListAdapter.clear();
+      mSuggestionListAdapter.addAll(searchedArtists);
       mSuggestionListView.setVisibility(View.VISIBLE);
     }
   }
@@ -319,43 +310,6 @@ public class SearchFragment extends Fragment {
   }
 
   /**
-   * Add the given search to the top of the recent searches list, pushing off the oldest entry. Both
-   * names and ids are stored, under search0 (most recent), search1, ... and id0, id1, ... up to a
-   * maximum of five entries.
-   *
-   * <p>If the id for a recent search is 0, this indicates that the search was done via the enter
-   * key and since no specific result was chosen, there is no associated id.
-   */
-  private void addRecentSearch(String query, String id) {
-    if (getActivity() == null) {
-      return;
-    }
-
-    SharedPreferences recentFile =
-        getActivity().getSharedPreferences(getString(R.string.prefs_name), Context.MODE_PRIVATE);
-    SharedPreferences.Editor editor = recentFile.edit();
-
-    for (String s : mRecentSearchesList) {
-      if (s.equalsIgnoreCase(query)) {
-        // TODO: Instead of doing nothing, move the search to the top
-        // And replace the ID if necessary
-        return;
-      }
-    }
-
-    for (int i = NUM_RECENT_SEARCHES - 2; i >= 0; i--) {
-      if (recentFile.contains("search" + i)) {
-        editor.putString("search" + (i + 1), recentFile.getString("search" + i, ""));
-        editor.putString("id" + (i + 1), recentFile.getString("id" + i, "0"));
-      }
-    }
-
-    editor.putString("search" + 0, query);
-    editor.putString("id" + 0, id);
-    editor.apply();
-  }
-
-  /**
    * Callback to inform the activity that the user has selected an artist and we should display
    * relevant setlists for that artist.
    */
@@ -365,10 +319,8 @@ public class SearchFragment extends Fragment {
     /**
      * Notifies listener that artist has been selected
      *
-     * @param artistName query, like "The Killers"
-     * @param artistId ID for the artist, if available. Due to the way setlist.fm works, sometimes
-     *     we do not have the ID, only the name.
+     * @param artist artist selected
      */
-    void onArtistSelected(String artistName, String artistId);
+    void onArtistSelected(SearchedArtist artist);
   }
 }

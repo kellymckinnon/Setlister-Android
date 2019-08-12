@@ -6,6 +6,7 @@ import static androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,31 +80,44 @@ public class ShowAdapter extends Adapter {
       venue.setText(show.getVenue());
       tour.setText(show.getTour());
       date.setText(show.getDate());
+
+      Context context = itemView.getContext();
+
       numSongs.setText(
-          numSongs
-              .getContext()
+          context
               .getResources()
               .getQuantityString(
                   R.plurals.setlist_row_num_songs, show.getSongs().length, show.getSongs().length));
 
       if (show.getSongs().length == 0) {
-        itemView.setOnClickListener(null);
-        itemView.setBackgroundColor(Color.LTGRAY);
-        band.setTextColor(Color.GRAY);
-        venue.setTextColor(Color.GRAY);
-        tour.setTextColor(Color.GRAY);
-        date.setTextColor(Color.GRAY);
-        numSongs.setTextColor(Color.GRAY);
+        disableView();
       } else {
-        Context context = itemView.getContext();
-        itemView.setOnClickListener(this);
-        itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.appBackground));
-        band.setTextColor(ContextCompat.getColor(context, R.color.primaryText));
-        venue.setTextColor(ContextCompat.getColor(context, R.color.primaryText));
-        tour.setTextColor(ContextCompat.getColor(context, R.color.secondaryText));
-        date.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
-        numSongs.setTextColor(ContextCompat.getColor(context, R.color.secondaryText));
+        enableView(context);
       }
+    }
+
+    private void disableView() {
+      itemView.setOnClickListener(null);
+      itemView.setBackgroundColor(Color.LTGRAY);
+      band.setTextColor(Color.GRAY);
+      venue.setTextColor(Color.GRAY);
+      tour.setTextColor(Color.GRAY);
+      date.setTextColor(Color.GRAY);
+      numSongs.setTextColor(Color.GRAY);
+    }
+
+    private void enableView(Context context) {
+      itemView.setOnClickListener(this);
+
+      TypedValue outValue = new TypedValue();
+      context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+      itemView.setBackgroundResource(outValue.resourceId);
+
+      band.setTextColor(ContextCompat.getColor(context, R.color.primaryText));
+      venue.setTextColor(ContextCompat.getColor(context, R.color.primaryText));
+      tour.setTextColor(ContextCompat.getColor(context, R.color.secondaryText));
+      date.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+      numSongs.setTextColor(ContextCompat.getColor(context, R.color.secondaryText));
     }
 
     @Override

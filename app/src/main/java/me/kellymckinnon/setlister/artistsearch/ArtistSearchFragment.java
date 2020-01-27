@@ -223,6 +223,9 @@ public class ArtistSearchFragment extends Fragment {
     }
 
     mArtistSearchViewModel.cancelSearch(mCurrentSearch);
+
+    mCurrentSearch = mSearchEditText.getText().toString();
+
     mArtistSearchViewModel
         .getArtistSuggestions(mCurrentSearch)
         .observe(

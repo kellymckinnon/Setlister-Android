@@ -29,8 +29,6 @@ import me.kellymckinnon.setlister.R;
 import me.kellymckinnon.setlister.common.Utility;
 import me.kellymckinnon.setlister.models.Artist;
 import me.kellymckinnon.setlister.models.SearchedArtist;
-import me.kellymckinnon.setlister.network.RetrofitClient;
-import me.kellymckinnon.setlister.network.SetlistFMService;
 
 /**
  * Fragment opened by SetlisterActivity that holds a search bar and displays recent results as well
@@ -50,7 +48,6 @@ public class ArtistSearchFragment extends Fragment {
   private TextView mNoConnectionTextView;
   private TextView mSuggestionsHeader;
   private TextView mNoRecentSearchesText;
-  private SetlistFMService mSetlistFMService;
   private OnArtistSelectedListener mOnArtistSelectedListener;
   private String mCurrentSearch;
   private ArtistSearchViewModel mArtistSearchViewModel;
@@ -59,7 +56,6 @@ public class ArtistSearchFragment extends Fragment {
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    mSetlistFMService = RetrofitClient.getSetlistFMService();
     mArtistSearchViewModel = ViewModelProviders.of(this).get(ArtistSearchViewModel.class);
     mArtistSearchViewModel
         .getSearchedArtists()

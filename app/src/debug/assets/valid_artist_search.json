@@ -1,0 +1,213 @@
+{
+  "type": "artists",
+  "itemsPerPage": 30,
+  "page": 1,
+  "total": 58,
+  "artist": [
+    {
+      "mbid": "0e763b87-f3cd-4a63-986f-bebc4189f1f0",
+      "name": "Stray Cats",
+      "sortName": "Stray Cats",
+      "disambiguation": "",
+      "url": "https://www.setlist.fm/setlists/stray-cats-3bd68450.html"
+    },
+    {
+      "mbid": "0fff8ab2-c500-4564-b4f1-f4da7642d986",
+      "name": "Stray From the Path",
+      "sortName": "Stray From the Path",
+      "disambiguation": "",
+      "url": "https://www.setlist.fm/setlists/stray-from-the-path-3bd440e4.html"
+    },
+    {
+      "mbid": "7a48a7a2-4068-40e6-b8e6-45e28a583c3b",
+      "name": "Stray",
+      "sortName": "Stray",
+      "disambiguation": "60s UK band",
+      "url": "https://www.setlist.fm/setlists/stray-43d79ba3.html"
+    },
+    {
+      "mbid": "8252945c-649c-4b43-bb40-4550063f5d94",
+      "name": "Neil Young & The Stray Gators",
+      "sortName": "Young, Neil & Stray Gators, The",
+      "url": "https://www.setlist.fm/setlists/neil-young-and-the-stray-gators-1bd241a4.html"
+    },
+    {
+      "mbid": "e3ab3ede-1aa2-4153-bdcc-a89b7ea69636",
+      "name": "Stray Train",
+      "sortName": "Stray Train",
+      "disambiguation": "",
+      "url": "https://www.setlist.fm/setlists/stray-train-1bc0451c.html"
+    },
+    {
+      "mbid": "57172a45-356f-45f7-8dfc-aa405f1c00d4",
+      "name": "Stray Dogg",
+      "sortName": "Stray Dogg",
+      "disambiguation": "",
+      "url": "https://www.setlist.fm/setlists/stray-dogg-1bd345b8.html"
+    },
+    {
+      "mbid": "17f89020-5fa1-45fb-9fc8-a8a8062e64dd",
+      "name": "Stray Dog",
+      "sortName": "Stray Dog",
+      "disambiguation": "70s blues-based hard rock band from Texas",
+      "url": "https://www.setlist.fm/setlists/stray-dog-73d63e55.html"
+    },
+    {
+      "mbid": "729a4eb5-791f-4b42-9fb0-6c539a680a19",
+      "name": "The Stray Birds",
+      "sortName": "Stray Birds, The",
+      "disambiguation": "",
+      "url": "https://www.setlist.fm/setlists/the-stray-birds-53df033d.html"
+    },
+    {
+      "mbid": "b4a2b780-6c2f-4029-808a-458296be6003",
+      "name": "Einar Stray",
+      "sortName": "Stray, Einar",
+      "disambiguation": "musician Einar Stray",
+      "url": "https://www.setlist.fm/setlists/einar-stray-1bd23d28.html"
+    },
+    {
+      "mbid": "9d197f82-ca0a-4e82-b1eb-6d35c5cd152c",
+      "name": "Dusty Stray",
+      "sortName": "Dusty Stray",
+      "disambiguation": "",
+      "url": "https://www.setlist.fm/setlists/dusty-stray-3d3c9e3.html"
+    },
+    {
+      "mbid": "49a0a1a4-7a27-451c-be1c-a76e31296512",
+      "name": "Einar Stray Orchestra",
+      "sortName": "Einar Stray Orchestra",
+      "disambiguation": "Norwegian indie-pop & post-rock band",
+      "url": "https://www.setlist.fm/setlists/einar-stray-orchestra-2bd80436.html"
+    },
+    {
+      "mbid": "ab203550-3171-4dcf-9d27-369ad569d34e",
+      "name": "The Stray Sisters",
+      "sortName": "Stray Sisters, The",
+      "disambiguation": "",
+      "url": "https://www.setlist.fm/setlists/the-stray-sisters-6bda5a3e.html"
+    },
+    {
+      "mbid": "142b343d-bf5a-428c-a64f-6d1a7566bbe9",
+      "name": "Stray Kids",
+      "sortName": "Stray Kids",
+      "disambiguation": "",
+      "url": "https://www.setlist.fm/setlists/stray-kids-4bcd37b6.html"
+    },
+    {
+      "mbid": "1e04ecf9-4b08-4610-b9b0-6ed5dae18de3",
+      "name": "Feral & Stray",
+      "sortName": "Feral & Stray",
+      "disambiguation": "Erin Lang",
+      "url": "https://www.setlist.fm/setlists/feral-and-stray-7bdbce34.html"
+    },
+    {
+      "mbid": "96a25e74-67b6-4613-b9e7-912fc8d15e52",
+      "name": "The Stray Bullets",
+      "sortName": "Stray Bullets, The",
+      "disambiguation": "USA punk band",
+      "url": "https://www.setlist.fm/setlists/the-stray-bullets-53d17b59.html"
+    },
+    {
+      "mbid": "a29c9645-53c9-40c9-aa37-4ad583790732",
+      "name": "Stray Dogs",
+      "sortName": "Stray Dogs",
+      "disambiguation": "90ties punk group",
+      "url": "https://www.setlist.fm/setlists/stray-dogs-23d16cd7.html"
+    },
+    {
+      "mbid": "ccd19605-acd8-4a36-a9cd-04f3f22def27",
+      "name": "Stray Borders",
+      "sortName": "Stray Borders",
+      "disambiguation": "",
+      "url": "https://www.setlist.fm/setlists/stray-borders-5bd50f64.html"
+    },
+    {
+      "mbid": "1d109b3f-70e4-4e1e-8186-1e8ec168bb06",
+      "name": "Stray Dog",
+      "sortName": "Stray Dog",
+      "disambiguation": "British Singer",
+      "url": "https://www.setlist.fm/setlists/stray-dog-6bc25a02.html"
+    },
+    {
+      "mbid": "1388649c-c79c-48a6-8655-cbbd8f2e7053",
+      "name": "Stray Colors",
+      "sortName": "Stray Colors",
+      "disambiguation": "",
+      "url": "https://www.setlist.fm/setlists/stray-colors-23c6cc67.html"
+    },
+    {
+      "mbid": "fca81389-6caf-40b2-ab4c-a0c015f90d38",
+      "name": "Stray",
+      "sortName": "Stray",
+      "disambiguation": "Electronic",
+      "url": "https://www.setlist.fm/setlists/stray-4bd79ba2.html"
+    },
+    {
+      "mbid": "266e04cb-ecfe-490d-9632-a237f68bd9f3",
+      "name": "Stray",
+      "sortName": "Stray",
+      "url": "https://www.setlist.fm/setlists/stray-43d9ebdb.html"
+    },
+    {
+      "mbid": "07298dd1-5521-4a68-a55a-45db3282cfa4",
+      "name": "straY",
+      "sortName": "Stray",
+      "disambiguation": "Swedish electronic funk producer and singer",
+      "url": "https://www.setlist.fm/setlists/stray-63d202c3.html"
+    },
+    {
+      "mbid": "70d33751-3567-4a0a-951e-239fee87e88e",
+      "name": "Stray 76",
+      "sortName": "Stray 76",
+      "url": "https://www.setlist.fm/setlists/stray-76-53d2a7d9.html"
+    },
+    {
+      "mbid": "107dce56-e860-4787-8171-b6042774323a",
+      "name": "Stray Hens",
+      "sortName": "Stray Hens",
+      "disambiguation": "Australian Folk Band",
+      "url": "https://www.setlist.fm/setlists/stray-hens-33dbfc49.html"
+    },
+    {
+      "mbid": "a9879d60-a057-4b39-a8e9-9e155d8b79ea",
+      "name": "Stray Voltage",
+      "sortName": "Stray Voltage",
+      "disambiguation": "",
+      "url": "https://www.setlist.fm/setlists/stray-voltage-1bc651b8.html"
+    },
+    {
+      "mbid": "2e7dce8f-132c-4f63-8493-6c1625b810e1",
+      "name": "Stray Theories",
+      "sortName": "Stray Theories",
+      "url": "https://www.setlist.fm/setlists/stray-theories-4bd7cb96.html"
+    },
+    {
+      "mbid": "7ec7a1a4-1f9c-4d37-afcd-7f2f357c23dd",
+      "name": "Stray Mood",
+      "sortName": "Stray Mood",
+      "disambiguation": "",
+      "url": "https://www.setlist.fm/setlists/stray-mood-bcfc5a2.html"
+    },
+    {
+      "mbid": "10dd4b82-3613-423f-ad10-cc72db4336cd",
+      "name": "Stray Excel",
+      "sortName": "Stray Excel",
+      "disambiguation": "",
+      "url": "https://www.setlist.fm/setlists/stray-excel-3bc89c28.html"
+    },
+    {
+      "mbid": "4aea031b-38c0-4e93-ba91-48cdd15f7900",
+      "name": "Stray Gators",
+      "sortName": "Stray Gators",
+      "url": "https://www.setlist.fm/setlists/stray-gators-2bd61c6e.html"
+    },
+    {
+      "mbid": "b5b2557c-47dd-4ee9-9817-10e4947ecd36",
+      "name": "Stray Dog",
+      "sortName": "Stray Dog",
+      "disambiguation": "Tijs Verwest (Tiesto)",
+      "url": "https://www.setlist.fm/setlists/stray-dog-43f68f5f.html"
+    }
+  ]
+}

@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -18,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import me.kellymckinnon.setlister.R;
+import me.kellymckinnon.setlister.SetlisterActivity;
+import me.kellymckinnon.setlister.SetlisterApplication;
 import me.kellymckinnon.setlister.common.SetlisterConstants;
 import me.kellymckinnon.setlister.common.Utility;
 import me.kellymckinnon.setlister.models.SearchedArtist;
@@ -63,12 +64,6 @@ public class ShowListFragment extends Fragment {
 
     showListFragment.setArguments(args);
     return showListFragment;
-  }
-
-  @Override
-  public void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    mSetlistFMService = RetrofitClient.getSetlistFMService();
   }
 
   @Override
@@ -118,12 +113,15 @@ public class ShowListFragment extends Fragment {
   public void onAttach(@NonNull Context context) {
     super.onAttach(context);
 
-    try {
-      mOnSetlistSelectedListener = (OnSetlistSelectedListener) context;
-    } catch (ClassCastException e) {
-      throw new ClassCastException(
-          context.toString() + " must implement OnSetlistSelectedListener");
+    if (!(context instanceof SetlisterActivity)) {
+      throw new RuntimeException("Context is not of type SetlisterActivity");
     }
+
+    SetlisterActivity activity = (SetlisterActivity) context;
+    mOnSetlistSelectedListener = activity;
+
+    String setlistFMUrl = ((SetlisterApplication) activity.getApplication()).getSetlistFMUrl();
+    mSetlistFMService = RetrofitClient.getSetlistFMService(setlistFMUrl);
   }
 
   @Override

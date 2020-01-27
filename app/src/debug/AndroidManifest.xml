@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="me.kellymckinnon.setlister">
+
+  <!-- This is necessary for our tests to connect to localhost. -->
+  <application
+    android:usesCleartextTraffic="true" />
+
+</manifest>

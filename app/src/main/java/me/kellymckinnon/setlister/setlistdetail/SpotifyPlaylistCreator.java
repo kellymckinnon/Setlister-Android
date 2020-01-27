@@ -44,8 +44,8 @@ public class SpotifyPlaylistCreator {
    * @param show Show that we're getting the setlist from
    * @return a CompositeDisposable object so that the caller can dispose of it properly
    */
-  public static CompositeDisposable createPlaylist(
-      String auth, View rootView, Context context, Show show) {
+  static CompositeDisposable createPlaylist(
+      String spotifyUrl, String auth, View rootView, Context context, Show show) {
     CompositeDisposable compositeDisposable = new CompositeDisposable();
     Snackbar.make(
             rootView,
@@ -57,9 +57,9 @@ public class SpotifyPlaylistCreator {
         new ArrayList<>(); // This is where we will store tracks that aren't found
 
     compositeDisposable.add(
-        getCreateSpotifyPlaylistObservable(auth, show)
+        getCreateSpotifyPlaylistObservable(spotifyUrl, auth, show)
             .zipWith(
-                getFetchTracksObservable(auth, show, failedSongs),
+                getFetchTracksObservable(spotifyUrl, auth, show, failedSongs),
                 ((spotifyPlaylist, uris) -> {
                   String concatenatedTrackUris = TextUtils.join(",", uris);
                   String playlistId = spotifyPlaylist.getId();
@@ -69,7 +69,7 @@ public class SpotifyPlaylistCreator {
             .flatMap(
                 (Function<Pair<String, String>, Single<ResponseBody>>)
                     pair ->
-                        RetrofitClient.getSpotifyService()
+                        RetrofitClient.getSpotifyService(spotifyUrl)
                             .addTracksToPlaylist(auth, pair.first, pair.second))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -91,12 +91,14 @@ public class SpotifyPlaylistCreator {
   }
 
   private static Single<List<String>> getFetchTracksObservable(
-      String auth, Show show, ArrayList<String> failedSongs) {
+      String spotifyUrl, String auth, Show show, ArrayList<String> failedSongs) {
     return Observable.fromArray(show.getSongs())
         .flatMap( // Search Spotify for a list of track suggestions for each song
             setlistFmSongName ->
-                RetrofitClient.getSpotifyService()
-                    .searchTracks(auth, "track:" + setlistFmSongName.replace("'", "") + " artist:" + show.getBand())
+                RetrofitClient.getSpotifyService(spotifyUrl)
+                    .searchTracks(
+                        auth,
+                        "track:" + setlistFmSongName.replace("'", "") + " artist:" + show.getBand())
                     .map(
                         spotifySearchResults ->
                             new Pair<>(setlistFmSongName, spotifySearchResults)))
@@ -137,8 +139,8 @@ public class SpotifyPlaylistCreator {
 
   /** This is used to create an empty Spotify playlist. */
   private static Single<SpotifyPlaylist> getCreateSpotifyPlaylistObservable(
-      String auth, Show show) {
-    return RetrofitClient.getSpotifyService()
+      String spotifyUrl, String auth, Show show) {
+    return RetrofitClient.getSpotifyService(spotifyUrl)
         .getUser(auth)
         .subscribeOn(Schedulers.io())
         .flatMap(
@@ -154,7 +156,7 @@ public class SpotifyPlaylistCreator {
                   Map<String, String> playlistCreationParams = new HashMap<>();
                   playlistCreationParams.put(PLAYLIST_NAME_EXTRA, playlistName);
 
-                  return RetrofitClient.getSpotifyService()
+                  return RetrofitClient.getSpotifyService(spotifyUrl)
                       .createPlaylist(auth, spotifyUser.getId(), playlistCreationParams);
                 });
   }

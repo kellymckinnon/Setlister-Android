@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import java.util.ArrayList;
 import java.util.List;
+import me.kellymckinnon.setlister.SetlisterApplication;
 import me.kellymckinnon.setlister.models.Artist;
 import me.kellymckinnon.setlister.models.Artists;
 import me.kellymckinnon.setlister.models.SearchedArtist;
@@ -26,7 +27,8 @@ class ArtistSearchRepository {
   private LiveData<List<SearchedArtist>> mSearchedArtists;
 
   ArtistSearchRepository(Application application) {
-    mSetlistFMService = RetrofitClient.getSetlistFMService();
+    mSetlistFMService =
+        RetrofitClient.getSetlistFMService(((SetlisterApplication) application).getSetlistFMUrl());
 
     SearchedArtistRoomDatabase db = SearchedArtistRoomDatabase.getDatabase(application);
     mSearchedArtistDao = db.artistDao();

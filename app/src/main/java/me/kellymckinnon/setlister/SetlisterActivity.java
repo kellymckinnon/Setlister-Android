@@ -1,23 +1,26 @@
 package me.kellymckinnon.setlister;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import me.kellymckinnon.setlister.showlist.ShowListFragment;
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 import me.kellymckinnon.setlister.artistsearch.ArtistSearchFragment;
-import me.kellymckinnon.setlister.setlistdetail.SetlistFragment;
+import me.kellymckinnon.setlister.common.Utility;
 import me.kellymckinnon.setlister.models.SearchedArtist;
 import me.kellymckinnon.setlister.models.Show;
-import me.kellymckinnon.setlister.common.Utility;
+import me.kellymckinnon.setlister.setlistdetail.SetlistFragment;
+import me.kellymckinnon.setlister.showlist.ShowListFragment;
 
 /**
- * The launcher activity, which uses a ArtistSearchFragment to guide the user to search for an artist,
- * venue, or city.
+ * The launcher activity, which uses a ArtistSearchFragment to guide the user to search for an
+ * artist, venue, or city.
  */
 public class SetlisterActivity extends AppCompatActivity
-    implements ArtistSearchFragment.OnArtistSelectedListener, ShowListFragment.OnSetlistSelectedListener {
+    implements ArtistSearchFragment.OnArtistSelectedListener,
+        ShowListFragment.OnSetlistSelectedListener {
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -28,8 +31,8 @@ public class SetlisterActivity extends AppCompatActivity
   @Override
   public boolean onOptionsItemSelected(@NonNull MenuItem item) {
     switch (item.getItemId()) {
-      case R.id.action_about:
-        Utility.showAboutDialog(this);
+      case R.id.action_licenses:
+        startActivity(new Intent(this, OssLicensesMenuActivity.class));
         return true;
       case R.id.action_feedback:
         Utility.startFeedbackEmail(this);

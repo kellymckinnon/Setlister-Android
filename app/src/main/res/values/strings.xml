@@ -1,66 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Setlister</string>
-    <string name="title_activity_list">ListingActivity</string>
-    <string name="title_activity_setlist">SetlistActivity</string>
+  <string name="app_name">Setlister</string>
 
+  <string name="search_header">SEARCH FOR AN ARTIST</string>
+  <string name="search_bar_hint">Results powered by setlist.fm</string>
+  <string name="recent_searches_header">RECENT SEARCHES</string>
+  <string name="best_matches_header">BEST MATCHES</string>
 
-    <string name="search_header">SEARCH FOR AN ARTIST</string>
-    <string name="search_bar_hint">Results powered by setlist.fm</string>
-    <string name="recent_searches_header">RECENT SEARCHES</string>
-    <string name="best_matches_header">BEST MATCHES</string>
+  <string name="no_results_found">No results found.</string>
+  <string name="no_recent_searches">You haven\'t searched for anything yet.</string>
+  <string name="no_connection">No network connection.</string>
 
-    <string name="no_results_found">No results found.</string>
-    <string name="no_recent_searches">You haven\'t searched for anything yet.</string>
-    <string name="no_connection">No network connection.</string>
+  <string name="licenses">Licenses</string>
+  <string name="send_feedback">Send Feedback</string>
 
-    <string name="about">About</string>
-    <string name="send_feedback">Send Feedback</string>
-    <string name="about_info">Browse through thousands of concert setlists from setlist.fm. Add them to a Spotify playlist with one click!</string>
+  <string name="email">setlisterapp@gmail.com</string>
+  <string name="feedback_subject">Setlister Feedback</string>
+  <string name="venue">Venue</string>
+  <string name="share">Share</string>
+  <string name="default_date">12/31/1969</string>
+  <string name="default_num_songs">0 songs</string>
+  <string name="tour">Tour</string>
+  <string name="clear_search">Clear Search</string>
+  <string name="send_email">Send email…</string>
+  <string name="setlist_share_title">SETLISTER: %1$s on %2$s at %3$s</string>
+  <plurals name="setlist_row_num_songs">
+    <item quantity="one">%d song</item>
+    <item quantity="other">%d songs</item>
+  </plurals>
 
-    <string name="library_spotify_title">Spotify Android SDK\nCopyright © 2014 Spotify</string>
-
-    <string name="apache_license">
-        Licensed under the Apache License, Version 2.0 (the "License");
-        you may not use this file except in compliance with the License.
-        You may obtain a copy of the License at
-
-             http://www.apache.org/licenses/LICENSE-2.0
-
-        Unless required by applicable law or agreed to in writing, software
-        distributed under the License is distributed on an "AS IS" BASIS,
-        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-        See the License for the specific language governing permissions and
-        limitations under the License.</string>
-
-    <string name="email">setlisterapp@gmail.com</string>
-    <string name="feedback_subject">Setlister Feedback</string>
-    <string name="prefs_name">RecentSearchesFile</string>
-    <string name="venue">Venue</string>
-    <string name="share">Share</string>
-    <string name="default_date">12/31/1969</string>
-    <string name="default_num_songs">0 songs</string>
-    <string name="tour">Tour</string>
-    <string name="licenses_header">Licenses:</string>
-    <string name="clear_search">Clear Search</string>
-    <string name="about_setlister">About Setlister</string>
-    <string name="send_email">Send email…</string>
-    <string name="setlist_share_title">SETLISTER: %1$s on %2$s at %3$s</string>
-    <plurals name="setlist_row_num_songs">
-        <item quantity="one">%d song</item>
-        <item quantity="other">%d songs</item>
-    </plurals>
-
-    <!-- Saving songs to Spotify -->
-    <string name="spotify_connection_failed_snackbar">Connecting to Spotify failed. Try again.</string>
-    <string name="spotify_creating_playlist_snackbar">Creating playlist…</string>
-    <string name="spotify_playlist_created_snackbar">Playlist created!</string>
-    <string name="spotify_missing_songs_dialog_body">The following songs were not found on Spotify:</string>
-    <string name="spotify_missing_songs_dialog_title">Missing songs</string>
-    <string name="generic_error">Sorry, something went wrong.</string>
-    <plurals name="spotify_missing_songs_snackbar">
-        <item quantity="one">Show %d missing song</item>
-        <item quantity="other">Show %d missing songs</item>
-    </plurals>
+  <!-- Saving songs to Spotify -->
+  <string name="spotify_connection_failed_snackbar">Connecting to Spotify failed. Try again.</string>
+  <string name="spotify_creating_playlist_snackbar">Creating playlist…</string>
+  <string name="spotify_playlist_created_snackbar">Playlist created!</string>
+  <string name="spotify_missing_songs_dialog_body">The following songs were not found on Spotify:</string>
+  <string name="spotify_missing_songs_dialog_title">Missing songs</string>
+  <string name="generic_error">Sorry, something went wrong.</string>
+  <plurals name="spotify_missing_songs_snackbar">
+    <item quantity="one">Show %d missing song</item>
+    <item quantity="other">Show %d missing songs</item>
+  </plurals>
 
 </resources>

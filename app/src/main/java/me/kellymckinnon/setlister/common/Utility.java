@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -71,13 +70,6 @@ public class Utility {
 
     NetworkInfo activeNetwork = cm != null ? cm.getActiveNetworkInfo() : null;
     return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-  }
-
-  public static void showAboutDialog(Context context) {
-    new MaterialAlertDialogBuilder(context)
-        .setTitle(R.string.about_setlister)
-        .setView(R.layout.about_dialog)
-        .show();
   }
 
   public static void startFeedbackEmail(Activity callingActivity) {

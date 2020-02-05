@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.ShareActionProvider;
 import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
@@ -80,7 +81,6 @@ public class SetlistFragment extends Fragment {
 
   @Override
   public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-    inflater.inflate(R.menu.menu_setlister, menu);
     MenuItem item = menu.findItem(R.id.action_share);
     item.setVisible(true);
     mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
@@ -99,8 +99,8 @@ public class SetlistFragment extends Fragment {
 
     int id = item.getItemId();
 
-    if (id == R.id.action_about) {
-      Utility.showAboutDialog(getContext());
+    if (id == R.id.action_licenses) {
+      startActivity(new Intent(getActivity(), OssLicensesMenuActivity.class));
       return true;
     } else if (id == R.id.action_feedback) {
       Utility.startFeedbackEmail(getActivity());
